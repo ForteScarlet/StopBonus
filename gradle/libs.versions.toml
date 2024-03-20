@@ -1,0 +1,51 @@
+[versions]
+compose = "1.6.3"
+compose-plugin = "1.6.1"
+# Kotlin
+kotlin = "1.9.23"
+kotlinx-coroutines = "1.8.0"
+kotlinx-serialization = "1.6.3"
+# logback
+logback = "1.4.14"
+# https://github.com/h2database/h2database
+h2 = "2.2.224"
+# https://github.com/JetBrains/Exposed
+exposed = "0.48.0"
+# https://github.com/KoalaPlot/koalaplot-core
+# https://koalaplot.github.io/
+koalaPlot = "0.5.3"
+
+
+[libraries]
+# logback
+logback-classic = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
+
+# ktx
+# ktx-coroutine
+kotlinx-coroutine-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+
+# h2 driver
+h2db = { module = "com.h2database:h2", version.ref = "h2" }
+h2-r2dbc = { module = "io.r2dbc:r2dbc-h2", version = "1.0.0.RELEASE" }
+
+# exposed
+exposed-core = { group = "org.jetbrains.exposed", name = "exposed-core", version.ref = "exposed" }
+exposed-dao = { group = "org.jetbrains.exposed", name = "exposed-dao", version.ref = "exposed" }
+exposed-jdbc = { group = "org.jetbrains.exposed", name = "exposed-jdbc", version.ref = "exposed" }
+exposed-javaTime = { group = "org.jetbrains.exposed", name = "exposed-java-time", version.ref = "exposed" }
+
+# koalaPlot
+koalaPlot-core = { group = "io.github.koalaplot", name = "koalaplot-core", version.ref = "koalaPlot" }
+
+# com.zaxxer:HikariCP
+# https://github.com/brettwooldridge/HikariCP
+hikariCP = "com.zaxxer:HikariCP:5.1.0"
+
+[bundles]
+exposed = ["exposed-core", "exposed-dao", "exposed-jdbc", "exposed-javaTime"]
+
+[plugins]
+jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
