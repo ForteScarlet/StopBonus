@@ -48,17 +48,24 @@ dependencies {
     implementation(libs.koalaPlot.core)
 }
 
+val groupId = "love.forte.app.bonus"
+
+// https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Native_distributions_and_local_execution/README.md
 compose.desktop {
     application {
         mainClass = "MainKt"
 
+        val versionValue = "1.0.3"
 
         nativeDistributions {
             modules("java.sql", "java.naming")
 
-            targetFormats(TargetFormat.Exe, TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            targetFormats(
+                TargetFormat.AppImage,
+                TargetFormat.Exe, TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb
+            )
             packageName = "StopBonus"
-            packageVersion = "1.0.1"
+            packageVersion = versionValue
             vendor = "ForteScarlet"
             description = "别再奖励自己了！"
             copyright = "Copyright © 2024 Forte Scarlet."
@@ -67,9 +74,12 @@ compose.desktop {
                 shortcut = true
                 dirChooser = true
                 menu = true
+                menuGroup = groupId
                 perUserInstall = true
-                iconFile.set(project.file("hot.png"))
+                iconFile.set(project.rootDir.resolve("hot.ico"))
                 upgradeUuid = "f4a9a22b-b663-4848-95a8-7c0cf844da3f"
+                exePackageVersion = versionValue
+                msiPackageVersion = versionValue
             }
         }
 

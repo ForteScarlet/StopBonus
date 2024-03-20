@@ -5,6 +5,7 @@ import FontLXGWNeoXiHeiScreenFamily
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -15,6 +16,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
@@ -62,6 +64,10 @@ object AccountHomeView : AccountViewPage {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AccountHome(state: PageViewState) {
+    val nowMillis = System.currentTimeMillis()
+    val nowUTCMillis = Clock.systemUTC().millis()
+    val nowLocalDateTime = LocalDateTime.now()
+
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
 
@@ -70,12 +76,13 @@ private fun AccountHome(state: PageViewState) {
 
     val startDatePickerState = rememberDatePickerState(
         initialSelectedDateMillis = null,
-        initialDisplayedMonthMillis = System.currentTimeMillis(),
+        initialDisplayedMonthMillis = nowMillis,
         yearRange = 1900..nowYear.value,
         initialDisplayMode = DisplayMode.Input,
         selectableDates = object : SelectableDates {
             override fun isSelectableDate(utcTimeMillis: Long): Boolean =
-                utcTimeMillis <= System.currentTimeMillis()
+                Instant.ofEpochMilli(utcTimeMillis).atZone(ZoneOffset.UTC)
+                    .toLocalDate() <= nowLocalDateTime.toLocalDate()
         }
     )
 
@@ -96,7 +103,8 @@ private fun AccountHome(state: PageViewState) {
         initialDisplayMode = DisplayMode.Input,
         selectableDates = object : SelectableDates {
             override fun isSelectableDate(utcTimeMillis: Long): Boolean =
-                utcTimeMillis <= System.currentTimeMillis()
+                Instant.ofEpochMilli(utcTimeMillis).atZone(ZoneOffset.UTC)
+                    .toLocalDate() <= nowLocalDateTime.toLocalDate()
         }
     )
 
@@ -254,7 +262,6 @@ private fun AccountHome(state: PageViewState) {
         AnimatedVisibility(duration != null) {
             // 打分
             ScoreSelector(state, score)
-
         }
 
         // AnimatedVisibility(duration != null) {
@@ -377,7 +384,10 @@ private inline fun WeaponSelector(
         },
     ) {
         OutlinedTextField(
-            modifier = Modifier.menuAnchor().fillMaxWidth(.65f),
+            modifier = Modifier
+                .focusable(false)
+                .menuAnchor()
+                .fillMaxWidth(.65f),
             value = if (!expanded) selectedWeapon?.name ?: "无" else value,
             onValueChange = {
                 value = it
@@ -441,9 +451,13 @@ private fun ScoreSelector(
     val scoreValue = scoreState.value.toInt()
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
                 "体验分数",
                 fontFamily = FontLXGWNeoXiHeiScreenFamily,
