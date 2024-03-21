@@ -28,8 +28,8 @@ jobs:
       - name: Run packageExe
         uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: 8.5
-          arguments: packageExe --info --warning-mode all -x test --build-cache
+          gradle-version: 8.6
+          arguments: build packageExe --info --warning-mode all -x test --build-cache
 
       - name: Upload algolia-indexes
         uses: actions/upload-artifact@v3
