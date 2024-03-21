@@ -1,0 +1,62 @@
+name: Package release
+on:
+  push:
+    tags:
+      - v**
+env:
+  IS_CI: true
+
+jobs:
+  package:
+    name: Package release
+    #    strategy:
+    #      matrix:
+    #        os: [ macos-latest, windows-latest, ubuntu-latest ]
+    runs-on: windows-latest
+    steps:
+      # 检出仓库代码
+      - name: Check Out Repo
+        uses: actions/checkout@v4
+      # setup Java
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: 21
+          cache: 'gradle'
+      # setup and use Gradle
+      - name: Gradle Run Test
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: 8.5
+          arguments: packageExe
+
+      - name: Upload algolia-indexes
+        uses: actions/upload-artifact@v3
+        with:
+          name: package-exe
+          path: build/compose/binaries/main/exe/StopBonus-${{ github.ref_name }}.exe
+          retention-days: 7
+
+  create-release:
+    name: Create release
+    runs-on: ubuntu-latest
+    needs: package
+    permissions:
+      contents: write
+
+    steps:
+      # 下载文件
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: package-exe
+
+        # Create gitHub release
+      - name: Create Github Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: StopBonus-${{ github.ref_name }}.exe
+          token: ${{ secrets.PUSH_TOKEN }}
+#          generate_release_notes: true
+
