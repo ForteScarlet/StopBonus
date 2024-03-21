@@ -25,11 +25,11 @@ jobs:
           java-version: 21
           cache: 'gradle'
       # setup and use Gradle
-      - name: Gradle Run Test
+      - name: Run packageExe
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: 8.5
-          arguments: packageExe
+          arguments: packageExe --info --warning-mode all -x test --build-cache
 
       - name: Upload algolia-indexes
         uses: actions/upload-artifact@v3
