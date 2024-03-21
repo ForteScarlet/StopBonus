@@ -23,20 +23,21 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: 21
-          cache: 'gradle'
+#          cache: 'gradle'
+
       # setup and use Gradle
       - name: Run packageExe
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: 8.6
-          arguments: build packageExe --info --warning-mode all -x test --build-cache
+          arguments: build packageExe --info --warning-mode all -x test
 
-      - name: Upload algolia-indexes
+      - name: Upload package
         uses: actions/upload-artifact@v3
         with:
           name: package-exe
           path: build/compose/binaries/main/exe/StopBonus-${{ github.ref_name }}.exe
-          retention-days: 7
+          retention-days: 3
 
   create-release:
     name: Create release
