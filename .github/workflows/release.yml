@@ -30,7 +30,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: 8.6
-          arguments: build packageExe --stacktrace --warning-mode all -x test -Pcompose.desktop.verbose=true
+          arguments: packageDistributionForCurrentOS --stacktrace --warning-mode all -x test -Pcompose.desktop.verbose=true
 
       - name: Upload logs
         uses: actions/upload-artifact@v3
