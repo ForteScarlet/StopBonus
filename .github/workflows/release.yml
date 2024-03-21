@@ -32,11 +32,19 @@ jobs:
           gradle-version: 8.6
           arguments: build packageExe --stacktrace --warning-mode all -x test -Pcompose.desktop.verbose=true
 
+      - name: Upload logs
+        uses: actions/upload-artifact@v3
+        if: ${{ always() }}
+        with:
+          name: logs
+          path: 'build\compose\logs\**'
+          retention-days: 3
+
       - name: Upload package
         uses: actions/upload-artifact@v3
         with:
           name: package-exe
-          path: build/compose/binaries/main/exe/StopBonus-${{ github.ref_name }}.exe
+          path: 'build/compose/binaries/main/exe/StopBonus-${{ github.ref_name }}.exe'
           retention-days: 3
 
   create-release:
