@@ -18,6 +18,7 @@ repositories {
 }
 
 java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
 }
@@ -25,6 +26,7 @@ java {
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         jvmTarget = "21"
+        javaParameters = true
     }
 }
 
@@ -75,15 +77,12 @@ compose.desktop {
             copyright = "Copyright © 2024 Forte Scarlet."
 
             windows {
-                packageVersion = versionValue
-                exePackageVersion = versionValue
-                msiPackageVersion = versionValue
                 shortcut = true
                 dirChooser = true
                 menu = true
                 menuGroup = groupId
                 perUserInstall = true
-                iconFile.set(project.rootDir.resolve("hot.ico"))
+                iconFile.set(project.rootDir.resolve("icon.ico"))
                 upgradeUuid = "f4a9a22b-b663-4848-95a8-7c0cf844da3f"
             }
         }
