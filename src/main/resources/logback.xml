@@ -4,7 +4,7 @@
 
     <property name="LOG_CONTEXT_NAME" value="web-app"/>
     <!--定义日志文件的存储地址 勿在LogBack的配置中使用相对路径-->
-    <property name="LOG_HOME" value="logs/${LOG_CONTEXT_NAME}"/>
+    <property name="LOG_HOME" value=".logs/${LOG_CONTEXT_NAME}"/>
     <!-- 定义日志上下文的名称 -->
     <contextName>${LOG_CONTEXT_NAME}</contextName>
 

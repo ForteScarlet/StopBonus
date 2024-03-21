@@ -49,19 +49,23 @@ dependencies {
 }
 
 val versionValue = "1.0.3"
-val groupId = "love.forte.app.bonus"
+val groupId = "forte.app"
 
 // https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Native_distributions_and_local_execution/README.md
 compose.desktop {
     application {
         mainClass = "MainKt"
-
+        jvmArgs += listOf(
+            "-XX:ErrorFile=.logs/hs_err.log",
+            "-XX:-HeapDumpOnOutOfMemoryError",
+            "-XX:HeapDumpPath=.logs/dump.hprof",
+        )
 
         nativeDistributions {
             modules("java.sql", "java.naming")
 
             targetFormats(
-                TargetFormat.AppImage,
+                // TargetFormat.AppImage,
                 TargetFormat.Exe, TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb
             )
             packageName = "StopBonus"
