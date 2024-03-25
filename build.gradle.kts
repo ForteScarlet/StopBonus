@@ -8,9 +8,9 @@ plugins {
     alias(libs.plugins.jetbrainsCompose)
 }
 
-val projectName = "StopBonus"
+val appName = "StopBonus"
 val appPackage = "love.forte.bonus"
-val appNameWithPackage = "$appPackage.$projectName"
+val appNameWithPackage = "$appPackage.$appName"
 val appVersion = "1.0.4"
 
 group = appPackage
@@ -72,7 +72,7 @@ compose.desktop {
             targetFormats(
                 TargetFormat.Dmg, TargetFormat.Exe, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm
             )
-            packageName = appNameWithPackage
+            packageName = appName
             packageVersion = appVersion
             vendor = "Forte Scarlet"
             description = "别再奖励自己了！"
@@ -89,12 +89,11 @@ compose.desktop {
             }
 
             windows {
-                shortcut = true
+                // shortcut = true
                 dirChooser = true
                 menuGroup = appPackage
                 iconFile.set(project.rootDir.resolve("icon.ico"))
                 upgradeUuid = "f4a9a22b-b663-4848-95a8-7c0cf844da3f"
-                exePackageVersion = appVersion
             }
         }
 
