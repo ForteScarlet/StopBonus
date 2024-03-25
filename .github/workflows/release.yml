@@ -25,9 +25,11 @@ jobs:
           java-version: 17
           cache: 'gradle'
       - uses: gradle/actions/setup-gradle@v3
+        with:
+          args:
 
       - name: Package distributables for ${{ runner.os }}
-        run: ./gradlew packageDistributionForCurrentOS --info --stacktrace --warning-mode all
+        run: gradle packageDistributionForCurrentOS --info --stacktrace --warning-mode all
 
       - name: Upload logs
         uses: actions/upload-artifact@v4
