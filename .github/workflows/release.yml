@@ -25,8 +25,6 @@ jobs:
           java-version: 17
           cache: 'gradle'
       - uses: gradle/actions/setup-gradle@v3
-        with:
-          args:
 
       - name: Package distributables for ${{ runner.os }}
         run: gradle packageDistributionForCurrentOS --info --stacktrace --warning-mode all
@@ -42,7 +40,7 @@ jobs:
       - name: Upload package
         uses: actions/upload-artifact@v4
         with:
-          name: distributions
+          name: distributions-${{ matrix.os }}
           retention-days: 1
           path: 'build/compose/binaries/main/*/StopBonus-*.*'
 
@@ -65,7 +63,8 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v3
         with:
-          name: distributions
+          pattern: distributions-*
+          merge-multiple: true
           path: ./distributions/
 
         # Create gitHub release
