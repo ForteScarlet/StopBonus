@@ -86,20 +86,19 @@ compose.desktop {
             }
 
             windows {
-                shortcut = true
+                // shortcut = true
                 dirChooser = true
                 menuGroup = project.group.toString()
                 iconFile.set(project.rootDir.resolve("icon.ico"))
                 upgradeUuid = "f4a9a22b-b663-4848-95a8-7c0cf844da3f"
-                this.exePackageVersion = project.version.toString()
+                exePackageVersion = project.version.toString()
             }
         }
 
-        // buildTypes.release.proguard {
-        //     optimize.set(true)
-        //     // obfuscate.set(true)
-        //
-        //     // optimize.set(false)
-        // }
+        buildTypes.release.proguard {
+            isEnabled.set(false)
+            obfuscate.set(false)
+            optimize.set(false)
+        }
     }
 }
