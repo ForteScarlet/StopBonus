@@ -71,7 +71,9 @@ compose.desktop {
             modules("java.sql", "java.naming")
 
             targetFormats(
-                TargetFormat.Dmg, TargetFormat.Deb, TargetFormat.Rpm, TargetFormat.Msi, TargetFormat.Exe
+                TargetFormat.Dmg, TargetFormat.Deb,
+                TargetFormat.Rpm, TargetFormat.Pkg,
+                TargetFormat.Msi, TargetFormat.Exe
             )
             packageName = appName
             packageVersion = appVersion
