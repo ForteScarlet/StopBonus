@@ -17,6 +17,23 @@ import org.slf4j.LoggerFactory
 import view.App
 import view.AppState
 import java.awt.Toolkit
+import java.nio.file.Path
+import kotlin.io.path.Path
+import kotlin.io.path.pathString
+
+fun storeAppPath(): Path {
+    val localAppData = System.getenv("LOCALAPPDATA")
+    if (localAppData != null) {
+        return Path(localAppData, "StopBonus", "data")
+    }
+
+    val userHome = System.getProperty("user.home")
+    if (userHome != null) {
+        return Path(userHome, "StopBonus", "data")
+    }
+
+    return Path("./data")
+}
 
 
 @Composable
@@ -54,7 +71,7 @@ fun main() = application {
     }
 
     val winState = rememberWindowState(size = winSize)
-    val databaseOp = remember { connectDatabaseOperator("bonus") }
+    val databaseOp = remember { connectDatabaseOperator(dataDir = storeAppPath(), schemaName = "bonus") }
 
     val trayState = rememberTrayState()
 

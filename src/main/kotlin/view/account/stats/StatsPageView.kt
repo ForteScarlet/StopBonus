@@ -147,7 +147,7 @@ private fun MainStatsPageView(state: PageViewState) {
 
 
 /**
- * 月份统计
+ * 月份内的每日统计
  */
 private class MonthModeState(yearMonth: YearMonth, type: StatsType) {
     var yearMonth: YearMonth by mutableStateOf(yearMonth)
@@ -160,7 +160,7 @@ private class MonthModeStats(val monthModeState: MonthModeState) : StatsMode() {
 
     @Composable
     override fun Label(state: PageViewState) {
-        Text("月统计")
+        Text("日统计")
     }
 
     @OptIn(ExperimentalMaterial3Api::class)

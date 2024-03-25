@@ -7,7 +7,11 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.transactions.transactionManager
+import java.nio.file.Path
 import kotlin.coroutines.CoroutineContext
+import kotlin.io.path.Path
+import kotlin.io.path.div
+import kotlin.io.path.pathString
 import kotlin.math.max
 
 class DatabaseOperator(
@@ -42,15 +46,17 @@ class DatabaseOperator(
 
 }
 
-fun connectDatabaseOperator(schemaName: String): DatabaseOperator {
+private val DEFAULT_DATA_DIR = Path("./data")
+private const val DATA_FILE_NAME = "bonus.d"
+
+fun connectDatabaseOperator(dataDir: Path = DEFAULT_DATA_DIR, schemaName: String): DatabaseOperator {
     val schema = Schema(schemaName)
 
     val config = hikariConfig {
-        jdbcUrl = "jdbc:h2:file:./data/bonus.d"
+        jdbcUrl = "jdbc:h2:file:${(dataDir / DATA_FILE_NAME).pathString}"
         driverClassName = "org.h2.Driver"
         poolName = "BonusDBPool"
-        minimumIdle = max(4, Runtime.getRuntime().availableProcessors() / 2)
-        //threadFactory = Thread.ofVirtual().factory()
+        minimumIdle = max(1, Runtime.getRuntime().availableProcessors() / 2)
     }
 
     val dataSource = HikariDataSource(config)
@@ -61,6 +67,7 @@ fun connectDatabaseOperator(schemaName: String): DatabaseOperator {
             // set other parameters here
             defaultFetchSize = 100
             keepLoadedReferencesOutOfTransaction = true
+            defaultMaxRepetitionDelay = 6000
         }
     )
 

@@ -50,7 +50,7 @@ dependencies {
     implementation(libs.koalaPlot.core)
 }
 
-val versionValue = "1.0.3"
+val versionValue = "1.0.4"
 val groupId = "forte.app"
 
 // https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Native_distributions_and_local_execution/README.md
