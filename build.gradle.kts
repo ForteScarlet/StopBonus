@@ -10,6 +10,7 @@ plugins {
 
 val appName = "StopBonus"
 val appPackage = "love.forte.bonus"
+val appMenuGroup = "forteApp"
 val appNameWithPackage = "$appPackage.$appName"
 val appVersion = "1.0.4"
 
@@ -31,7 +32,7 @@ java {
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         jvmTarget = "17"
-        javaParameters = true
+        freeCompilerArgs = freeCompilerArgs + listOf("-Xopt-in=kotlin.RequiresOptIn")
     }
 }
 
@@ -70,17 +71,19 @@ compose.desktop {
             modules("java.sql", "java.naming")
 
             targetFormats(
-                TargetFormat.Dmg, TargetFormat.Exe, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm
+                TargetFormat.Dmg, TargetFormat.Deb, TargetFormat.Rpm, TargetFormat.Msi, TargetFormat.Exe
             )
             packageName = appName
             packageVersion = appVersion
             vendor = "Forte Scarlet"
-            description = "别再奖励自己了！"
-            copyright = "Copyright © 2024 Forte Scarlet."
+            description = "DO NOT BONUS YOURSELF!"
+            copyright = "Copyright © 2024 Forte Scarlet. All rights reserved."
 
             linux {
-                menuGroup = appPackage
+                shortcut = true
+                menuGroup = appMenuGroup
                 iconFile.set(project.rootDir.resolve("icon.png"))
+                debMaintainer = "ForteScarlet@163.com"
             }
 
             macOS {
@@ -89,9 +92,9 @@ compose.desktop {
             }
 
             windows {
-                // shortcut = true
+                shortcut = true
                 dirChooser = true
-                menuGroup = appPackage
+                menuGroup = appMenuGroup
                 iconFile.set(project.rootDir.resolve("icon.ico"))
                 upgradeUuid = "f4a9a22b-b663-4848-95a8-7c0cf844da3f"
             }
