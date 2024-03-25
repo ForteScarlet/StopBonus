@@ -89,7 +89,7 @@ compose.desktop {
             }
 
             windows {
-                // shortcut = true
+                shortcut = true
                 dirChooser = true
                 menuGroup = appPackage
                 iconFile.set(project.rootDir.resolve("icon.ico"))
