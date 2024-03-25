@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "love.forte.bouns"
-version = "1.0-SNAPSHOT"
+version = "1.0.4"
 
 repositories {
     mavenCentral()
@@ -50,8 +50,7 @@ dependencies {
     implementation(libs.koalaPlot.core)
 }
 
-val versionValue = "1.0.4"
-val groupId = "forte.app"
+val projectName = "StopBonus"
 
 // https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Native_distributions_and_local_execution/README.md
 compose.desktop {
@@ -67,21 +66,29 @@ compose.desktop {
             modules("java.sql", "java.naming")
 
             targetFormats(
-                // TargetFormat.AppImage,
-                TargetFormat.Exe, TargetFormat.Dmg, TargetFormat.Deb
+                TargetFormat.Dmg, TargetFormat.Exe, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm
             )
-            packageName = "StopBonus"
-            packageVersion = versionValue
-            vendor = "ForteScarlet"
+
+            packageName = projectName
+            packageVersion = project.version.toString()
+            vendor = "Forte Scarlet"
             description = "别再奖励自己了！"
             copyright = "Copyright © 2024 Forte Scarlet."
+
+            linux {
+                menuGroup = project.group.toString()
+                iconFile.set(project.rootDir.resolve("icon.png"))
+            }
+
+            macOS {
+                bundleID = "${project.group}.$projectName"
+                iconFile.set(project.rootDir.resolve("icon.icns"))
+            }
 
             windows {
                 shortcut = true
                 dirChooser = true
-                menu = true
-                menuGroup = groupId
-                perUserInstall = true
+                menuGroup = project.group.toString()
                 iconFile.set(project.rootDir.resolve("icon.ico"))
                 upgradeUuid = "f4a9a22b-b663-4848-95a8-7c0cf844da3f"
             }
