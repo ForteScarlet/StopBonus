@@ -64,7 +64,6 @@ object AccountHomeView : AccountViewPage {
 @Composable
 private fun AccountHome(state: PageViewState) {
     val nowMillis = System.currentTimeMillis()
-    val nowUTCMillis = Clock.systemUTC().millis()
     val nowLocalDateTime = LocalDateTime.now()
 
     val scope = rememberCoroutineScope()
@@ -260,7 +259,7 @@ private fun AccountHome(state: PageViewState) {
 
         AnimatedVisibility(duration != null) {
             // 打分
-            ScoreSelector(state, score)
+            ScoreSelector(score)
         }
 
         // AnimatedVisibility(duration != null) {
@@ -444,7 +443,6 @@ private inline fun WeaponSelector(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ScoreSelector(
-    state: PageViewState,
     scoreState: SliderState,
 ) {
     val scoreValue = scoreState.value.toInt()

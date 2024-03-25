@@ -87,9 +87,11 @@ compose.desktop {
             }
         }
 
-        buildTypes.release.proguard {
-            obfuscate.set(false)
-            optimize.set(false)
-        }
+        // buildTypes.release.proguard {
+        //     optimize.set(true)
+        //     // obfuscate.set(true)
+        //
+        //     // optimize.set(false)
+        // }
     }
 }
