@@ -16,7 +16,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
@@ -277,7 +276,7 @@ private fun AccountHome(state: PageViewState) {
 
         AnimatedVisibility(selectedStartDateTime != null && selectedEndDateTime != null) {
             ElevatedButton(
-                enabled = !recording && duration != null && duration.isPositive,
+                enabled = !recording && duration != null && duration.isPositive(),
                 modifier = Modifier.fillMaxWidth()
                     .align(Alignment.CenterHorizontally),
                 onClick = {
@@ -489,3 +488,7 @@ private fun ScoreSelector(
 
 
 }
+
+
+private fun Duration.isPositive(): Boolean = (seconds.toInt() or toNanosPart()) > 0
+// (seconds | nanos) > 0

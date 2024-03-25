@@ -18,14 +18,14 @@ repositories {
 }
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
-        jvmTarget = "21"
+        jvmTarget = "17"
         javaParameters = true
     }
 }
@@ -68,7 +68,7 @@ compose.desktop {
 
             targetFormats(
                 // TargetFormat.AppImage,
-                TargetFormat.Exe, TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb
+                TargetFormat.Exe, TargetFormat.Dmg, TargetFormat.Deb
             )
             packageName = "StopBonus"
             packageVersion = versionValue
