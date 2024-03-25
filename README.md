@@ -15,13 +15,18 @@
 
 **数据保存位置**
 
-Windows 上数据默认储存在 `$USER_HOME\Local\AppData\Local\StopBonus`
+Windows 上数据默认储存在 `$USER_HOME\AppData\Local\StopBonus`
 
 **如何使用**
 
 奖励完了填个表。
 
 ## 截图
+
+<div>
+
+
+</div>
 
 ![](docs/images/1.png)
 
