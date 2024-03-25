@@ -8,8 +8,13 @@ plugins {
     alias(libs.plugins.jetbrainsCompose)
 }
 
-group = "love.forte.bonus"
-version = "1.0.4"
+val projectName = "StopBonus"
+val appPackage = "love.forte.bonus"
+val appNameWithPackage = "$appPackage.$projectName"
+val appVersion = "1.0.4"
+
+group = appPackage
+version = appVersion
 
 repositories {
     mavenCentral()
@@ -50,7 +55,6 @@ dependencies {
     implementation(libs.koalaPlot.core)
 }
 
-val projectName = "StopBonus"
 
 // https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Native_distributions_and_local_execution/README.md
 compose.desktop {
@@ -68,30 +72,29 @@ compose.desktop {
             targetFormats(
                 TargetFormat.Dmg, TargetFormat.Exe, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm
             )
-
-            packageName = projectName
-            packageVersion = project.version.toString()
+            packageName = appNameWithPackage
+            packageVersion = appVersion
             vendor = "Forte Scarlet"
             description = "别再奖励自己了！"
             copyright = "Copyright © 2024 Forte Scarlet."
 
             linux {
-                menuGroup = project.group.toString()
+                menuGroup = appPackage
                 iconFile.set(project.rootDir.resolve("icon.png"))
             }
 
             macOS {
-                bundleID = "${project.group}.$projectName"
+                bundleID = appNameWithPackage
                 iconFile.set(project.rootDir.resolve("icon.icns"))
             }
 
             windows {
                 // shortcut = true
                 dirChooser = true
-                menuGroup = project.group.toString()
+                menuGroup = appPackage
                 iconFile.set(project.rootDir.resolve("icon.ico"))
                 upgradeUuid = "f4a9a22b-b663-4848-95a8-7c0cf844da3f"
-                exePackageVersion = project.version.toString()
+                exePackageVersion = appVersion
             }
         }
 
