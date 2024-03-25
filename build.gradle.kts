@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.jetbrainsCompose)
 }
 
-group = "love.forte.bouns"
+group = "love.forte.bonus"
 version = "1.0.4"
 
 repositories {
@@ -43,8 +43,8 @@ dependencies {
     implementation(compose.material3)
 
     runtimeOnly(libs.logback.classic)
-
     runtimeOnly(libs.h2db)
+
     implementation(libs.hikariCP)
     implementation(libs.bundles.exposed)
     implementation(libs.koalaPlot.core)
@@ -91,6 +91,7 @@ compose.desktop {
                 menuGroup = project.group.toString()
                 iconFile.set(project.rootDir.resolve("icon.ico"))
                 upgradeUuid = "f4a9a22b-b663-4848-95a8-7c0cf844da3f"
+                this.exePackageVersion = project.version.toString()
             }
         }
 
