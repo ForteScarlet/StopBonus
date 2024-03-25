@@ -65,13 +65,13 @@ jobs:
         with:
           pattern: distributions-*
           merge-multiple: true
-          path: ./distributions/
+          path: distributions
 
         # Create gitHub release
       - name: Create Github Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ./distributions/**
+          files: 'distributions/*/StopBonus-*.*'
 #          files: StopBonus-${{ github.ref_name }}.exe
           token: ${{ secrets.PUSH_TOKEN }}
 #          generate_release_notes: true
