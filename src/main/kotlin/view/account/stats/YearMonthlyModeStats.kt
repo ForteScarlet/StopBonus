@@ -3,7 +3,6 @@ package view.account.stats
 import FontBTTFamily
 import FontLXGWNeoXiHeiScreenFamily
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,7 +17,6 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
-import database.entity.BonusRecord
 import database.entity.BonusRecords
 import io.github.koalaplot.core.ChartLayout
 import io.github.koalaplot.core.Symbol
@@ -26,7 +24,9 @@ import io.github.koalaplot.core.bar.*
 import io.github.koalaplot.core.legend.ColumnLegend
 import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
-import io.github.koalaplot.core.xygraph.*
+import io.github.koalaplot.core.xygraph.CategoryAxisModel
+import io.github.koalaplot.core.xygraph.XYGraph
+import io.github.koalaplot.core.xygraph.rememberLinearAxisModel
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.count
 import org.jetbrains.exposed.sql.javatime.month
@@ -34,10 +34,9 @@ import org.jetbrains.exposed.sql.javatime.year
 import org.jetbrains.exposed.sql.sum
 import view.account.PageViewState
 import view.account.record.format
-import java.math.BigDecimal
 import java.time.*
 import java.time.format.TextStyle
-import java.util.Locale
+import java.util.*
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -241,7 +240,10 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
                     XYGraph(
                         xAxisModel = remember { CategoryAxisModel(d.boroughs) },
                         xAxisLabels = { it.displayMonth() },
-                        yAxisModel = rememberLinearAxisModel(0f..max(1f, d.population.max() / 0.85f), minorTickCount = 0),
+                        yAxisModel = rememberLinearAxisModel(
+                            0f..max(1f, d.population.max() / 0.85f),
+                            minorTickCount = 0
+                        ),
                         yAxisTitle = "奖励次数",
                         xAxisTitle = "月份"
                     ) {
@@ -263,8 +265,14 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
                                             val date = d.boroughs[index]
                                             val value = d.population[index]
                                             Column(modifier = Modifier.padding(12.dp)) {
-                                                Text("月份: ${year.atMonth(index + 1).displayMonth()}", fontFamily = FontLXGWNeoXiHeiScreenFamily)
-                                                Text("次数: ${value.toInt()}", fontFamily = FontLXGWNeoXiHeiScreenFamily)
+                                                Text(
+                                                    "月份: ${date.displayMonth()}",
+                                                    fontFamily = FontLXGWNeoXiHeiScreenFamily
+                                                )
+                                                Text(
+                                                    "次数: ${value.toInt()}",
+                                                    fontFamily = FontLXGWNeoXiHeiScreenFamily
+                                                )
                                             }
                                         }
                                     }
@@ -415,8 +423,14 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
                                         ) {
                                             Column(modifier = Modifier.padding(12.dp)) {
                                                 Text(name, fontFamily = FontLXGWNeoXiHeiScreenFamily)
-                                                Text("月份: ${yearMonth.displayMonth()}", fontFamily = FontLXGWNeoXiHeiScreenFamily)
-                                                Text("时长: ${Duration.ofMinutes(value.toLong()).format()}", fontFamily = FontLXGWNeoXiHeiScreenFamily)
+                                                Text(
+                                                    "月份: ${yearMonth.displayMonth()}",
+                                                    fontFamily = FontLXGWNeoXiHeiScreenFamily
+                                                )
+                                                Text(
+                                                    "时长: ${Duration.ofMinutes(value.toLong()).format()}",
+                                                    fontFamily = FontLXGWNeoXiHeiScreenFamily
+                                                )
                                             }
                                         }
                                     }
@@ -457,5 +471,5 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
 
 private fun YearMonth.displayMonth(
     style: TextStyle = TextStyle.SHORT,
-    locale: Locale = Locale.getDefault()
+    locale: Locale = Locale.CHINA // Locale.getDefault()
 ): String = month.getDisplayName(style, locale)
