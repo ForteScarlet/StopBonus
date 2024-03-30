@@ -5,6 +5,8 @@ import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.duration
 import org.jetbrains.exposed.sql.javatime.timestamp
+import java.time.Duration
+import java.time.Instant
 
 /**
  * 奖励记录
@@ -64,3 +66,26 @@ object BonusRecordWeapons : Table() {
     override val primaryKey: PrimaryKey = PrimaryKey(record, weapon)
 }
 
+data class BonusRecordView(
+    override val entityID: EntityID<Int>,
+    val startTime: Instant,
+    val endTime: Instant,
+    val duration: Duration,
+    val score: UInt,
+    val weapons: List<WeaponView>
+) : BaseIntEntityView
+
+fun BonusRecord.toView(
+    startTime: Instant = this.startTime,
+    endTime: Instant = this.endTime,
+    duration: Duration = this.duration,
+    score: UInt = this.score,
+    weapons: List<WeaponView> = this.weapons.map { it.toView() }
+): BonusRecordView = BonusRecordView(
+    entityID = id,
+    startTime = startTime,
+    endTime = endTime,
+    duration = duration,
+    score = score,
+    weapons = weapons,
+)

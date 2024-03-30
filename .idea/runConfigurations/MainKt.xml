@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="MainKt" type="JetRunConfigurationType" nameIsGenerated="true">
+    <option name="MAIN_CLASS_NAME" value="MainKt" />
+    <module name="bonus-self-desktop.main" />
+    <shortenClasspath name="NONE" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+      <option name="com.soywiz.korge.intellij.UpdateResourceBeforeRunTask" enabled="false" />
+    </method>
+  </configuration>
+</component>

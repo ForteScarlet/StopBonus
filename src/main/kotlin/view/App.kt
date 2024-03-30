@@ -9,7 +9,6 @@ import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -28,7 +27,7 @@ import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.WindowState
 import database.DatabaseOperator
-import database.entity.Account
+import database.entity.AccountView
 import kotlinx.coroutines.CoroutineScope
 import view.account.AccountHome
 import view.account.AccountState
@@ -47,7 +46,7 @@ class AppState(
 @Composable
 @Preview
 fun FrameWindowScope.App(appState: AppState) {
-    val targetAccount = remember { mutableStateOf<Account?>(null) }
+    val targetAccount = remember { mutableStateOf<AccountView?>(null) }
 
     AnimatedContent(targetAccount.value) { account ->
         when (account) {

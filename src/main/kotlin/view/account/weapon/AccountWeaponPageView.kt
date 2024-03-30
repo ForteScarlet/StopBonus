@@ -24,10 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import database.entity.Weapon
-import database.entity.Weapons
+import database.entity.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
 import view.account.AccountViewPage
 import view.account.PageViewState
 
@@ -59,12 +60,15 @@ object AccountWeaponPageView : AccountViewPage {
 @Composable
 private fun WeaponList(state: PageViewState) {
     val scope = rememberCoroutineScope()
-    val weaponList = remember { mutableStateListOf<Weapon>() }
+    val weaponList = remember { mutableStateListOf<WeaponView>() }
     val listState = rememberLazyListState()
 
     LaunchedEffect(state) {
         state.accountState.inAccountTransaction { account ->
-            val all = Weapon.find { Weapons.account eq account.id }.notForUpdate()
+            val all = Weapon.find { Weapons.account eq account.id }
+                .notForUpdate()
+                .map { it.toView() }
+
             weaponList.addAll(all)
         }
     }
@@ -115,7 +119,7 @@ private inline fun NewWeapon(
     scope: CoroutineScope,
     state: PageViewState,
     crossinline onDismiss: () -> Unit,
-    crossinline onCreated: (Weapon) -> Unit,
+    crossinline onCreated: (WeaponView) -> Unit,
 ) {
     var creating by remember { mutableStateOf(false) }
 
@@ -189,11 +193,11 @@ private inline fun NewWeapon(
                             try {
                                 state.accountState.inAccountTransaction { account ->
                                     val new = Weapon.new {
-                                        this.account = account
+                                        this.account = Account.findById(account.id)!! // TODO null ?
                                         this.name = newName
                                     }
 
-                                    onCreated(new)
+                                    onCreated(new.toView())
                                 }
 
                                 onDismiss()
@@ -241,7 +245,7 @@ private fun ShowList(
     state: PageViewState,
     scope: CoroutineScope,
     listState: LazyListState,
-    weaponList: SnapshotStateList<Weapon>,
+    weaponList: SnapshotStateList<WeaponView>,
 ) {
     LazyColumn(
         state = listState,
@@ -258,8 +262,8 @@ private fun ShowList(
 private fun LazyItemScope.ListItemWeapon(
     state: PageViewState,
     scope: CoroutineScope,
-    weapon: Weapon,
-    onDelete: (Weapon) -> Unit,
+    weapon: WeaponView,
+    onDelete: (WeaponView) -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
@@ -286,7 +290,7 @@ private fun LazyItemScope.ListItemWeapon(
                             val name = weapon.name
                             try {
                                 state.accountState.database.inSuspendedTransaction {
-                                    weapon.delete()
+                                    Weapons.deleteWhere(limit = 1) { id eq weapon.id }
                                 }
 
                                 scope.launch {
