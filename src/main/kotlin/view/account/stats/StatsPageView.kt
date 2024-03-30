@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import view.account.AccountViewPage
 import view.account.PageViewState
 import view.account.stats.StatsType.COUNT
+import java.time.Year
 import java.time.YearMonth
 
 
@@ -69,9 +70,11 @@ enum class StatsType(val title: String) {
 
 @Composable
 private fun MainStatsPageView(state: PageViewState) {
+    val modeTypeState = remember { mutableStateOf(COUNT) }
     val modes = remember {
-        listOf<StatsMode>(
-            MonthDailyModeStats(MonthDailyModeState(YearMonth.now(), COUNT)),
+        listOf(
+            MonthDailyModeStats(MonthDailyModeState(YearMonth.now(), modeTypeState)),
+            YearMonthlyModeStats(YearMonthlyModeState(Year.now(), modeTypeState)),
         )
     }
 

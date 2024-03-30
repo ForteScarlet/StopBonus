@@ -23,20 +23,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import database.entity.BonusRecord
-import database.entity.BonusRecordWeapons.weapon
+import database.entity.BonusRecordView
 import database.entity.BonusRecords
-import database.entity.Weapon
+import database.entity.toView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.exposed.dao.with
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.mapLazy
 import view.account.AccountViewPage
 import view.account.PageViewState
 import java.time.Duration
-import java.time.Instant
 import java.time.ZoneId
 
 
@@ -75,37 +73,28 @@ var account by Account referencedOn BonusRecords.account
     var weapons by Weapon via BonusRecordWeapons
  */
 
-private data class RecordData(
-    val id: Int,
-    val startTime: Instant,
-    val endTime: Instant,
-    val duration: Duration,
-    val score: UInt,
-    val weapons: List<Weapon>
-)
+// private data class RecordData(
+//     val id: Int,
+//     val startTime: Instant,
+//     val endTime: Instant,
+//     val duration: Duration,
+//     val score: UInt,
+//     val weapons: List<WeaponView>
+// )
 
 @Composable
 private fun ShowBonusRecordList(state: PageViewState) {
     val scope = rememberCoroutineScope()
-    val recordList = remember { mutableStateListOf<RecordData>() }
+    val recordList = remember { mutableStateListOf<BonusRecordView>() }
     val listState = rememberLazyListState()
 
     LaunchedEffect(Unit) {
         state.accountState.inAccountTransaction { account ->
-            val all = account.records
+            val all = BonusRecord.find { BonusRecords.account eq account.id }
                 .orderBy(BonusRecords.createTime to SortOrder.DESC)
                 .with(BonusRecord::weapons)
                 .notForUpdate()
-                .mapLazy {
-                    RecordData(
-                        id = it.id.value,
-                        startTime = it.startTime,
-                        endTime = it.endTime,
-                        duration = it.duration,
-                        score = it.score,
-                        weapons = it.weapons.toList(),
-                    )
-                }
+                .map { it.toView() }
 
             recordList.addAll(all)
         }
@@ -125,8 +114,8 @@ private fun ShowBonusRecordList(state: PageViewState) {
 private fun ListItemRecord(
     state: PageViewState,
     scope: CoroutineScope,
-    record: RecordData,
-    onDelete: (RecordData) -> Unit,
+    record: BonusRecordView,
+    onDelete: (BonusRecordView) -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()

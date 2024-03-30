@@ -8,7 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import database.DatabaseOperator
-import database.entity.Account
+import database.entity.AccountView
 import org.jetbrains.exposed.sql.Transaction
 import view.AppState
 import view.account.home.AccountHomeView
@@ -21,15 +21,15 @@ import kotlin.coroutines.CoroutineContext
 class AccountState(
     val appState: AppState,
     val database: DatabaseOperator,
-    val account: Account,
-    val accountState: MutableState<Account?>,
+    val account: AccountView,
+    val accountState: MutableState<AccountView?>,
 ) {
     var accountOrNull by accountState
 
     suspend inline fun <T> inAccountTransaction(
         context: CoroutineContext? = null,
         transactionIsolation: Int? = null,
-        crossinline block: suspend Transaction.(Account) -> T
+        crossinline block: suspend Transaction.(AccountView) -> T
     ): T {
         return account.let { a ->
             database.inSuspendedTransaction(context, transactionIsolation) {

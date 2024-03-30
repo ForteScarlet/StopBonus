@@ -1,12 +1,9 @@
 package database.entity
 
 import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.sql.ReferenceOption
-import org.jetbrains.exposed.sql.Table
 
-//region 配菜
 /**
- * 配菜信息。
+ * 武器信息。
  */
 object Weapons : BaseIntIdTable() {
     val account = referenceAccount()
@@ -22,5 +19,16 @@ class Weapon(id: EntityID<Int>) : BaseIntEntity(id, Weapons) {
     var account by Account referencedOn Weapons.account
     var name by Weapons.name
 }
-//endregion
 
+
+data class WeaponView(
+    override val entityID: EntityID<Int>,
+    val name: String
+) : BaseIntEntityView
+
+fun Weapon.toView(
+    name: String = this.name,
+): WeaponView = WeaponView(
+    entityID = id,
+    name = name
+)

@@ -14,6 +14,7 @@ object Accounts : BaseIntIdTable() {
 
 class Account(id: EntityID<Int>) : BaseIntEntity(id, Accounts) {
     companion object : BaseEntityClass<Account>(Accounts)
+
     var name by Accounts.name
 
     val records by BonusRecord referrersOn BonusRecords.account
@@ -27,3 +28,16 @@ fun Table.referenceAccount(
     fkName: String? = null
 ): Column<EntityID<Int>> =
     reference(columnName, Accounts, onDelete, onUpdate, fkName)
+
+
+data class AccountView(
+    override val entityID: EntityID<Int>,
+    val name: String,
+) : BaseIntEntityView
+
+fun Account.toView(
+    name: String = this.name,
+): AccountView = AccountView(
+    id,
+    name = name,
+)
