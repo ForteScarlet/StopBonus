@@ -22,10 +22,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
-import database.entity.Account
-import database.entity.BonusRecord
-import database.entity.Weapon
-import database.entity.Weapons
+import database.entity.*
 import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.SizedCollection
 import view.account.AccountViewPage
@@ -111,7 +108,7 @@ private fun AccountHome(state: PageViewState) {
         initialMinute = nowTime.minute
     )
 
-    var weapon by remember { mutableStateOf<Weapon?>(null) }
+    var weapon by remember { mutableStateOf<WeaponView?>(null) }
     val score = remember { SliderState(value = 10f, steps = 8, valueRange = 1f..10f) }
 
     suspend fun clearStates() {
@@ -287,7 +284,7 @@ private fun AccountHome(state: PageViewState) {
 
 
                                     BonusRecord.new {
-                                        this.account = account
+                                        this.account = Account.findById(account.id)!! // TODO null ?
                                         this.duration = duration
                                         this.startTime =
                                             ZonedDateTime.of(selectedStartDateTime, ZoneId.systemDefault()).toInstant()
@@ -295,7 +292,8 @@ private fun AccountHome(state: PageViewState) {
                                             ZonedDateTime.of(selectedEndDateTime, ZoneId.systemDefault()).toInstant()
                                         this.score = score.value.toUInt()
                                         weapon?.also { w ->
-                                            this.weapons = SizedCollection(listOf(w))
+                                            this.weapons = SizedCollection(listOf(Weapon.findById(w.id)!!))
+                                            // TODO null?
                                         }
                                     }
                                 }
@@ -358,14 +356,14 @@ private fun AccountHome(state: PageViewState) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private inline fun WeaponSelector(
-    state: PageViewState, selectedWeapon: Weapon?,
-    crossinline onSelect: (Weapon?) -> Unit
+    state: PageViewState, selectedWeapon: WeaponView?,
+    crossinline onSelect: (WeaponView?) -> Unit
 ) {
-    val weapons = remember { mutableStateListOf<Weapon>() }
+    val weapons = remember { mutableStateListOf<WeaponView>() }
     LaunchedEffect(state) {
-        state.accountState.inAccountTransaction { account: Account ->
+        state.accountState.inAccountTransaction { account ->
             val all = Weapon.find { Weapons.account eq account.id }
-                .notForUpdate()
+                .notForUpdate().map { it.toView() }
 
             weapons.addAll(all)
         }

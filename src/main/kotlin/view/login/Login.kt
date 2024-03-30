@@ -20,7 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import database.DatabaseOperator
 import database.entity.Account
+import database.entity.AccountView
+import database.entity.Accounts
+import database.entity.toView
 import kotlinx.coroutines.launch
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
 import view.AppState
 
 class LoginState(
@@ -31,14 +36,14 @@ class LoginState(
 }
 
 @Composable
-fun LoginView(state: LoginState, onSelect: (Account) -> Unit) {
+fun LoginView(state: LoginState, onSelect: (AccountView) -> Unit) {
     val scope by state::scope
-    val accountList = remember { mutableStateListOf<Account>() }
+    val accountList = remember { mutableStateListOf<AccountView>() }
     var inDeleting by remember { mutableStateOf(false) }
 
     suspend fun readData() {
         state.database.inSuspendedTransaction {
-            accountList.addAll(Account.all().notForUpdate())
+            accountList.addAll(Account.all().notForUpdate().map { it.toView() })
         }
     }
 
@@ -68,7 +73,7 @@ fun LoginView(state: LoginState, onSelect: (Account) -> Unit) {
                 scope.launch {
                     try {
                         state.database.inSuspendedTransaction {
-                            target.delete()
+                            Accounts.deleteWhere(limit = 1) { id eq target.id }
                             accountList.remove(target)
                         }
                     } finally {
@@ -85,10 +90,10 @@ fun LoginView(state: LoginState, onSelect: (Account) -> Unit) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private inline fun AccountList(
-    accounts: List<Account>,
+    accounts: List<AccountView>,
     inDeleting: Boolean,
-    crossinline onDelete: (Account) -> Unit = {},
-    crossinline onSelect: (Account) -> Unit = {}
+    crossinline onDelete: (AccountView) -> Unit = {},
+    crossinline onSelect: (AccountView) -> Unit = {}
 ) {
     // val hovering by remember { mutableStateOf<Int?>(null) }
 
@@ -101,8 +106,8 @@ private inline fun AccountList(
             verticalArrangement = Arrangement.spacedBy(15.dp, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            items(accounts, key = { it.id.value }) { item ->
-                val itemId = item.id.value
+            items(accounts, key = { it.id }) { item ->
+                val itemId = item.id
                 val hoverState = remember(item) { MutableInteractionSource() }
                 // val isHovered by hoverState.collectIsHoveredAsState()
 
@@ -185,7 +190,7 @@ private inline fun AccountList(
 @Composable
 inline fun NewAccount(
     state: LoginState,
-    crossinline onCreate: (Account) -> Unit = {}
+    crossinline onCreate: (AccountView) -> Unit = {}
 ) {
     var inSave by remember { mutableStateOf(false) }
     var nameValue by remember { mutableStateOf("") }
@@ -215,7 +220,7 @@ inline fun NewAccount(
                                 }
                             }
 
-                            onCreate(new)
+                            onCreate(new.toView())
                         } finally {
                             inSave = false
                         }

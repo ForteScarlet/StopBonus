@@ -1,8 +1,10 @@
 package view.account.stats
 
 import FontBTTFamily
+import FontLXGWNeoXiHeiScreenFamily
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
@@ -39,9 +42,9 @@ import kotlin.math.max
 /**
  * 月份内的每日统计
  */
-class MonthDailyModeState(yearMonth: YearMonth, type: StatsType) {
+class MonthDailyModeState(yearMonth: YearMonth, type: MutableState<StatsType>) {
     var yearMonth: YearMonth by mutableStateOf(yearMonth)
-    var type by mutableStateOf(type)
+    var type by type
 }
 
 /**
@@ -234,13 +237,14 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
                 KoalaPlotTheme {
                     XYGraph(
                         xAxisModel = remember { CategoryAxisModel(d.boroughs) },
-                        yAxisModel = rememberLinearAxisModel(0f..max(1f, d.population.max() + 5f), minorTickCount = 0),
+                        yAxisModel = rememberLinearAxisModel(0f..max(1f, d.population.max() / 0.85f), minorTickCount = 0),
                         yAxisTitle = "奖励次数",
                         xAxisTitle = "日期"
                     ) {
                         VerticalBarPlot(
                             xData = d.boroughs,
                             yData = d.population,
+                            barWidth = 0.65f,
                             bar = { index ->
                                 DefaultVerticalBar(
                                     brush = SolidColor(Color.Blue),
@@ -255,8 +259,8 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
                                             val date = d.boroughs[index]
                                             val value = d.population[index]
                                             Column(modifier = Modifier.padding(12.dp)) {
-                                                Text("日期: $yearMonth-$date")
-                                                Text("次数: ${value.toInt()}")
+                                                Text("日期: $yearMonth-$date", fontFamily = FontLXGWNeoXiHeiScreenFamily)
+                                                Text("次数: ${value.toInt()}", fontFamily = FontLXGWNeoXiHeiScreenFamily)
                                             }
                                         }
                                     }
@@ -361,21 +365,22 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
                                 symbol = { Symbol(shape = RectangleShape, fillBrush = SolidColor(chartColors[it])) },
                                 label = {
                                     if (it == 0) {
-                                        Text("总时长(分钟)")
+                                        Text("总时长(分钟)", fontFamily = FontLXGWNeoXiHeiScreenFamily)
                                     } else {
-                                        Text("平均时长(分钟)")
+                                        Text("平均时长(分钟)", fontFamily = FontLXGWNeoXiHeiScreenFamily)
                                     }
                                 }
                             )
                         }
                     ) {
+
                         XYGraph(
-                            xAxisModel = remember { CategoryAxisModel(d.boroughs) },
+                            xAxisModel = remember(d) { CategoryAxisModel(d.boroughs) },
                             yAxisModel = rememberLinearAxisModel(
-                                0f..max(1f, d.population.flatten().max() + 3f),
+                                0f..max(1f, d.population.flatten().max() / 0.85f),
                                 minorTickCount = 0
                             ),
-                            yAxisTitle = "奖励时长",
+                            yAxisTitle = "奖励时长(分钟)",
                             xAxisTitle = "日期"
                         ) {
 
@@ -392,16 +397,16 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
                                             colors = CardDefaults.elevatedCardColors(containerColor = Color.LightGray)
                                         ) {
                                             Column(modifier = Modifier.padding(12.dp)) {
-                                                Text(name)
-                                                Text("日期: $yearMonth-$date")
-                                                Text("时长: ${Duration.ofMinutes(value.toLong()).format()}")
+                                                Text(name, fontFamily = FontLXGWNeoXiHeiScreenFamily)
+                                                Text("日期: $yearMonth-$date", fontFamily = FontLXGWNeoXiHeiScreenFamily)
+                                                Text("时长: ${Duration.ofMinutes(value.toLong()).format()}", fontFamily = FontLXGWNeoXiHeiScreenFamily)
                                             }
                                         }
                                     }
                                 )
                             }
 
-                            GroupedVerticalBarPlot {
+                            GroupedVerticalBarPlot(maxBarGroupWidth = 0.65f) {
                                 // 1: 总
                                 series(solidBar(chartColors[0])) {
                                     d.boroughs.forEachIndexed { index, borough ->
@@ -416,7 +421,7 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
                                 // 2: 平均
                                 series(solidBar(chartColors[1])) {
                                     d.boroughs.forEachIndexed { index, borough ->
-                                        val value = d.population[index][0]
+                                        val value = d.population[index][1]
                                         item(borough, 0f, d.population[index][1]) {
                                             Bar("平均时长(分钟)", chartColors[1], borough, value)
                                         }

@@ -22,6 +22,10 @@ import kotlin.io.path.Path
 import kotlin.io.path.pathString
 
 fun storeAppPath(): Path {
+    if (System.getenv("DEBUG").toBoolean() || System.getProperty("debug").toBoolean()) {
+        return Path("./data")
+    }
+
     val localAppData = System.getenv("LOCALAPPDATA")
     if (localAppData != null) {
         return Path(localAppData, "StopBonus", "data")
