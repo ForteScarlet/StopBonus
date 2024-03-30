@@ -263,7 +263,7 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
                                             val date = d.boroughs[index]
                                             val value = d.population[index]
                                             Column(modifier = Modifier.padding(12.dp)) {
-                                                Text("月份: ${year.atMonth(index + 1)}", fontFamily = FontLXGWNeoXiHeiScreenFamily)
+                                                Text("月份: ${year.atMonth(index + 1).displayMonth()}", fontFamily = FontLXGWNeoXiHeiScreenFamily)
                                                 Text("次数: ${value.toInt()}", fontFamily = FontLXGWNeoXiHeiScreenFamily)
                                             }
                                         }
