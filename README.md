@@ -21,12 +21,15 @@ Windows 上数据默认储存在 `$USER_HOME\AppData\Local\StopBonus`
 
 奖励完了填个表。
 
+## 更新
+
+比较建议先卸载旧的，再安装新的。如果数据被保存在安装目录内，记得先备份。
+别问，compose打包出来的安装包似乎对更新安装不太友好。
+
+当然，如果实际上是我配置的有问题请务必[告诉我](https://github.com/ForteScarlet/StopBonus/issues/new)，
+非常感谢！
+
 ## 截图
-
-<div>
-
-
-</div>
 
 ![](docs/images/1.png)
 
