@@ -81,7 +81,7 @@ private fun AccountHome(state: PageViewState) {
         }
     )
 
-    val startTimePickerState = rememberTimePickerState()
+    val startTimePickerState = rememberTimePickerState(is24Hour = true)
 
     val selectedStartDateMillis = startDatePickerState.selectedDateMillis
     val selectedStartDateInstant = selectedStartDateMillis?.let { Instant.ofEpochMilli(it) }
