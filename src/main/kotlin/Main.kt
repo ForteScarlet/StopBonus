@@ -58,77 +58,79 @@ val FontLXGWNeoXiHeiScreenFamily = FontFamily(FontLXGWNeoXiHeiScreen())
 
 private val logger = LoggerFactory.getLogger("MAIN")
 
-fun main() = application {
+fun main() {
     Thread.setDefaultUncaughtExceptionHandler { t, e ->
         logger.error("UncaughtExceptionHandler on Thread[{}]", t, e)
     }
 
-    val scope = rememberCoroutineScope { Dispatchers.Default }
-    val materialThemeState = rememberMaterialThemeState()
+    val databaseOp = connectDatabaseOperator(dataDir = storeAppPath(), schemaName = "bonus")
 
-    val winSize = kotlin.runCatching {
-        with(Toolkit.getDefaultToolkit().screenSize) {
-            DpSize((width * 0.8f).dp, (height * 0.8f).dp)
+    application {
+        val scope = rememberCoroutineScope { Dispatchers.Default }
+        val materialThemeState = rememberMaterialThemeState()
+
+        val winSize = kotlin.runCatching {
+            with(Toolkit.getDefaultToolkit().screenSize) {
+                DpSize((width * 0.8f).dp, (height * 0.8f).dp)
+            }
+        }.getOrElse {
+            DpSize(1024.dp, 768.dp)
         }
-    }.getOrElse {
-        DpSize(1024.dp, 768.dp)
-    }
 
-    val winState = rememberWindowState(size = winSize)
-    val databaseOp = remember { connectDatabaseOperator(dataDir = storeAppPath(), schemaName = "bonus") }
+        val winState = rememberWindowState(size = winSize)
+        val trayState = rememberTrayState()
 
-    val trayState = rememberTrayState()
-
-    if (winState.isMinimized) {
-        Tray(
-            icon = Logo(),
-            tooltip = "别奖励了😡",
-            state = trayState,
-            onAction = {
-                winState.isMinimized = false
-                winState.position = WindowPosition.PlatformDefault
-            },
-            menu = {
-                Item("Open") {
+        if (winState.isMinimized) {
+            Tray(
+                icon = Logo(),
+                tooltip = "别奖励了😡",
+                state = trayState,
+                onAction = {
                     winState.isMinimized = false
                     winState.position = WindowPosition.PlatformDefault
-                }
-                Separator()
-                Item("Exit") {
-                    exitApplication()
-                }
-            }
-        )
-    }
-
-    Window(
-        icon = Logo(),
-        state = winState,
-        title = "别奖励了!",
-        visible = !winState.isMinimized,
-        enabled = !winState.isMinimized,
-        onCloseRequest = {
-            exitApplication()
-        }
-    ) {
-        MaterialTheme(
-            colors = materialThemeState.colors,
-            typography = materialThemeState.typography,
-            shapes = materialThemeState.shapes
-        ) {
-            App(
-                remember {
-                    AppState(
-                        winState,
-                        materialThemeState,
-                        scope,
-                        databaseOp
-                    )
+                },
+                menu = {
+                    Item("Open") {
+                        winState.isMinimized = false
+                        winState.position = WindowPosition.PlatformDefault
+                    }
+                    Separator()
+                    Item("Exit") {
+                        exitApplication()
+                    }
                 }
             )
         }
-    }
 
+        Window(
+            icon = Logo(),
+            state = winState,
+            title = "别奖励了!",
+            visible = !winState.isMinimized,
+            enabled = !winState.isMinimized,
+            onCloseRequest = {
+                exitApplication()
+            }
+        ) {
+            MaterialTheme(
+                colors = materialThemeState.colors,
+                typography = materialThemeState.typography,
+                shapes = materialThemeState.shapes
+            ) {
+                App(
+                    remember {
+                        AppState(
+                            winState,
+                            materialThemeState,
+                            scope,
+                            databaseOp
+                        )
+                    }
+                )
+            }
+        }
+
+    }
 }
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")

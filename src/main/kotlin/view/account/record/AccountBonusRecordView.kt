@@ -1,12 +1,14 @@
 package view.account.record
 
 import FontBTTFamily
+import FontLXGWNeoXiHeiScreenFamily
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import database.entity.BonusRecord
 import database.entity.BonusRecordView
@@ -170,10 +173,10 @@ private fun ListItemRecord(
         modifier = Modifier.hoverable(interactionSource),
         headlineContent = {
             if (record.weapons.isEmpty()) {
-                Text("手艺活")
+                Text("手艺活", fontFamily = FontLXGWNeoXiHeiScreenFamily)
             } else {
                 val weaponsString = record.weapons.joinToString("、", prefix = "「", postfix = "」") { it.name }
-                Text("使用 $weaponsString")
+                Text("使用 $weaponsString", fontFamily = FontLXGWNeoXiHeiScreenFamily)
             }
         },
         supportingContent = {
@@ -183,12 +186,31 @@ private fun ListItemRecord(
             val endDate = end.toLocalDate()
             val startTime = start.toLocalTime()
             val endTime = end.toLocalTime()
+            val remark = record.remark
+            val score = record.score
 
-            if (startDate == endDate) {
-                Text("从 $startDate 的 $startTime 开始, 直到 $endTime")
-            } else {
-                Text("从 $startDate 的 $startTime 开始, 直到 $endDate 的 $endTime")
+            Column {
+                if (startDate == endDate) {
+                    Text("从 $startDate 的 $startTime 开始, 直到 $endTime", fontFamily = FontLXGWNeoXiHeiScreenFamily)
+                } else {
+                    Text(
+                        "从 $startDate 的 $startTime 开始, 直到 $endDate 的 $endTime",
+                        fontFamily = FontLXGWNeoXiHeiScreenFamily
+                    )
+                }
+                // 评分
+                Row {
+                    Text("评分: ", fontWeight = FontWeight.Bold, fontFamily = FontLXGWNeoXiHeiScreenFamily)
+                    Text(score.toString(), fontFamily = FontLXGWNeoXiHeiScreenFamily)
+                }
+
+                // 备注
+                Row {
+                    Text("备注: ", fontWeight = FontWeight.Bold, fontFamily = FontLXGWNeoXiHeiScreenFamily)
+                    Text(remark.ifBlank { "无" }, fontFamily = FontLXGWNeoXiHeiScreenFamily)
+                }
             }
+
         },
         trailingContent = {
             Row(
@@ -206,7 +228,7 @@ private fun ListItemRecord(
                             }
                     )
                 }
-                Text("持续:" + record.duration.format())
+                Text("持续:" + record.duration.format(), fontFamily = FontLXGWNeoXiHeiScreenFamily)
             }
         }
     )

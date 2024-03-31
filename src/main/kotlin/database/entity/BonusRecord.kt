@@ -33,6 +33,11 @@ object BonusRecords : BaseIntIdTable() {
      * 给本次打分。0~10分。
      */
     val score = uinteger("score").default(0u)
+
+    /**
+     * 备注
+     */
+    val remark = varchar("remark", 500).clientDefault { "" }
 }
 
 class BonusRecord(id: EntityID<Int>) : BaseIntEntity(id, BonusRecords) {
@@ -43,6 +48,7 @@ class BonusRecord(id: EntityID<Int>) : BaseIntEntity(id, BonusRecords) {
     var endTime by BonusRecords.endTime
     var duration by BonusRecords.duration
     var score by BonusRecords.score
+    var remark by BonusRecords.remark
 
     var weapons by Weapon via BonusRecordWeapons
 }
@@ -72,6 +78,7 @@ data class BonusRecordView(
     val endTime: Instant,
     val duration: Duration,
     val score: UInt,
+    val remark: String,
     val weapons: List<WeaponView>
 ) : BaseIntEntityView
 
@@ -80,6 +87,7 @@ fun BonusRecord.toView(
     endTime: Instant = this.endTime,
     duration: Duration = this.duration,
     score: UInt = this.score,
+    remark: String = this.remark,
     weapons: List<WeaponView> = this.weapons.map { it.toView() }
 ): BonusRecordView = BonusRecordView(
     entityID = id,
@@ -87,5 +95,6 @@ fun BonusRecord.toView(
     endTime = endTime,
     duration = duration,
     score = score,
+    remark = remark,
     weapons = weapons,
 )
