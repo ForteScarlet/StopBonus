@@ -1,4 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -6,13 +7,16 @@ plugins {
     // id("org.jetbrains.compose")
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.jetbrainsCompose)
+    // https://conveyor.hydraulic.dev/14.0/configs/maven-gradle/#gradle
+    //id("dev.hydraulic.conveyor") version "1.9"
+    idea
 }
 
 val appName = "StopBonus"
 val appPackage = "love.forte.bonus"
 val appMenuGroup = "forteApp"
 val appNameWithPackage = "$appPackage.$appName"
-val appVersion = "1.0.8"
+val appVersion = "1.0.9"
 
 group = appPackage
 version = appVersion
@@ -59,6 +63,9 @@ dependencies {
 
 // https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Native_distributions_and_local_execution/README.md
 compose.desktop {
+    nativeApplication {
+    }
+
     application {
         mainClass = "MainKt"
         jvmArgs += listOf(
@@ -66,6 +73,8 @@ compose.desktop {
             "-XX:-HeapDumpOnOutOfMemoryError",
             "-XX:HeapDumpPath=.logs/dump.hprof",
         )
+        args("--win-help-url", "https://github.com/ForteScarlet/StopBonus")
+        args("--win-shortcut-prompt")
 
         nativeDistributions {
             modules("java.sql", "java.naming")
@@ -75,6 +84,7 @@ compose.desktop {
                 TargetFormat.Rpm, TargetFormat.Pkg,
                 TargetFormat.Msi, TargetFormat.Exe
             )
+
             packageName = appName
             packageVersion = appVersion
             vendor = "Forte Scarlet"
@@ -107,5 +117,11 @@ compose.desktop {
             obfuscate.set(false)
             optimize.set(false)
         }
+    }
+}
+
+idea {
+    this.module {
+        isDownloadSources = true
     }
 }

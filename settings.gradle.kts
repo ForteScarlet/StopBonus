@@ -4,6 +4,7 @@ pluginManagement {
         google()
         gradlePluginPortal()
         mavenCentral()
+        // maven("https://maven.hq.hydraulic.software")
     }
 }
 
