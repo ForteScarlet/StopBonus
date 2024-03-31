@@ -12,7 +12,6 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.io.path.Path
 import kotlin.io.path.div
 import kotlin.io.path.pathString
-import kotlin.math.max
 
 class DatabaseOperator(
     val schema: Schema,
@@ -52,11 +51,30 @@ private const val DATA_FILE_NAME = "bonus.d"
 fun connectDatabaseOperator(dataDir: Path = DEFAULT_DATA_DIR, schemaName: String): DatabaseOperator {
     val schema = Schema(schemaName)
 
+    val jdbcUrl = "jdbc:h2:file:${(dataDir / DATA_FILE_NAME).pathString};" +
+            "DB_CLOSE_DELAY=-1;" +
+            "DB_CLOSE_ON_EXIT=FALSE;" +
+            "TRACE_LEVEL_FILE=3;" +
+            "AUTO_RECONNECT=TRUE;"
+
+    // val database = Database.connect(
+    //     url = jdbcUrl,
+    //     driver = "org.h2.Driver",
+    //     databaseConfig = DatabaseConfig {
+    //         // set other parameters here
+    //         defaultFetchSize = 100
+    //         keepLoadedReferencesOutOfTransaction = true
+    //         defaultMaxRepetitionDelay = 6000
+    //     }
+    // )
+
     val config = hikariConfig {
-        jdbcUrl = "jdbc:h2:file:${(dataDir / DATA_FILE_NAME).pathString}"
+        this.jdbcUrl = jdbcUrl
         driverClassName = "org.h2.Driver"
         poolName = "BonusDBPool"
-        minimumIdle = max(1, Runtime.getRuntime().availableProcessors() / 2)
+        minimumIdle = 1
+        maximumPoolSize = 1
+
     }
 
     val dataSource = HikariDataSource(config)

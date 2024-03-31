@@ -259,14 +259,18 @@ private fun AccountHome(state: PageViewState) {
             ScoreSelector(score)
         }
 
-        // AnimatedVisibility(duration != null) {
-        //     Text(
-        //         text = duration?.toString() ?: "",
-        //         fontFamily = FontLXGWNeoXiHeiScreenFamily,
-        //         modifier = Modifier
-        //             .align(Alignment.CenterHorizontally)
-        //     )
-        // }
+        var remarkValue by remember { mutableStateOf("") }
+
+        AnimatedVisibility(duration != null) {
+            // 备注
+            OutlinedTextField(
+                value = remarkValue,
+                onValueChange = { remarkValue = if (it.length <= 500) it else it.substring(0, 500) },
+                label = { Text("备注") },
+                placeholder = { Text("备注") },
+                supportingText = { Text("500字内") },
+            )
+        }
 
         var recording by remember { mutableStateOf(false) }
 
@@ -291,9 +295,11 @@ private fun AccountHome(state: PageViewState) {
                                         this.endTime =
                                             ZonedDateTime.of(selectedEndDateTime, ZoneId.systemDefault()).toInstant()
                                         this.score = score.value.toUInt()
+                                        this.remark = remarkValue
                                         weapon?.also { w ->
-                                            this.weapons = SizedCollection(listOf(Weapon.findById(w.id)!!))
-                                            // TODO null?
+                                            Weapon.findById(w.id)?.also {
+                                                this.weapons = SizedCollection(listOf(it))
+                                            }
                                         }
                                     }
                                 }
@@ -361,12 +367,12 @@ private inline fun WeaponSelector(
 ) {
     val weapons = remember { mutableStateListOf<WeaponView>() }
     LaunchedEffect(state) {
-        state.accountState.inAccountTransaction { account ->
-            val all = Weapon.find { Weapons.account eq account.id }
+        val all = state.accountState.inAccountTransaction { account ->
+            Weapon.find { Weapons.account eq account.id }
                 .notForUpdate().map { it.toView() }
-
-            weapons.addAll(all)
         }
+
+        weapons.addAll(all)
     }
 
     var expanded by remember { mutableStateOf(false) }
