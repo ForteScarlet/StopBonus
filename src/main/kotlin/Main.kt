@@ -110,6 +110,7 @@ fun main() {
             enabled = !winState.isMinimized,
             onCloseRequest = {
                 exitApplication()
+                databaseOp.close()
             }
         ) {
             MaterialTheme(

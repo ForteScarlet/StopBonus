@@ -37,7 +37,7 @@ object BonusRecords : BaseIntIdTable() {
     /**
      * 备注
      */
-    val remark = varchar("remark", 500).clientDefault { "" }
+    val remark = varchar("remark", 500).default("")
 }
 
 class BonusRecord(id: EntityID<Int>) : BaseIntEntity(id, BonusRecords) {
