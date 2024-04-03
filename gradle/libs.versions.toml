@@ -10,7 +10,7 @@ logback = "1.4.14"
 # https://github.com/h2database/h2database
 h2 = "2.2.224"
 # https://github.com/JetBrains/Exposed
-exposed = "0.48.0"
+exposed = "0.49.0"
 # https://github.com/KoalaPlot/koalaplot-core
 # https://koalaplot.github.io/
 koalaPlot = "0.5.3"

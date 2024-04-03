@@ -3,8 +3,6 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    // kotlin("jvm")
-    // id("org.jetbrains.compose")
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.jetbrainsCompose)
     // https://conveyor.hydraulic.dev/14.0/configs/maven-gradle/#gradle
@@ -16,7 +14,7 @@ val appName = "StopBonus"
 val appPackage = "love.forte.bonus"
 val appMenuGroup = "forteApp"
 val appNameWithPackage = "$appPackage.$appName"
-val appVersion = "1.0.9"
+val appVersion = "1.0.10"
 
 group = appPackage
 version = appVersion
@@ -52,8 +50,8 @@ dependencies {
     implementation(compose.material)
     implementation(compose.material3)
 
+    implementation(libs.h2db)
     runtimeOnly(libs.logback.classic)
-    runtimeOnly(libs.h2db)
 
     implementation(libs.hikariCP)
     implementation(libs.bundles.exposed)
@@ -107,6 +105,8 @@ compose.desktop {
                 shortcut = true
                 dirChooser = true
                 menuGroup = appMenuGroup
+                perUserInstall = true
+                menu = true
                 iconFile.set(project.rootDir.resolve("icon.ico"))
                 upgradeUuid = "f4a9a22b-b663-4848-95a8-7c0cf844da3f"
             }

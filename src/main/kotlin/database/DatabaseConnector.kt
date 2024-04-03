@@ -7,19 +7,16 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.transactions.transactionManager
+import org.jetbrains.exposed.sql.vendors.H2Dialect
 import java.nio.file.Path
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
 import kotlin.io.path.Path
 import kotlin.io.path.div
 import kotlin.io.path.pathString
 
-class DatabaseOperator(
-    val schema: Schema,
-    val database: Database,
-    private val dataSource: HikariDataSource,
-) {
+class DatabaseOperator(val database: Database) {
     fun close() {
-        dataSource.close()
     }
 
     suspend inline fun <T> inSuspendedTransaction(
@@ -50,48 +47,42 @@ private const val DATA_FILE_NAME = "bonus.d"
 
 fun connectDatabaseOperator(dataDir: Path = DEFAULT_DATA_DIR, schemaName: String): DatabaseOperator {
     val schema = Schema(schemaName)
+    // val dialect = H2Dialect()
 
-    val jdbcUrl = "jdbc:h2:file:${(dataDir / DATA_FILE_NAME).pathString};" +
+    val jdbcUrl = "jdbc:h2:${(dataDir / DATA_FILE_NAME).pathString};" +
             "DB_CLOSE_DELAY=-1;" +
             "DB_CLOSE_ON_EXIT=FALSE;" +
             "TRACE_LEVEL_FILE=3;" +
             "AUTO_RECONNECT=TRUE;"
 
-    // val database = Database.connect(
-    //     url = jdbcUrl,
-    //     driver = "org.h2.Driver",
-    //     databaseConfig = DatabaseConfig {
-    //         // set other parameters here
-    //         defaultFetchSize = 100
-    //         keepLoadedReferencesOutOfTransaction = true
-    //         defaultMaxRepetitionDelay = 6000
-    //     }
-    // )
+    // val connection
 
     val config = hikariConfig {
         this.jdbcUrl = jdbcUrl
         driverClassName = "org.h2.Driver"
-        poolName = "BonusDBPool"
+        // this.threadFactory
+        connectionInitSql = "CREATE SCHEMA IF NOT EXISTS $schemaName; SET SCHEMA $schemaName"
         minimumIdle = 1
         maximumPoolSize = 1
-
     }
 
-    val dataSource = HikariDataSource(config)
+    val source = HikariDataSource(config)
 
     val database = Database.connect(
-        datasource = dataSource,
+        source,
+        setupConnection = { println("Setup: $it") },
         databaseConfig = DatabaseConfig {
             // set other parameters here
             defaultFetchSize = 100
-            keepLoadedReferencesOutOfTransaction = true
+            //keepLoadedReferencesOutOfTransaction = true
             defaultMaxRepetitionDelay = 6000
         }
     )
 
+
     database.init(schema)
 
-    return DatabaseOperator(schema, database, dataSource)
+    return DatabaseOperator(database)
 }
 
 private inline fun hikariConfig(block: HikariConfig.() -> Unit): HikariConfig = HikariConfig().apply {
@@ -105,6 +96,10 @@ fun Database.init(schema: Schema) {
             SchemaUtils.createSchema(schema)
         }
         SchemaUtils.setSchema(schema)
-        SchemaUtils.createMissingTablesAndColumns(*AllTables)
+        SchemaUtils.createMissingTablesAndColumns(
+            tables = AllTables,
+            inBatch = true,
+            withLogs = true,
+        )
     }
 }
