@@ -49,7 +49,7 @@ class PageViewState(
 
 }
 
-val pageViews: List<AccountViewPage> = listOf(
+val pageViews: List<AccountViewPageSelector> = listOf(
     AccountHomeView,
     AccountWeaponPageView,
     AccountBonusRecordView,

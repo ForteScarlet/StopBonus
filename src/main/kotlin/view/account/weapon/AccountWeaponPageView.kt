@@ -29,15 +29,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
-import view.account.AccountViewPage
 import view.account.PageViewState
+import view.account.SimpleAccountViewPageSelector
 
 
 /**
  *
  * @author ForteScarlet
  */
-object AccountWeaponPageView : AccountViewPage {
+object AccountWeaponPageView : SimpleAccountViewPageSelector {
     override val isMenuIconSupport: Boolean
         get() = true
 

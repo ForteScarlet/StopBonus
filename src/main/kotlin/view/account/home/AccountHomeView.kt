@@ -4,11 +4,9 @@ import FontBTTFamily
 import FontLXGWNeoXiHeiScreenFamily
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.background
-import androidx.compose.foundation.focusable
+import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Home
@@ -26,6 +24,7 @@ import database.entity.*
 import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.SizedCollection
 import view.account.AccountViewPage
+import view.account.AccountViewPageSelector
 import view.account.PageViewState
 import java.time.*
 import java.time.format.DateTimeFormatter
@@ -36,25 +35,81 @@ private const val EMOJI_ANGRY = "\uD83D\uDE21"
  *
  * @author ForteScarlet
  */
-object AccountHomeView : AccountViewPage {
-
-    override val isMenuIconSupport: Boolean
-        get() = true
+object AccountHomeView : AccountViewPageSelector {
 
     @Composable
-    override fun menuIcon(state: PageViewState) {
+    override fun navigationDrawerItem(
+        state: PageViewState,
+        selected: AccountViewPage?,
+        onSelect: (AccountViewPage?) -> Unit
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            NavigationDrawerItem(
+                modifier = Modifier.fillMaxWidth(.5f),
+                selected = this == selected,
+                onClick = {
+                    onSelect(if (AccountHomePage == selected) null else AccountHomePage)
+                },
+                icon = {
+                    menuIcon(state)
+                },
+                label = {
+                    Text("我打了😢", fontFamily = FontLXGWNeoXiHeiScreenFamily)
+                }
+            )
+
+            // TODO
+            NavigationDrawerItem(
+                modifier = Modifier.clickable(false) {}.hoverable(remember { MutableInteractionSource() }, false),
+                selected = false, // TODO
+                onClick = {
+                    // onSelect(if (thisPage == selected) null else thisPage)
+                },
+                icon = {
+                    menuIcon(state)
+                },
+                label = {
+                    Column {
+                        Text("现在开打😡", fontFamily = FontLXGWNeoXiHeiScreenFamily)
+                        Text(
+                            "(暂不可用)",
+                            fontFamily = FontLXGWNeoXiHeiScreenFamily,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            )
+        }
+    }
+
+    // override val isMenuIconSupport: Boolean
+    //     get() = true
+    //
+
+    @Composable
+    private fun menuIcon(state: PageViewState) {
         Icon(Icons.Filled.Home, "Home icon")
     }
+    //
+    // @Composable
+    // override fun menuLabel(state: PageViewState) {
+    //     Row {
+    //     Text("我打了😢", fontFamily = FontLXGWNeoXiHeiScreenFamily)
+    //     Text("现在开打😡", fontFamily = FontLXGWNeoXiHeiScreenFamily)
+    //     }
+    // }
 
-    @Composable
-    override fun menuLabel(state: PageViewState) {
-        Text("我打了😢", fontFamily = FontLXGWNeoXiHeiScreenFamily)
+    private data object AccountHomePage : AccountViewPage {
+        @Composable
+        override fun rightView(state: PageViewState) {
+            AccountHome(state)
+        }
     }
 
-    @Composable
-    override fun rightView(state: PageViewState) {
-        AccountHome(state)
-    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

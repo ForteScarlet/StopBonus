@@ -8,8 +8,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import view.account.AccountViewPage
 import view.account.PageViewState
+import view.account.SimpleAccountViewPageSelector
 import view.account.stats.StatsType.COUNT
 import java.time.Year
 import java.time.YearMonth
@@ -20,7 +20,7 @@ import java.time.YearMonth
  *
  * @author ForteScarlet
  */
-object StatsPageView : AccountViewPage {
+object StatsPageView : SimpleAccountViewPageSelector {
 
     override val isMenuIconSupport: Boolean
         get() = true

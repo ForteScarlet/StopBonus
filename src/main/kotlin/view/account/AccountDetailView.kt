@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,7 +14,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 inline fun AccountDetailView(
     state: PageViewState,
-    pages: List<AccountViewPage>,
+    pageSelectors: List<AccountViewPageSelector>,
     selected: AccountViewPage?,
     crossinline onSelect: (AccountViewPage?) -> Unit
 ) {
@@ -34,17 +33,22 @@ inline fun AccountDetailView(
         HorizontalDivider(Modifier.fillMaxWidth(.80f).padding(vertical = 20.dp).align(Alignment.CenterHorizontally))
 
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            pages.forEach { page ->
-                NavigationDrawerItem(
-                    selected = page == selected,
-                    onClick = { onSelect(if (page == selected) null else page) },
-                    icon = if (page.isMenuIconSupport) {
-                        {
-                            page.menuIcon(state)
-                        }
-                    } else null,
-                    label = { page.menuLabel(state) }
+            pageSelectors.forEach { page ->
+                page.navigationDrawerItem(
+                    state = state,
+                    selected = selected,
+                    onSelect = { onSelect(it) }
                 )
+                // NavigationDrawerItem(
+                //     selected = page == selected,
+                //     onClick = { onSelect(if (page == selected) null else page) },
+                //     icon = if (page.isMenuIconSupport) {
+                //         {
+                //             page.menuIcon(state)
+                //         }
+                //     } else null,
+                //     label = { page.menuLabel(state) }
+                // )
             }
         }
 

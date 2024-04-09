@@ -35,8 +35,8 @@ import org.jetbrains.exposed.dao.with
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
-import view.account.AccountViewPage
 import view.account.PageViewState
+import view.account.SimpleAccountViewPageSelector
 import java.time.Duration
 import java.time.ZoneId
 
@@ -45,7 +45,7 @@ import java.time.ZoneId
  *
  * @author ForteScarlet
  */
-object AccountBonusRecordView : AccountViewPage {
+object AccountBonusRecordView : SimpleAccountViewPageSelector {
 
     override val isMenuIconSupport: Boolean
         get() = true
