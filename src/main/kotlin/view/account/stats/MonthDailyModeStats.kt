@@ -247,7 +247,7 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
                             barWidth = 0.65f,
                             bar = { index ->
                                 DefaultVerticalBar(
-                                    brush = SolidColor(Color.Blue),
+                                    brush = SolidColor(StatsColors.firstColor),
                                     shape = RoundedCornerShape(topStartPercent = 35, topEndPercent = 35),
                                     hoverElement = {
                                         ElevatedCard(
@@ -275,8 +275,8 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
     }
 
     private val chartColors = arrayOf(
-        Color.Red,
-        Color.Blue
+        StatsColors.firstColor,
+        StatsColors.secondColor
     )
 
     @OptIn(ExperimentalKoalaPlotApi::class, ExperimentalFoundationApi::class)

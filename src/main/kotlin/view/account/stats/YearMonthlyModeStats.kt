@@ -27,11 +27,9 @@ import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import io.github.koalaplot.core.xygraph.CategoryAxisModel
 import io.github.koalaplot.core.xygraph.XYGraph
 import io.github.koalaplot.core.xygraph.rememberLinearAxisModel
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.count
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.javatime.month
 import org.jetbrains.exposed.sql.javatime.year
-import org.jetbrains.exposed.sql.sum
 import view.account.PageViewState
 import view.account.record.format
 import java.time.*
@@ -187,6 +185,7 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
 
         LaunchedEffect(type, year) {
             state.accountState.inAccountTransaction { account ->
+                addLogger(StdOutSqlLogger)
                 // 根据年查询所有数据，并按月统计
                 // 数据：年月 / 次数
 
@@ -210,6 +209,8 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
                     val count = row[idCount]
                     val year = row[stYear]
                     val month = row[stMonth]
+
+                    println("year=$year, month=$month, count=$count")
 
                     DataRow(YearMonth.of(year, month), count)
                 }.associate { it.yearMonth to it.count }
@@ -253,7 +254,7 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
                             barWidth = 0.65f,
                             bar = { index ->
                                 DefaultVerticalBar(
-                                    brush = SolidColor(Color.Blue),
+                                    brush = SolidColor(StatsColors.firstColor),
                                     shape = RoundedCornerShape(topStartPercent = 35, topEndPercent = 35),
                                     hoverElement = {
                                         ElevatedCard(
@@ -286,8 +287,8 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
     }
 
     private val chartColors = arrayOf(
-        Color.Red,
-        Color.Blue
+        StatsColors.firstColor,
+        StatsColors.secondColor
     )
 
     @OptIn(ExperimentalKoalaPlotApi::class)
