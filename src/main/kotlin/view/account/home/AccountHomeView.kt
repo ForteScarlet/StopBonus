@@ -4,14 +4,52 @@ import FontBTTFamily
 import FontLXGWNeoXiHeiScreenFamily
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DisplayMode
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimeInput
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,16 +58,29 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
-import database.entity.*
+import database.entity.Account
+import database.entity.BonusRecord
+import database.entity.Weapon
+import database.entity.WeaponView
+import database.entity.Weapons
+import database.entity.toView
 import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.SizedCollection
 import view.account.AccountViewPage
 import view.account.AccountViewPageSelector
 import view.account.PageViewState
-import java.time.*
+import java.time.Duration
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.Year
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 private const val EMOJI_ANGRY = "\uD83D\uDE21"
+private const val EMOJI_CLOCK = "\u23F1"
 
 /**
  *
@@ -136,18 +187,29 @@ private fun AccountHome(state: PageViewState) {
         }
     )
 
-    val startTimePickerState = rememberTimePickerState(is24Hour = true)
-
     val selectedStartDateMillis = startDatePickerState.selectedDateMillis
     val selectedStartDateInstant = selectedStartDateMillis?.let { Instant.ofEpochMilli(it) }
-    val selectedStartDateTime = selectedStartDateInstant?.atZone(ZoneId.systemDefault())
-        ?.toLocalDate()
-        ?.atTime(startTimePickerState.hour, startTimePickerState.minute)
+
+    var startTimePickerValue by remember { mutableStateOf<LocalTime?>(null) }
+
+    fun selectedStartDateTime(): LocalDateTime? {
+        val selectedStartDateInstantValue = selectedStartDateInstant
+            ?: return null
+        val timeValue = startTimePickerValue
+            ?: return null
+
+        return selectedStartDateInstantValue.atZone(ZoneId.systemDefault())
+            .toLocalDate()
+            .atTime(timeValue)
+    }
+
+    val selectedStartDateTime = selectedStartDateTime()
+
 
     val endDatePickerState = rememberDatePickerState(
         initialSelectedDateMillis = null,
         initialDisplayedMonthMillis = selectedStartDateMillis ?: System.currentTimeMillis(),
-        yearRange = selectedStartDateTime?.let {
+        yearRange = selectedStartDateTime()?.let {
             it.year..nowYear.value
         } ?: nowYear.value..nowYear.value,
         initialDisplayMode = DisplayMode.Input,
@@ -158,19 +220,41 @@ private fun AccountHome(state: PageViewState) {
         }
     )
 
-    val endTimePickerState = rememberTimePickerState(
-        initialHour = nowTime.hour,
-        initialMinute = nowTime.minute
-    )
+    val selectedEndDateMillis = endDatePickerState.selectedDateMillis
+    val selectedEndDateInstant = selectedEndDateMillis?.let { Instant.ofEpochMilli(it) }
+    // val selectedEndDateTime = selectedEndDateInstant?.atZone(ZoneId.systemDefault())
+    //     ?.toLocalDate()
+    //     ?.atTime(endTimePickerState.hour, endTimePickerState.minute)
+
+    var endTimePickerValue by remember { mutableStateOf<LocalTime?>(null) }
+
+    fun selectedEndDateTime(): LocalDateTime? {
+        val selectedEndDateInstantValue = selectedEndDateInstant
+            ?: return null
+        val timeValue = endTimePickerValue
+            ?: return null
+
+        return selectedEndDateInstantValue.atZone(ZoneId.systemDefault())
+            .toLocalDate()
+            .atTime(timeValue)
+    }
+
+    val selectedEndDateTime = selectedEndDateTime()
+
+    // val endTimePickerState = rememberTimePickerState(
+    //     is24Hour = true,
+    //     initialHour = nowTime.hour,
+    //     initialMinute = nowTime.minute
+    // )
 
     var weapon by remember { mutableStateOf<WeaponView?>(null) }
     val score = remember { SliderState(value = 10f, steps = 8, valueRange = 1f..10f) }
 
-    suspend fun clearStates() {
+    fun clearStates() {
         startDatePickerState.selectedDateMillis = null
-        startTimePickerState.settle()
+        // startTimePickerState.settle()
         endDatePickerState.selectedDateMillis = null
-        endTimePickerState.settle()
+        // endTimePickerState.settle()
         weapon = null
         score.value = 10f
     }
@@ -183,10 +267,30 @@ private fun AccountHome(state: PageViewState) {
         // start date
         var showSelectStartDate by remember { mutableStateOf(false) }
         if (showSelectStartDate) {
+            val nowTime0 = LocalTime.now()
+            val startTimePickerState = rememberTimePickerState(
+                is24Hour = true,
+                initialHour = nowTime0.hour,
+                initialMinute = nowTime0.minute
+            )
+
             DatePickerDialog(
                 onDismissRequest = { showSelectStartDate = false },
+                dismissButton = {
+                    TextButton(onClick = {
+                        startDatePickerState.selectedDateMillis = System.currentTimeMillis()
+                    }) {
+                        Text(
+                            "现在$EMOJI_CLOCK",
+                            fontFamily = FontLXGWNeoXiHeiScreenFamily,
+                        )
+                    }
+                },
                 confirmButton = {
-                    TextButton(onClick = { showSelectStartDate = false }) {
+                    TextButton(onClick = {
+                        startTimePickerValue = LocalTime.of(startTimePickerState.hour, startTimePickerState.minute)
+                        showSelectStartDate = false
+                    }) {
                         Text(
                             "就是这时$EMOJI_ANGRY",
                             fontFamily = FontLXGWNeoXiHeiScreenFamily,
@@ -195,7 +299,6 @@ private fun AccountHome(state: PageViewState) {
                 },
             ) {
                 DatePicker(
-                    modifier = Modifier.padding(20.dp),
                     state = startDatePickerState,
                     title = {
                         Text(
@@ -219,7 +322,7 @@ private fun AccountHome(state: PageViewState) {
             onClick = { showSelectStartDate = true }
         ) {
             Text(
-                "什么时候开始打的\uD83D\uDE21",
+                "什么时候开始打的$EMOJI_ANGRY$EMOJI_ANGRY",
                 fontFamily = FontLXGWNeoXiHeiScreenFamily,
                 fontSize = TextUnit(50f, TextUnitType.Sp),
                 modifier = Modifier
@@ -240,10 +343,30 @@ private fun AccountHome(state: PageViewState) {
         // end date & time
         var showEndDateTime by remember { mutableStateOf(false) }
         if (showEndDateTime) {
+            val nowTime0 = LocalTime.now()
+            val endTimePickerState = rememberTimePickerState(
+                is24Hour = true,
+                initialHour = nowTime0.hour,
+                initialMinute = nowTime0.minute
+            )
+
             DatePickerDialog(
                 onDismissRequest = { showEndDateTime = false },
+                dismissButton = {
+                    TextButton(onClick = {
+                        endDatePickerState.selectedDateMillis = System.currentTimeMillis()
+                    }) {
+                        Text(
+                            "现在$EMOJI_CLOCK",
+                            fontFamily = FontLXGWNeoXiHeiScreenFamily,
+                        )
+                    }
+                },
                 confirmButton = {
-                    TextButton(onClick = { showEndDateTime = false }) {
+                    TextButton(onClick = {
+                        endTimePickerValue = LocalTime.of(endTimePickerState.hour, endTimePickerState.minute)
+                        showEndDateTime = false
+                    }) {
                         Text(
                             "就是这时$EMOJI_ANGRY",
                             fontFamily = FontLXGWNeoXiHeiScreenFamily,
@@ -252,7 +375,6 @@ private fun AccountHome(state: PageViewState) {
                 },
             ) {
                 DatePicker(
-                    modifier = Modifier.padding(20.dp),
                     state = endDatePickerState,
                     title = {
                         Text(
@@ -283,12 +405,6 @@ private fun AccountHome(state: PageViewState) {
                 )
             }
         }
-
-        val selectedEndDateMillis = endDatePickerState.selectedDateMillis
-        val selectedEndDateInstant = selectedEndDateMillis?.let { Instant.ofEpochMilli(it) }
-        val selectedEndDateTime = selectedEndDateInstant?.atZone(ZoneId.systemDefault())
-            ?.toLocalDate()
-            ?.atTime(endTimePickerState.hour, endTimePickerState.minute)
 
         AnimatedVisibility(selectedEndDateTime != null) {
             Text(

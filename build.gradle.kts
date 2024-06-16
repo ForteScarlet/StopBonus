@@ -1,10 +1,12 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.jetbrainsCompose)
+    alias(libs.plugins.compose.compiler)
     // https://conveyor.hydraulic.dev/14.0/configs/maven-gradle/#gradle
     //id("dev.hydraulic.conveyor") version "1.9"
     idea
@@ -14,7 +16,7 @@ val appName = "StopBonus"
 val appPackage = "love.forte.bonus"
 val appMenuGroup = "forteApp"
 val appNameWithPackage = "$appPackage.$appName"
-val appVersion = "1.0.11"
+val appVersion = "1.0.12"
 
 group = appPackage
 version = appVersion
@@ -26,17 +28,18 @@ repositories {
 }
 
 java {
-    //toolchain.languageVersion.set(JavaLanguageVersion.of(17))
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "17"
-        freeCompilerArgs = freeCompilerArgs + listOf("-Xopt-in=kotlin.RequiresOptIn")
+    toolchain {
+        this.languageVersion.set(JavaLanguageVersion.of(17))
     }
 }
+
+kotlin {
+    jvmToolchain(17)
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+    }
+}
+
 
 dependencies {
     // Note, if you develop a library, you should use compose.desktop.common.
