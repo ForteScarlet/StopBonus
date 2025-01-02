@@ -4,10 +4,29 @@ import FontBTTFamily
 import FontLXGWNeoXiHeiScreenFamily
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,19 +39,35 @@ import androidx.compose.ui.unit.dp
 import database.entity.BonusRecords
 import io.github.koalaplot.core.ChartLayout
 import io.github.koalaplot.core.Symbol
-import io.github.koalaplot.core.bar.*
+import io.github.koalaplot.core.bar.BarScope
+import io.github.koalaplot.core.bar.DefaultVerticalBar
+import io.github.koalaplot.core.bar.GroupedVerticalBarPlot
+import io.github.koalaplot.core.bar.VerticalBarPlot
+import io.github.koalaplot.core.bar.solidBar
 import io.github.koalaplot.core.legend.ColumnLegend
 import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import io.github.koalaplot.core.xygraph.CategoryAxisModel
 import io.github.koalaplot.core.xygraph.XYGraph
-import io.github.koalaplot.core.xygraph.rememberLinearAxisModel
-import org.jetbrains.exposed.sql.*
+import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
+import org.jetbrains.exposed.sql.StdOutSqlLogger
+import org.jetbrains.exposed.sql.addLogger
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.count
 import org.jetbrains.exposed.sql.javatime.month
 import org.jetbrains.exposed.sql.javatime.year
+import org.jetbrains.exposed.sql.sum
 import view.account.PageViewState
 import view.account.record.format
-import java.time.*
+import java.time.Duration
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.Month
+import java.time.Year
+import java.time.YearMonth
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.TextStyle
 import java.util.*
 import kotlin.math.abs
@@ -76,7 +111,7 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
                 onExpandedChange = { typeExpanded = it },
             ) {
                 OutlinedTextField(
-                    modifier = Modifier.menuAnchor(),
+                    modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryEditable),
                     value = type.title,
                     readOnly = true,
                     onValueChange = { typeExpanded = true },
@@ -210,8 +245,6 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
                     val year = row[stYear]
                     val month = row[stMonth]
 
-                    println("year=$year, month=$month, count=$count")
-
                     DataRow(YearMonth.of(year, month), count)
                 }.associate { it.yearMonth to it.count }
 
@@ -241,7 +274,7 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
                     XYGraph(
                         xAxisModel = remember { CategoryAxisModel(d.boroughs) },
                         xAxisLabels = { it.displayMonth() },
-                        yAxisModel = rememberLinearAxisModel(
+                        yAxisModel = rememberFloatLinearAxisModel(
                             0f..max(1f, d.population.max() / 0.85f),
                             minorTickCount = 0
                         ),
@@ -402,7 +435,7 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
                         XYGraph(
                             xAxisModel = remember(d) { CategoryAxisModel(d.boroughs) },
                             xAxisLabels = { it.displayMonth() },
-                            yAxisModel = rememberLinearAxisModel(
+                            yAxisModel = rememberFloatLinearAxisModel(
                                 0f..max(1f, d.population.flatten().max() / 0.85f),
                                 minorTickCount = 0
                             ),

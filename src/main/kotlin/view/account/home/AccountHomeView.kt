@@ -32,6 +32,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SelectableDates
@@ -173,7 +174,6 @@ private fun AccountHome(state: PageViewState) {
     val scrollState = rememberScrollState()
 
     val nowYear = Year.now()
-    val nowTime = LocalTime.now()
 
     val startDatePickerState = rememberDatePickerState(
         initialSelectedDateMillis = null,
@@ -298,20 +298,23 @@ private fun AccountHome(state: PageViewState) {
                     }
                 },
             ) {
-                DatePicker(
-                    state = startDatePickerState,
-                    title = {
-                        Text(
-                            "什么时候开始打的$EMOJI_ANGRY",
-                            fontFamily = FontLXGWNeoXiHeiScreenFamily,
-                            modifier = Modifier.padding(PaddingValues(start = 24.dp, end = 12.dp, top = 16.dp))
-                        )
-                    },
-                )
-                TimeInput(
-                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(20.dp),
-                    state = startTimePickerState,
-                )
+                Column {
+                    DatePicker(
+                        state = startDatePickerState,
+                        title = {
+                            Text(
+                                "什么时候开始打的$EMOJI_ANGRY",
+                                fontFamily = FontLXGWNeoXiHeiScreenFamily,
+                                modifier = Modifier.padding(PaddingValues(start = 24.dp, end = 12.dp, top = 16.dp))
+                            )
+                        },
+                    )
+
+                    TimeInput(
+                        modifier = Modifier.align(Alignment.CenterHorizontally).padding(20.dp),
+                        state = startTimePickerState,
+                    )
+                }
             }
 
         }
@@ -559,7 +562,8 @@ private inline fun WeaponSelector(
         OutlinedTextField(
             modifier = Modifier
                 .focusable(false)
-                .menuAnchor()
+                // .menuAnchor()
+                .menuAnchor(MenuAnchorType.PrimaryEditable)
                 .fillMaxWidth(.65f),
             value = if (!expanded) selectedWeapon?.name ?: "无" else value,
             onValueChange = {

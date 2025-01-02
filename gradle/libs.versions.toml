@@ -1,20 +1,19 @@
 [versions]
-compose = "1.6.3"
-compose-plugin = "1.6.10"
+compose-plugin = "1.7.3"
 # Kotlin
-kotlin = "2.0.0"
-kotlinx-coroutines = "1.8.1"
-kotlinx-serialization = "1.6.3"
+kotlin = "2.1.0"
+kotlinx-coroutines = "1.10.1"
+kotlinx-serialization = "1.7.3"
 # logback
 logback = "1.4.14"
 # https://github.com/h2database/h2database
-h2 = "2.2.224"
+h2 = "2.3.232"
 # https://github.com/JetBrains/Exposed
-exposed = "0.51.1"
+exposed = "0.57.0"
 # https://github.com/KoalaPlot/koalaplot-core
 # https://koalaplot.github.io/
 #koalaPlot = "0.5.3"
-koalaPlot = "0.6.0"
+koalaPlot = "0.7.1"
 
 
 [libraries]
@@ -40,7 +39,7 @@ koalaPlot-core = { group = "io.github.koalaplot", name = "koalaplot-core", versi
 
 # com.zaxxer:HikariCP
 # https://github.com/brettwooldridge/HikariCP
-hikariCP = "com.zaxxer:HikariCP:5.1.0"
+hikariCP = "com.zaxxer:HikariCP:6.2.1"
 
 [bundles]
 exposed = ["exposed-core", "exposed-dao", "exposed-jdbc", "exposed-javaTime"]

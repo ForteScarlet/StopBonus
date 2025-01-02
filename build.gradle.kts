@@ -1,7 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     alias(libs.plugins.kotlinJvm)
@@ -16,7 +14,7 @@ val appName = "StopBonus"
 val appPackage = "love.forte.bonus"
 val appMenuGroup = "forteApp"
 val appNameWithPackage = "$appPackage.$appName"
-val appVersion = "1.0.12"
+val appVersion = "1.0.13"
 
 group = appPackage
 version = appVersion
@@ -50,12 +48,13 @@ dependencies {
     implementation(compose.ui)
     implementation(compose.uiUtil)
     implementation(compose.uiTooling)
-    implementation(compose.material)
+    // implementation(compose.material)
     implementation(compose.material3)
 
     implementation(libs.h2db)
     runtimeOnly(libs.logback.classic)
 
+    implementation(libs.kotlinx.coroutine.core)
     implementation(libs.hikariCP)
     implementation(libs.bundles.exposed)
     implementation(libs.koalaPlot.core)

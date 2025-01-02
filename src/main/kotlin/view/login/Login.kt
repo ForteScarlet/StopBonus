@@ -1,10 +1,16 @@
 package view.login
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
@@ -14,7 +20,13 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -87,7 +99,6 @@ fun LoginView(state: LoginState, onSelect: (AccountView) -> Unit) {
 
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private inline fun AccountList(
     accounts: List<AccountView>,
@@ -108,12 +119,12 @@ private inline fun AccountList(
         ) {
             items(accounts, key = { it.id }) { item ->
                 val itemId = item.id
-                val hoverState = remember(item) { MutableInteractionSource() }
+                // val hoverState = remember(item) { MutableInteractionSource() }
                 // val isHovered by hoverState.collectIsHoveredAsState()
 
+                // Modifier.fillMaxWidth().hoverable(hoverState, enabled = !inDeleting)
                 OutlinedCard(
-                    modifier = Modifier.fillMaxWidth().hoverable(hoverState, enabled = !inDeleting)
-                        .animateItemPlacement(),
+                    modifier = Modifier.fillMaxWidth().animateItem(),
                     onClick = {
                         showItem = if (showItem != itemId) itemId else null
                     },
@@ -124,58 +135,53 @@ private inline fun AccountList(
                         verticalArrangement = Arrangement.Top,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        AnimatedContent(showItem == itemId) { isShow ->
-                            if (isShow) {
-                                var inDeleteConfirm by remember(item) { mutableStateOf(false) }
+                        Text(item.name)
 
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Text(item.name)
+                        AnimatedVisibility(showItem == itemId) { // isShow ->
+                            var inDeleteConfirm by remember(item) { mutableStateOf(false) }
 
-                                    AnimatedContent(inDeleteConfirm) { isInDeleteConfirm ->
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(.80f),
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                AnimatedContent(inDeleteConfirm) { isInDeleteConfirm ->
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(.80f),
 
-                                            horizontalArrangement = Arrangement.SpaceEvenly
-                                        ) {
-                                            if (!isInDeleteConfirm) {
-                                                ElevatedButton(
-                                                    onClick = {
-                                                        onSelect(item)
-                                                    },
-                                                ) {
-                                                    Text("进入")
-                                                }
-                                            }
-
+                                        horizontalArrangement = Arrangement.SpaceEvenly
+                                    ) {
+                                        if (!isInDeleteConfirm) {
                                             ElevatedButton(
                                                 onClick = {
-                                                    if (!isInDeleteConfirm) {
-                                                        inDeleteConfirm = true
-                                                    } else {
-                                                        // YES, delete it
-                                                        onDelete(item)
-                                                    }
+                                                    onSelect(item)
                                                 },
-                                                colors = ButtonDefaults.elevatedButtonColors(
-                                                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                                                    contentColor = MaterialTheme.colorScheme.error,
-                                                )
                                             ) {
-                                                if (isInDeleteConfirm) {
-                                                    Text("确认删除?")
-                                                } else {
-                                                    Text("删除")
-                                                }
+                                                Text("进入")
                                             }
                                         }
 
+                                        ElevatedButton(
+                                            onClick = {
+                                                if (!isInDeleteConfirm) {
+                                                    inDeleteConfirm = true
+                                                } else {
+                                                    // YES, delete it
+                                                    onDelete(item)
+                                                }
+                                            },
+                                            colors = ButtonDefaults.elevatedButtonColors(
+                                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                                contentColor = MaterialTheme.colorScheme.error,
+                                            )
+                                        ) {
+                                            if (isInDeleteConfirm) {
+                                                Text("确认删除?")
+                                            } else {
+                                                Text("删除")
+                                            }
+                                        }
                                     }
 
                                 }
-                            } else {
-                                Text(item.name)
                             }
 
                         }

@@ -269,7 +269,7 @@ private fun LazyItemScope.ListItemWeapon(
     val isHovered by interactionSource.collectIsHoveredAsState()
 
     ElevatedCard(
-        modifier = Modifier.animateItemPlacement(),
+        modifier = Modifier.animateItem(),
     ) {
         var deleteConfirm by remember { mutableStateOf(false) }
         if (deleteConfirm) {

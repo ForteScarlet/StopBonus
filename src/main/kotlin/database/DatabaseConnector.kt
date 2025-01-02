@@ -3,13 +3,15 @@ package database
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import database.entity.AllTables
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.DatabaseConfig
+import org.jetbrains.exposed.sql.Schema
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.transactions.transactionManager
-import org.jetbrains.exposed.sql.vendors.H2Dialect
 import java.nio.file.Path
-import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.CoroutineContext
 import kotlin.io.path.Path
 import kotlin.io.path.div
@@ -75,7 +77,7 @@ fun connectDatabaseOperator(dataDir: Path = DEFAULT_DATA_DIR, schemaName: String
             // set other parameters here
             defaultFetchSize = 100
             //keepLoadedReferencesOutOfTransaction = true
-            defaultMaxRepetitionDelay = 6000
+            defaultMaxRetryDelay = 6000
         }
     )
 
