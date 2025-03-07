@@ -14,7 +14,7 @@ val appName = "StopBonus"
 val appPackage = "love.forte.bonus"
 val appMenuGroup = "forteApp"
 val appNameWithPackage = "$appPackage.$appName"
-val appVersion = "1.0.13"
+val appVersion = "1.0.14"
 
 group = appPackage
 version = appVersion
@@ -69,6 +69,7 @@ compose.desktop {
     application {
         mainClass = "MainKt"
         jvmArgs += listOf(
+            "-client",
             "-XX:ErrorFile=.logs/hs_err.log",
             "-XX:-HeapDumpOnOutOfMemoryError",
             "-XX:HeapDumpPath=.logs/dump.hprof",
