@@ -50,6 +50,12 @@ dependencies {
     implementation(compose.uiTooling)
     // implementation(compose.material)
     implementation(compose.material3)
+    implementation(compose.components.resources)
+    implementation(compose.animation)
+
+    // https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-navigation-routing.html
+    // implementation("org.jetbrains.androidx.navigation:navigation-compose:2.8.0-alpha10")
+
 
     implementation(libs.h2db)
     runtimeOnly(libs.logback.classic)
@@ -60,6 +66,12 @@ dependencies {
     implementation(libs.koalaPlot.core)
 }
 
+compose.resources {
+    // customDirectory(
+    //     sourceSetName = "main",
+    //     directoryProvider = provider { layout.projectDirectory.dir("src/main/composeResources") }
+    // )
+}
 
 // https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Native_distributions_and_local_execution/README.md
 compose.desktop {

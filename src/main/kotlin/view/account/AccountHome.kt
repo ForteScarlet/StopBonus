@@ -2,9 +2,25 @@ package view.account
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.PermanentDrawerSheet
+import androidx.compose.material3.PermanentNavigationDrawer
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import database.DatabaseOperator
@@ -17,15 +33,12 @@ import view.account.stats.StatsPageView
 import view.account.weapon.AccountWeaponPageView
 import kotlin.coroutines.CoroutineContext
 
-@Suppress("CanBeParameter", "MemberVisibilityCanBePrivate")
+@Suppress("MemberVisibilityCanBePrivate")
 class AccountState(
     val appState: AppState,
     val database: DatabaseOperator,
     val account: AccountView,
-    val accountState: MutableState<AccountView?>,
 ) {
-    var accountOrNull by accountState
-
     suspend inline fun <T> inAccountTransaction(
         context: CoroutineContext? = null,
         transactionIsolation: Int? = null,

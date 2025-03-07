@@ -109,7 +109,7 @@ object AccountHomeView : AccountViewPageSelector {
                     menuIcon(state)
                 },
                 label = {
-                    Text("我打了😢", fontFamily = FontLXGWNeoXiHeiScreenFamily)
+                    Text("我打了😢", fontFamily = FontLXGWNeoXiHeiScreenFamily())
                 }
             )
 
@@ -125,10 +125,10 @@ object AccountHomeView : AccountViewPageSelector {
                 },
                 label = {
                     Column {
-                        Text("现在开打😡", fontFamily = FontLXGWNeoXiHeiScreenFamily)
+                        Text("现在开打😡", fontFamily = FontLXGWNeoXiHeiScreenFamily())
                         Text(
                             "(暂不可用)",
-                            fontFamily = FontLXGWNeoXiHeiScreenFamily,
+                            fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                             color = MaterialTheme.colorScheme.error
                         )
                     }
@@ -149,8 +149,8 @@ object AccountHomeView : AccountViewPageSelector {
     // @Composable
     // override fun menuLabel(state: PageViewState) {
     //     Row {
-    //     Text("我打了😢", fontFamily = FontLXGWNeoXiHeiScreenFamily)
-    //     Text("现在开打😡", fontFamily = FontLXGWNeoXiHeiScreenFamily)
+    //     Text("我打了😢", fontFamily = FontLXGWNeoXiHeiScreenFamily())
+    //     Text("现在开打😡", fontFamily = FontLXGWNeoXiHeiScreenFamily())
     //     }
     // }
 
@@ -282,7 +282,7 @@ private fun AccountHome(state: PageViewState) {
                     }) {
                         Text(
                             "现在$EMOJI_CLOCK",
-                            fontFamily = FontLXGWNeoXiHeiScreenFamily,
+                            fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                         )
                     }
                 },
@@ -293,7 +293,7 @@ private fun AccountHome(state: PageViewState) {
                     }) {
                         Text(
                             "就是这时$EMOJI_ANGRY",
-                            fontFamily = FontLXGWNeoXiHeiScreenFamily,
+                            fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                         )
                     }
                 },
@@ -304,7 +304,7 @@ private fun AccountHome(state: PageViewState) {
                         title = {
                             Text(
                                 "什么时候开始打的$EMOJI_ANGRY",
-                                fontFamily = FontLXGWNeoXiHeiScreenFamily,
+                                fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                                 modifier = Modifier.padding(PaddingValues(start = 24.dp, end = 12.dp, top = 16.dp))
                             )
                         },
@@ -326,7 +326,7 @@ private fun AccountHome(state: PageViewState) {
         ) {
             Text(
                 "什么时候开始打的$EMOJI_ANGRY$EMOJI_ANGRY",
-                fontFamily = FontLXGWNeoXiHeiScreenFamily,
+                fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                 fontSize = TextUnit(50f, TextUnitType.Sp),
                 modifier = Modifier
             )
@@ -335,7 +335,7 @@ private fun AccountHome(state: PageViewState) {
         AnimatedVisibility(visible = selectedStartDateTime != null) {
             Text(
                 text = selectedStartDateTime?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) ?: "",
-                fontFamily = FontLXGWNeoXiHeiScreenFamily,
+                fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                 fontSize = TextUnit(15f, TextUnitType.Sp),
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
@@ -361,7 +361,7 @@ private fun AccountHome(state: PageViewState) {
                     }) {
                         Text(
                             "现在$EMOJI_CLOCK",
-                            fontFamily = FontLXGWNeoXiHeiScreenFamily,
+                            fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                         )
                     }
                 },
@@ -372,7 +372,7 @@ private fun AccountHome(state: PageViewState) {
                     }) {
                         Text(
                             "就是这时$EMOJI_ANGRY",
-                            fontFamily = FontLXGWNeoXiHeiScreenFamily,
+                            fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                         )
                     }
                 },
@@ -382,7 +382,7 @@ private fun AccountHome(state: PageViewState) {
                     title = {
                         Text(
                             "什么时候打完的$EMOJI_ANGRY",
-                            fontFamily = FontLXGWNeoXiHeiScreenFamily,
+                            fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                             modifier = Modifier.padding(PaddingValues(start = 24.dp, end = 12.dp, top = 16.dp))
                         )
                     },
@@ -402,7 +402,7 @@ private fun AccountHome(state: PageViewState) {
             ) {
                 Text(
                     "什么时候打完的$EMOJI_ANGRY$EMOJI_ANGRY",
-                    fontFamily = FontLXGWNeoXiHeiScreenFamily,
+                    fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                     fontSize = TextUnit(50f, TextUnitType.Sp),
                     modifier = Modifier
                 )
@@ -412,7 +412,7 @@ private fun AccountHome(state: PageViewState) {
         AnimatedVisibility(selectedEndDateTime != null) {
             Text(
                 text = selectedEndDateTime?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) ?: "",
-                fontFamily = FontLXGWNeoXiHeiScreenFamily,
+                fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                 fontSize = TextUnit(15f, TextUnitType.Sp),
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
@@ -507,7 +507,7 @@ private fun AccountHome(state: PageViewState) {
                             "时光回溯是吧！$EMOJI_ANGRY",
                             modifier = Modifier
                                 .align(Alignment.CenterVertically),
-                            fontFamily = FontBTTFamily,
+                            fontFamily = FontBTTFamily(),
                             fontSize = TextUnit(50f, TextUnitType.Sp)
                         )
                     } else if (duration.toMinutes() <= 0) {
@@ -515,7 +515,7 @@ private fun AccountHome(state: PageViewState) {
                             "一分钟都没有？😰",
                             modifier = Modifier
                                 .align(Alignment.CenterVertically),
-                            fontFamily = FontBTTFamily,
+                            fontFamily = FontBTTFamily(),
                             fontSize = TextUnit(50f, TextUnitType.Sp)
                         )
                     } else {
@@ -523,7 +523,7 @@ private fun AccountHome(state: PageViewState) {
                             "就打就打$EMOJI_ANGRY$EMOJI_ANGRY$EMOJI_ANGRY",
                             modifier = Modifier
                                 .align(Alignment.CenterVertically),
-                            fontFamily = FontBTTFamily,
+                            fontFamily = FontBTTFamily(),
                             fontSize = TextUnit(50f, TextUnitType.Sp)
                         )
                     }
@@ -636,7 +636,7 @@ private fun ScoreSelector(
         ) {
             Text(
                 "体验分数",
-                fontFamily = FontLXGWNeoXiHeiScreenFamily,
+                fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                 fontSize = TextUnit(25f, TextUnitType.Sp)
             )
             val scoreValueEmoji = when (scoreValue) {
@@ -650,12 +650,12 @@ private fun ScoreSelector(
             Crossfade(scoreValueEmoji) { ej ->
                 Text(
                     ej,
-                    fontFamily = FontLXGWNeoXiHeiScreenFamily,
+                    fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                     fontSize = TextUnit(35f, TextUnitType.Sp)
                 )
             }
             Text(
-                ": $scoreValue", fontFamily = FontLXGWNeoXiHeiScreenFamily,
+                ": $scoreValue", fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                 fontSize = TextUnit(25f, TextUnitType.Sp)
             )
         }

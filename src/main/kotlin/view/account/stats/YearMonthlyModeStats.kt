@@ -266,7 +266,7 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
             verticalArrangement = Arrangement.spacedBy(15.dp, Alignment.Top),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("$year 奖励次数统计", fontFamily = FontBTTFamily, fontSize = TextUnit(20f, TextUnitType.Sp))
+            Text("$year 奖励次数统计", fontFamily = FontBTTFamily(), fontSize = TextUnit(20f, TextUnitType.Sp))
 
             val d = data
             if (d != null) {
@@ -301,11 +301,11 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
                                             Column(modifier = Modifier.padding(12.dp)) {
                                                 Text(
                                                     "月份: ${date.displayMonth()}",
-                                                    fontFamily = FontLXGWNeoXiHeiScreenFamily
+                                                    fontFamily = FontLXGWNeoXiHeiScreenFamily()
                                                 )
                                                 Text(
                                                     "次数: ${value.toInt()}",
-                                                    fontFamily = FontLXGWNeoXiHeiScreenFamily
+                                                    fontFamily = FontLXGWNeoXiHeiScreenFamily()
                                                 )
                                             }
                                         }
@@ -413,7 +413,7 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
                         title = {
                             Text(
                                 "$year 奖励时长统计",
-                                fontFamily = FontBTTFamily,
+                                fontFamily = FontBTTFamily(),
                                 fontSize = TextUnit(20f, TextUnitType.Sp)
                             )
                         },
@@ -424,9 +424,9 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
                                 symbol = { Symbol(shape = RectangleShape, fillBrush = SolidColor(chartColors[it])) },
                                 label = {
                                     if (it == 0) {
-                                        Text("总时长(分钟)", fontFamily = FontLXGWNeoXiHeiScreenFamily)
+                                        Text("总时长(分钟)", fontFamily = FontLXGWNeoXiHeiScreenFamily())
                                     } else {
-                                        Text("平均时长(分钟)", fontFamily = FontLXGWNeoXiHeiScreenFamily)
+                                        Text("平均时长(分钟)", fontFamily = FontLXGWNeoXiHeiScreenFamily())
                                     }
                                 }
                             )
@@ -456,14 +456,14 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
                                             colors = CardDefaults.elevatedCardColors(containerColor = Color.LightGray)
                                         ) {
                                             Column(modifier = Modifier.padding(12.dp)) {
-                                                Text(name, fontFamily = FontLXGWNeoXiHeiScreenFamily)
+                                                Text(name, fontFamily = FontLXGWNeoXiHeiScreenFamily())
                                                 Text(
                                                     "月份: ${yearMonth.displayMonth()}",
-                                                    fontFamily = FontLXGWNeoXiHeiScreenFamily
+                                                    fontFamily = FontLXGWNeoXiHeiScreenFamily()
                                                 )
                                                 Text(
                                                     "时长: ${Duration.ofMinutes(value.toLong()).format()}",
-                                                    fontFamily = FontLXGWNeoXiHeiScreenFamily
+                                                    fontFamily = FontLXGWNeoXiHeiScreenFamily()
                                                 )
                                             }
                                         }

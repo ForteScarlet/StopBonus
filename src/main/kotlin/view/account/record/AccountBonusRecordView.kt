@@ -17,8 +17,20 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -128,7 +140,7 @@ private fun ListItemRecord(
         var onDeleting by remember(deleteConfirm) { mutableStateOf(false) }
         AlertDialog(
             icon = { Icon(Icons.Filled.Warning, "Warning") },
-            title = { Text("删除这条奖励记录?", fontFamily = FontBTTFamily) },
+            title = { Text("删除这条奖励记录?", fontFamily = FontBTTFamily()) },
             onDismissRequest = {
                 if (!onDeleting) {
                     deleteConfirm = false
@@ -173,10 +185,10 @@ private fun ListItemRecord(
         modifier = Modifier.hoverable(interactionSource),
         headlineContent = {
             if (record.weapons.isEmpty()) {
-                Text("手艺活", fontFamily = FontLXGWNeoXiHeiScreenFamily)
+                Text("手艺活", fontFamily = FontLXGWNeoXiHeiScreenFamily())
             } else {
                 val weaponsString = record.weapons.joinToString("、", prefix = "「", postfix = "」") { it.name }
-                Text("使用 $weaponsString", fontFamily = FontLXGWNeoXiHeiScreenFamily)
+                Text("使用 $weaponsString", fontFamily = FontLXGWNeoXiHeiScreenFamily())
             }
         },
         supportingContent = {
@@ -191,23 +203,23 @@ private fun ListItemRecord(
 
             Column {
                 if (startDate == endDate) {
-                    Text("从 $startDate 的 $startTime 开始, 直到 $endTime", fontFamily = FontLXGWNeoXiHeiScreenFamily)
+                    Text("从 $startDate 的 $startTime 开始, 直到 $endTime", fontFamily = FontLXGWNeoXiHeiScreenFamily())
                 } else {
                     Text(
                         "从 $startDate 的 $startTime 开始, 直到 $endDate 的 $endTime",
-                        fontFamily = FontLXGWNeoXiHeiScreenFamily
+                        fontFamily = FontLXGWNeoXiHeiScreenFamily()
                     )
                 }
                 // 评分
                 Row {
-                    Text("评分: ", fontWeight = FontWeight.Bold, fontFamily = FontLXGWNeoXiHeiScreenFamily)
-                    Text(score.toString(), fontFamily = FontLXGWNeoXiHeiScreenFamily)
+                    Text("评分: ", fontWeight = FontWeight.Bold, fontFamily = FontLXGWNeoXiHeiScreenFamily())
+                    Text(score.toString(), fontFamily = FontLXGWNeoXiHeiScreenFamily())
                 }
 
                 // 备注
                 Row {
-                    Text("备注: ", fontWeight = FontWeight.Bold, fontFamily = FontLXGWNeoXiHeiScreenFamily)
-                    Text(remark.ifBlank { "无" }, fontFamily = FontLXGWNeoXiHeiScreenFamily)
+                    Text("备注: ", fontWeight = FontWeight.Bold, fontFamily = FontLXGWNeoXiHeiScreenFamily())
+                    Text(remark.ifBlank { "无" }, fontFamily = FontLXGWNeoXiHeiScreenFamily())
                 }
             }
 
@@ -228,7 +240,7 @@ private fun ListItemRecord(
                             }
                     )
                 }
-                Text("持续:" + record.duration.format(), fontFamily = FontLXGWNeoXiHeiScreenFamily)
+                Text("持续:" + record.duration.format(), fontFamily = FontLXGWNeoXiHeiScreenFamily())
             }
         }
     )

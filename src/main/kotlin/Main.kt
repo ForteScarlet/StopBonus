@@ -4,22 +4,36 @@ import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Shapes
 import androidx.compose.material.Typography
-import androidx.compose.runtime.*
-import androidx.compose.ui.res.painterResource
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.*
+import androidx.compose.ui.window.Tray
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPosition
+import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberTrayState
+import androidx.compose.ui.window.rememberWindowState
 import database.connectDatabaseOperator
 import kotlinx.coroutines.Dispatchers
+import love.forte.bonus.bonus_self_desktop.generated.resources.BTT
+import love.forte.bonus.bonus_self_desktop.generated.resources.Res
+import love.forte.bonus.bonus_self_desktop.generated.resources.angry_face_with_horns
+import org.jetbrains.compose.resources.painterResource
 import org.slf4j.LoggerFactory
 import view.App
 import view.AppState
 import java.awt.Toolkit
 import java.nio.file.Path
 import kotlin.io.path.Path
-import kotlin.io.path.pathString
 
 fun storeAppPath(): Path {
     if (System.getenv("DEBUG").toBoolean() || System.getProperty("debug").toBoolean()) {
@@ -41,20 +55,29 @@ fun storeAppPath(): Path {
 
 
 @Composable
-fun Logo() = painterResource("icons/angry face with horns.svg")
+fun Logo(): Painter = painterResource(Res.drawable.angry_face_with_horns)
 
-private val fontBTT = Font("font/BTT.ttf")
+@Composable
+fun FontBTT() = org.jetbrains.compose.resources.Font(Res.font.BTT)
 
-fun FontBTT() = fontBTT
-val FontBTTFamily = FontFamily(FontBTT())
+@Composable
+fun FontBTTFamily() = FontFamily(FontBTT())
+
+@Composable
+fun a() {
+    FontFamily(org.jetbrains.compose.resources.Font(Res.font.BTT))
+}
 
 private val fontLXGWNeoXiHeiScreen = Font("font/LXGWNeoXiHeiScreen.ttf")
 
 /**
  * 霞鹜新晰黑屏幕阅读版
  */
+@Composable
 fun FontLXGWNeoXiHeiScreen() = fontLXGWNeoXiHeiScreen
-val FontLXGWNeoXiHeiScreenFamily = FontFamily(FontLXGWNeoXiHeiScreen())
+
+@Composable
+fun FontLXGWNeoXiHeiScreenFamily() = FontFamily(FontLXGWNeoXiHeiScreen())
 
 private val logger = LoggerFactory.getLogger("MAIN")
 
@@ -136,9 +159,9 @@ fun main() {
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 class MaterialThemeState(
-    val colorsState: MutableState<Colors>,
-    val typographyState: MutableState<Typography>,
-    val shapesState: MutableState<Shapes>,
+    colorsState: MutableState<Colors>,
+    typographyState: MutableState<Typography>,
+    shapesState: MutableState<Shapes>,
 ) {
     var colors: Colors by colorsState
     var typography: Typography by typographyState

@@ -527,7 +527,7 @@
 //                 tint = Color.LightGray.copy(alpha = .25f)
 //             )
 //
-//             Text("欲善其事必利其器", fontFamily = FontLXGWNeoXiHeiScreenFamily)
+//             Text("欲善其事必利其器", fontFamily = FontLXGWNeoXiHeiScreenFamily())
 //         }
 //     }
 // }

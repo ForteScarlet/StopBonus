@@ -1,9 +1,11 @@
 package view.login
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.SharedTransitionScope.ResizeMode.Companion.ScaleToBounds
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,8 +49,14 @@ class LoginState(
     val scope get() = appState.scope
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun LoginView(state: LoginState, onSelect: (AccountView) -> Unit) {
+fun LoginView(
+    state: LoginState,
+    shardTitleTransactionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
+    onSelect: (AccountView) -> Unit
+) {
     val scope by state::scope
     val accountList = remember { mutableStateListOf<AccountView>() }
     var inDeleting by remember { mutableStateOf(false) }
@@ -80,6 +88,8 @@ fun LoginView(state: LoginState, onSelect: (AccountView) -> Unit) {
         AccountList(
             accounts = accountList,
             inDeleting = inDeleting,
+            shardTitleTransactionScope = shardTitleTransactionScope,
+            animatedContentScope = animatedContentScope,
             onDelete = { target ->
                 inDeleting = true
                 scope.launch {
@@ -99,10 +109,13 @@ fun LoginView(state: LoginState, onSelect: (AccountView) -> Unit) {
 
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private inline fun AccountList(
     accounts: List<AccountView>,
     inDeleting: Boolean,
+    shardTitleTransactionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
     crossinline onDelete: (AccountView) -> Unit = {},
     crossinline onSelect: (AccountView) -> Unit = {}
 ) {
@@ -135,7 +148,18 @@ private inline fun AccountList(
                         verticalArrangement = Arrangement.Top,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(item.name)
+                        with(shardTitleTransactionScope) {
+                            Text(
+                                modifier = Modifier
+                                    .sharedBounds(
+                                        shardTitleTransactionScope.rememberSharedContentState("title-$itemId"),
+                                        animatedVisibilityScope = animatedContentScope,
+                                        resizeMode = ScaleToBounds()
+                                    ),
+                                // fontFamily = FontBTTFamily(),
+                                text = item.name
+                            )
+                        }
 
                         AnimatedVisibility(showItem == itemId) { // isShow ->
                             var inDeleteConfirm by remember(item) { mutableStateOf(false) }
