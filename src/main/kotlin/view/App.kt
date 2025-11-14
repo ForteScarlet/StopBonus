@@ -11,8 +11,6 @@ import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -30,6 +28,9 @@ import androidx.compose.ui.window.WindowState
 import database.DatabaseOperator
 import database.entity.AccountView
 import kotlinx.coroutines.CoroutineScope
+import love.forte.bonus.bonus_self_desktop.generated.resources.Res
+import love.forte.bonus.bonus_self_desktop.generated.resources.icon_arrow_back
+import org.jetbrains.compose.resources.painterResource
 import view.account.AccountHome
 import view.account.AccountState
 import view.login.LoginState
@@ -100,7 +101,7 @@ fun FrameWindowScope.App(appState: AppState) {
                                     targetAccount = null
                                     // navController.navigate("home")
                                 }) {
-                                    Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                                    Icon(painterResource(Res.drawable.icon_arrow_back), contentDescription = "Back")
                                 }
                             },
 

@@ -5,71 +5,28 @@ import FontLXGWNeoXiHeiScreenFamily
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyItemScope
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.outlined.Warning
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetValue
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import database.entity.Account
-import database.entity.Weapon
-import database.entity.WeaponView
-import database.entity.Weapons
-import database.entity.toView
+import database.entity.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import love.forte.bonus.bonus_self_desktop.generated.resources.Res
+import love.forte.bonus.bonus_self_desktop.generated.resources.icon_add
+import love.forte.bonus.bonus_self_desktop.generated.resources.icon_delete
+import love.forte.bonus.bonus_self_desktop.generated.resources.icon_face
+import love.forte.bonus.bonus_self_desktop.generated.resources.icon_warning
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import view.account.PageViewState
@@ -86,7 +43,7 @@ object AccountWeaponPageView : SimpleAccountViewPageSelector {
 
     @Composable
     override fun menuIcon(state: PageViewState) {
-        Icon(Icons.Filled.Face, "Weapons")
+        Icon(painterResource(Res.drawable.icon_face), "Weapons")
     }
 
     @Composable
@@ -136,7 +93,7 @@ private fun WeaponList(state: PageViewState) {
                     createNewWeapon = true
                 },
             ) {
-                Icon(Icons.Filled.Add, "添加")
+                Icon(painterResource(Res.drawable.icon_add), "添加")
             }
         },
     ) {
@@ -271,7 +228,7 @@ private fun ShowEmpty() {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
-                Icons.Outlined.Warning,
+                painterResource(Res.drawable.icon_warning),
                 contentDescription = "啥也没有",
                 modifier = Modifier.size(300.dp),
                 tint = Color.LightGray.copy(alpha = .25f)
@@ -318,7 +275,7 @@ private fun LazyItemScope.ListItemWeapon(
         if (deleteConfirm) {
             var onDeleting by remember(deleteConfirm) { mutableStateOf(false) }
             AlertDialog(
-                icon = { Icon(Icons.Filled.Warning, "Warning") },
+                icon = { Icon(painterResource(Res.drawable.icon_warning), "Warning") },
                 title = { Text("删除「${weapon.name}」?", fontFamily = FontBTTFamily()) },
                 onDismissRequest = {
                     if (!onDeleting) {
@@ -364,7 +321,7 @@ private fun LazyItemScope.ListItemWeapon(
             trailingContent = {
                 AnimatedVisibility(isHovered) {
                     Icon(
-                        imageVector = Icons.Filled.Delete,
+                        painter = painterResource(Res.drawable.icon_delete),
                         contentDescription = "Delete icon",
                         modifier = Modifier
                             .clip(ButtonDefaults.shape)

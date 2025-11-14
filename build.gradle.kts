@@ -49,6 +49,7 @@ dependencies {
     implementation(compose.uiUtil)
     implementation(compose.uiTooling)
     // implementation(compose.material)
+    // 图标直接在 https://fonts.google.com/icons?hl=zh-cn 按需下载
     implementation(compose.material3)
     implementation(compose.components.resources)
     implementation(compose.animation)
@@ -75,13 +76,14 @@ compose.resources {
 
 // https://github.com/JetBrains/compose-multiplatform/blob/master/tutorials/Native_distributions_and_local_execution/README.md
 compose.desktop {
+    // TODO https://kotlinlang.org/docs/multiplatform/compose-native-distribution.html#gradle-plugin
     nativeApplication {
     }
 
     application {
         mainClass = "MainKt"
         jvmArgs += listOf(
-            "-client",
+            "-server",
             "-XX:ErrorFile=.logs/hs_err.log",
             "-XX:-HeapDumpOnOutOfMemoryError",
             "-XX:HeapDumpPath=.logs/dump.hprof",
@@ -102,7 +104,7 @@ compose.desktop {
             packageVersion = appVersion
             vendor = "Forte Scarlet"
             description = "DO NOT BONUS YOURSELF!"
-            copyright = "Copyright © 2024 Forte Scarlet. All rights reserved."
+            copyright = "Copyright © 2024-2026 Forte Scarlet. All rights reserved."
 
             linux {
                 shortcut = true

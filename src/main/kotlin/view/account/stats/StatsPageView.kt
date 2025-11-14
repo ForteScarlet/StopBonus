@@ -2,12 +2,13 @@ package view.account.stats
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import love.forte.bonus.bonus_self_desktop.generated.resources.Res
+import love.forte.bonus.bonus_self_desktop.generated.resources.icon_kid_star
+import org.jetbrains.compose.resources.painterResource
 import view.account.PageViewState
 import view.account.SimpleAccountViewPageSelector
 import view.account.stats.StatsType.COUNT
@@ -27,7 +28,7 @@ object StatsPageView : SimpleAccountViewPageSelector {
 
     @Composable
     override fun menuIcon(state: PageViewState) {
-        Icon(Icons.Rounded.Star, "")
+        Icon(painterResource(Res.drawable.icon_kid_star), "icon_star")
     }
 
     @Composable

@@ -13,24 +13,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +27,11 @@ import database.entity.BonusRecords
 import database.entity.toView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import love.forte.bonus.bonus_self_desktop.generated.resources.Res
+import love.forte.bonus.bonus_self_desktop.generated.resources.icon_date_range
+import love.forte.bonus.bonus_self_desktop.generated.resources.icon_delete
+import love.forte.bonus.bonus_self_desktop.generated.resources.icon_warning
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.exposed.dao.with
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -64,7 +53,7 @@ object AccountBonusRecordView : SimpleAccountViewPageSelector {
 
     @Composable
     override fun menuIcon(state: PageViewState) {
-        Icon(Icons.Filled.DateRange, "Record icon")
+        Icon(painterResource(Res.drawable.icon_date_range), "Record icon")
     }
 
     @Composable
@@ -139,7 +128,7 @@ private fun ListItemRecord(
     if (deleteConfirm) {
         var onDeleting by remember(deleteConfirm) { mutableStateOf(false) }
         AlertDialog(
-            icon = { Icon(Icons.Filled.Warning, "Warning") },
+            icon = { Icon(painterResource(Res.drawable.icon_warning), "Warning") },
             title = { Text("删除这条奖励记录?", fontFamily = FontBTTFamily()) },
             onDismissRequest = {
                 if (!onDeleting) {
@@ -231,7 +220,7 @@ private fun ListItemRecord(
             ) {
                 AnimatedVisibility(isHovered) {
                     Icon(
-                        imageVector = Icons.Filled.Delete,
+                        painter = painterResource(Res.drawable.icon_delete),
                         contentDescription = "Delete icon",
                         modifier = Modifier
                             .clip(ButtonDefaults.shape)

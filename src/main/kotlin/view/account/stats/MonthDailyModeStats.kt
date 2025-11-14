@@ -5,29 +5,10 @@ import FontLXGWNeoXiHeiScreenFamily
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.MenuAnchorType
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,11 +22,7 @@ import database.entity.BonusRecord
 import database.entity.BonusRecords
 import io.github.koalaplot.core.ChartLayout
 import io.github.koalaplot.core.Symbol
-import io.github.koalaplot.core.bar.BarScope
-import io.github.koalaplot.core.bar.DefaultVerticalBar
-import io.github.koalaplot.core.bar.GroupedVerticalBarPlot
-import io.github.koalaplot.core.bar.VerticalBarPlot
-import io.github.koalaplot.core.bar.solidBar
+import io.github.koalaplot.core.bar.*
 import io.github.koalaplot.core.legend.ColumnLegend
 import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
@@ -55,11 +32,7 @@ import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
 import org.jetbrains.exposed.sql.and
 import view.account.PageViewState
 import view.account.record.format
-import java.time.Duration
-import java.time.LocalDate
-import java.time.YearMonth
-import java.time.ZoneId
-import java.time.ZonedDateTime
+import java.time.*
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -106,7 +79,7 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
             ) {
                 OutlinedTextField(
                     // modifier = Modifier.menuAnchor(),
-                    modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryEditable),
+                    modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable),
                     value = type.title,
                     readOnly = true,
                     onValueChange = { typeExpanded = true },

@@ -4,53 +4,11 @@ import FontBTTFamily
 import FontLXGWNeoXiHeiScreenFamily
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
-import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DisplayMode
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SelectableDates
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimeInput
-import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberTimePickerState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -59,25 +17,17 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
-import database.entity.Account
-import database.entity.BonusRecord
-import database.entity.Weapon
-import database.entity.WeaponView
-import database.entity.Weapons
-import database.entity.toView
+import database.entity.*
 import kotlinx.coroutines.launch
+import love.forte.bonus.bonus_self_desktop.generated.resources.Res
+import love.forte.bonus.bonus_self_desktop.generated.resources.icon_clear
+import love.forte.bonus.bonus_self_desktop.generated.resources.icon_home
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.exposed.sql.SizedCollection
 import view.account.AccountViewPage
 import view.account.AccountViewPageSelector
 import view.account.PageViewState
-import java.time.Duration
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.Year
-import java.time.ZoneId
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
+import java.time.*
 import java.time.format.DateTimeFormatter
 
 private const val EMOJI_ANGRY = "\uD83D\uDE21"
@@ -143,7 +93,7 @@ object AccountHomeView : AccountViewPageSelector {
 
     @Composable
     private fun menuIcon(state: PageViewState) {
-        Icon(Icons.Filled.Home, "Home icon")
+        Icon(painterResource(Res.drawable.icon_home), "Home icon")
     }
     //
     // @Composable
@@ -562,8 +512,7 @@ private inline fun WeaponSelector(
         OutlinedTextField(
             modifier = Modifier
                 .focusable(false)
-                // .menuAnchor()
-                .menuAnchor(MenuAnchorType.PrimaryEditable)
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
                 .fillMaxWidth(.65f),
             value = if (!expanded) selectedWeapon?.name ?: "无" else value,
             onValueChange = {
@@ -594,7 +543,7 @@ private inline fun WeaponSelector(
         ) {
             DropdownMenuItem(
                 text = { Text("无") },
-                trailingIcon = { Icon(Icons.Filled.Clear, "Clear icon") },
+                trailingIcon = { Icon(painterResource(Res.drawable.icon_clear), "Clear icon") },
                 onClick = {
                     onSelect(null)
                     value = ""
