@@ -65,6 +65,9 @@ dependencies {
     implementation(libs.hikariCP)
     implementation(libs.bundles.exposed)
     implementation(libs.koalaPlot.core)
+
+    // https://www.sauronsoftware.it/projects/junique/index.php
+    // implementation(libs.junique)
 }
 
 compose.resources {

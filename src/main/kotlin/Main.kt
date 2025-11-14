@@ -4,24 +4,13 @@ import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Shapes
 import androidx.compose.material.Typography
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Tray
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.WindowPosition
-import androidx.compose.ui.window.application
-import androidx.compose.ui.window.rememberTrayState
-import androidx.compose.ui.window.rememberWindowState
+import androidx.compose.ui.window.*
 import database.connectDatabaseOperator
 import kotlinx.coroutines.Dispatchers
 import love.forte.bonus.bonus_self_desktop.generated.resources.BTT
@@ -34,6 +23,9 @@ import view.AppState
 import java.awt.Toolkit
 import java.nio.file.Path
 import kotlin.io.path.Path
+
+
+private const val APPID = "love.forte.bonus.bonus_self_desktop"
 
 fun storeAppPath(): Path {
     if (System.getenv("DEBUG").toBoolean() || System.getProperty("debug").toBoolean()) {
@@ -63,11 +55,6 @@ fun FontBTT() = org.jetbrains.compose.resources.Font(Res.font.BTT)
 @Composable
 fun FontBTTFamily() = FontFamily(FontBTT())
 
-@Composable
-fun a() {
-    FontFamily(org.jetbrains.compose.resources.Font(Res.font.BTT))
-}
-
 private val fontLXGWNeoXiHeiScreen = Font("font/LXGWNeoXiHeiScreen.ttf")
 
 /**
@@ -80,6 +67,18 @@ fun FontLXGWNeoXiHeiScreen() = fontLXGWNeoXiHeiScreen
 fun FontLXGWNeoXiHeiScreenFamily() = FontFamily(FontLXGWNeoXiHeiScreen())
 
 private val logger = LoggerFactory.getLogger("MAIN")
+
+// private fun checkInstance(handler: MessageHandler) {
+//     var alreadyRunning = false
+//     try {
+//         JUnique.acquireLock(APPID, handler)
+//         alreadyRunning = false
+//     } catch (e: AlreadyLockedException) {
+//         alreadyRunning = true
+//     }
+//
+//     JUnique.releaseLock(APPID)
+// }
 
 fun main() {
     Thread.setDefaultUncaughtExceptionHandler { t, e ->

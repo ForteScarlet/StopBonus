@@ -41,6 +41,8 @@ koalaPlot-core = { group = "io.github.koalaplot", name = "koalaplot-core", versi
 # https://github.com/brettwooldridge/HikariCP
 hikariCP = "com.zaxxer:HikariCP:6.2.1"
 
+junique = "de.huxhorn.lilith:de.huxhorn.lilith.3rdparty.junique:1.0.4"
+
 [bundles]
 exposed = ["exposed-core", "exposed-dao", "exposed-jdbc", "exposed-javaTime"]
 
