@@ -42,7 +42,12 @@ jobs:
         with:
           name: distributions-${{ matrix.os }}
           retention-days: 1
-          path: 'build/compose/binaries/main/*/StopBonus-*.*'
+          path: |
+            build/compose/binaries/main-release/*/StopBonus-*.*
+            build/compose/binaries/main-release/app/StopBonus.app
+            
+
+# mac: build/compose/binaries/main-release/app/StopBonus.app
 
 #  files: |
 #    build/compose/binaries/main/app/HashHash-${{ runner.os }}-standalone.zip
