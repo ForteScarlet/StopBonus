@@ -217,7 +217,9 @@ private fun AccountHome(state: PageViewState) {
         // start date
         var showSelectStartDate by remember { mutableStateOf(false) }
         if (showSelectStartDate) {
-            val nowTime0 = LocalTime.now()
+            // val nowInstant0 = Instant.now()
+            val nowTime0 = Instant.now().atZone(ZoneId.systemDefault()).toLocalDateTime()
+            // val nowTime0 =  LocalTime.now()
             val startTimePickerState = rememberTimePickerState(
                 is24Hour = true,
                 initialHour = nowTime0.hour,
@@ -296,7 +298,7 @@ private fun AccountHome(state: PageViewState) {
         // end date & time
         var showEndDateTime by remember { mutableStateOf(false) }
         if (showEndDateTime) {
-            val nowTime0 = LocalTime.now()
+            val nowTime0 = Instant.now().atZone(ZoneId.systemDefault()).toLocalDateTime()
             val endTimePickerState = rememberTimePickerState(
                 is24Hour = true,
                 initialHour = nowTime0.hour,
@@ -327,20 +329,22 @@ private fun AccountHome(state: PageViewState) {
                     }
                 },
             ) {
-                DatePicker(
-                    state = endDatePickerState,
-                    title = {
-                        Text(
-                            "什么时候打完的$EMOJI_ANGRY",
-                            fontFamily = FontLXGWNeoXiHeiScreenFamily(),
-                            modifier = Modifier.padding(PaddingValues(start = 24.dp, end = 12.dp, top = 16.dp))
-                        )
-                    },
-                )
-                TimeInput(
-                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(20.dp),
-                    state = endTimePickerState,
-                )
+                Column {
+                    DatePicker(
+                        state = endDatePickerState,
+                        title = {
+                            Text(
+                                "什么时候打完的$EMOJI_ANGRY",
+                                fontFamily = FontLXGWNeoXiHeiScreenFamily(),
+                                modifier = Modifier.padding(PaddingValues(start = 24.dp, end = 12.dp, top = 16.dp))
+                            )
+                        },
+                    )
+                    TimeInput(
+                        modifier = Modifier.align(Alignment.CenterHorizontally).padding(20.dp),
+                        state = endTimePickerState,
+                    )
+                }
             }
         }
 
