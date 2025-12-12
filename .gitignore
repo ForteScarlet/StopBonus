@@ -44,3 +44,7 @@ bin/
 .logs
 .kotlin
 .claude
+
+.idea/**
+!.idea/.gitignore
+!.idea/runConfigurations
