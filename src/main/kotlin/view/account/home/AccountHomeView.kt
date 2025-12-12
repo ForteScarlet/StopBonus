@@ -11,7 +11,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -92,7 +91,7 @@ object AccountHomeView : AccountViewPageSelector {
     //
 
     @Composable
-    private fun menuIcon(state: PageViewState) {
+    private fun menuIcon(@Suppress("UNUSED_PARAMETER") state: PageViewState) {
         Icon(painterResource(Res.drawable.icon_home), "Home icon")
     }
     //
@@ -132,7 +131,7 @@ private fun AccountHome(state: PageViewState) {
         initialDisplayMode = DisplayMode.Input,
         selectableDates = object : SelectableDates {
             override fun isSelectableDate(utcTimeMillis: Long): Boolean =
-                Instant.ofEpochMilli(utcTimeMillis).atZone(ZoneOffset.UTC)
+                Instant.ofEpochMilli(utcTimeMillis).atZone(ZoneId.systemDefault())
                     .toLocalDate() <= nowLocalDateTime.toLocalDate()
         }
     )
@@ -159,14 +158,17 @@ private fun AccountHome(state: PageViewState) {
     val endDatePickerState = rememberDatePickerState(
         initialSelectedDateMillis = null,
         initialDisplayedMonthMillis = selectedStartDateMillis ?: System.currentTimeMillis(),
-        yearRange = selectedStartDateTime()?.let {
+        yearRange = selectedStartDateTime?.let {
             it.year..nowYear.value
-        } ?: nowYear.value..nowYear.value,
+        } ?: 1900..nowYear.value,
         initialDisplayMode = DisplayMode.Input,
         selectableDates = object : SelectableDates {
-            override fun isSelectableDate(utcTimeMillis: Long): Boolean =
-                Instant.ofEpochMilli(utcTimeMillis).atZone(ZoneOffset.UTC)
-                    .toLocalDate() <= nowLocalDateTime.toLocalDate()
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                val date = Instant.ofEpochMilli(utcTimeMillis).atZone(ZoneId.systemDefault()).toLocalDate()
+                val notInFuture = date <= nowLocalDateTime.toLocalDate()
+                val afterStartDate = selectedStartDateTime?.toLocalDate()?.let { date >= it } ?: true
+                return notInFuture && afterStartDate
+            }
         }
     )
 
@@ -199,14 +201,16 @@ private fun AccountHome(state: PageViewState) {
 
     var weapon by remember { mutableStateOf<WeaponView?>(null) }
     val score = remember { SliderState(value = 10f, steps = 8, valueRange = 1f..10f) }
+    var remarkValue by remember { mutableStateOf("") }
 
     fun clearStates() {
         startDatePickerState.selectedDateMillis = null
-        // startTimePickerState.settle()
+        startTimePickerValue = null
         endDatePickerState.selectedDateMillis = null
-        // endTimePickerState.settle()
+        endTimePickerValue = null
         weapon = null
         score.value = 10f
+        remarkValue = ""
     }
 
     Column(
@@ -230,7 +234,10 @@ private fun AccountHome(state: PageViewState) {
                 onDismissRequest = { showSelectStartDate = false },
                 dismissButton = {
                     TextButton(onClick = {
+                        val now = LocalDateTime.now()
                         startDatePickerState.selectedDateMillis = System.currentTimeMillis()
+                        startTimePickerValue = now.toLocalTime()
+                        showSelectStartDate = false
                     }) {
                         Text(
                             "现在$EMOJI_CLOCK",
@@ -309,7 +316,10 @@ private fun AccountHome(state: PageViewState) {
                 onDismissRequest = { showEndDateTime = false },
                 dismissButton = {
                     TextButton(onClick = {
+                        val now = LocalDateTime.now()
                         endDatePickerState.selectedDateMillis = System.currentTimeMillis()
+                        endTimePickerValue = now.toLocalTime()
+                        showEndDateTime = false
                     }) {
                         Text(
                             "现在$EMOJI_CLOCK",
@@ -387,8 +397,6 @@ private fun AccountHome(state: PageViewState) {
             ScoreSelector(score)
         }
 
-        var remarkValue by remember { mutableStateOf("") }
-
         AnimatedVisibility(duration != null) {
             // 备注
             OutlinedTextField(
@@ -396,7 +404,7 @@ private fun AccountHome(state: PageViewState) {
                 onValueChange = { remarkValue = if (it.length <= 500) it else it.substring(0, 500) },
                 label = { Text("备注") },
                 placeholder = { Text("备注") },
-                supportingText = { Text("500字内") },
+                supportingText = { Text("${remarkValue.length} / 500") },
             )
         }
 
@@ -444,7 +452,7 @@ private fun AccountHome(state: PageViewState) {
                             } catch (e: Exception) {
                                 scope.launch {
                                     state.snackbarHostState.showSnackbar(
-                                        "记录失败: \n$e",
+                                        "记录失败: ${e.message ?: "未知错误"}",
                                         withDismissAction = true
                                     )
                                 }
@@ -539,7 +547,7 @@ private inline fun WeaponSelector(
 
         DropdownMenu(
             modifier = Modifier
-                .background(Color.White)
+                .background(MaterialTheme.colorScheme.surface)
                 .exposedDropdownSize(true),
             properties = PopupProperties(focusable = false),
             expanded = expanded,
