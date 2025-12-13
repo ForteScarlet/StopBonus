@@ -11,16 +11,8 @@ import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.FrameWindowScope
@@ -47,11 +39,14 @@ class AppState(
 @Suppress("UnusedReceiverParameter")
 @Composable
 @Preview
-fun FrameWindowScope.App(appState: AppState) {
+fun FrameWindowScope.App(
+    state: AppState,
+    onBackToWelcome: () -> Unit = {}
+) {
     val loginState = remember {
         LoginState(
-            appState,
-            appState.databaseOperator,
+            state,
+            state.databaseOperator,
         )
     }
     var targetAccount by remember { mutableStateOf<AccountView?>(null) }
@@ -66,8 +61,8 @@ fun FrameWindowScope.App(appState: AppState) {
                         animatedContentScope = this@AnimatedContent,
                         onSelect = {
                             targetAccount = it
-                            // navController.navigate("account/${it.id}")
-                        }
+                        },
+                        onBackToWelcome = onBackToWelcome
                     )
                 }
 
@@ -114,8 +109,8 @@ fun FrameWindowScope.App(appState: AppState) {
                         AccountHome(
                             remember {
                                 AccountState(
-                                    appState,
-                                    appState.databaseOperator,
+                                    state,
+                                    state.databaseOperator,
                                     targetAccountView
                                 )
                             })

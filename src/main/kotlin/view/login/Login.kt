@@ -1,34 +1,15 @@
 package view.login
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.*
 import androidx.compose.animation.SharedTransitionScope.ResizeMode.Companion.ScaleToBounds
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -38,6 +19,9 @@ import database.entity.AccountView
 import database.entity.Accounts
 import database.entity.toView
 import kotlinx.coroutines.launch
+import love.forte.bonus.bonus_self_desktop.generated.resources.Res
+import love.forte.bonus.bonus_self_desktop.generated.resources.icon_home
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import view.AppState
@@ -55,7 +39,8 @@ fun LoginView(
     state: LoginState,
     shardTitleTransactionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
-    onSelect: (AccountView) -> Unit
+    onSelect: (AccountView) -> Unit,
+    onBackToWelcome: () -> Unit = {}
 ) {
     val scope by state::scope
     val accountList = remember { mutableStateListOf<AccountView>() }
@@ -74,39 +59,54 @@ fun LoginView(
         readData()
     }
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(horizontal = 200.dp).padding(bottom = 50.dp)
-    ) {
-        NewAccount(
-            state,
-            onCreate = {
-                readDataState = Any()
-            })
+    Box(modifier = Modifier.fillMaxSize()) {
+        // 主体内容
+        Column(
+            verticalArrangement = Arrangement.spacedBy(20.dp, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxSize().padding(horizontal = 200.dp).padding(bottom = 50.dp)
+        ) {
+            NewAccount(
+                state,
+                onCreate = {
+                    readDataState = Any()
+                })
 
-        AccountList(
-            accounts = accountList,
-            inDeleting = inDeleting,
-            shardTitleTransactionScope = shardTitleTransactionScope,
-            animatedContentScope = animatedContentScope,
-            onDelete = { target ->
-                inDeleting = true
-                scope.launch {
-                    try {
-                        state.database.inSuspendedTransaction {
-                            Accounts.deleteWhere(limit = 1) { id eq target.id }
-                            accountList.remove(target)
+            AccountList(
+                accounts = accountList,
+                inDeleting = inDeleting,
+                shardTitleTransactionScope = shardTitleTransactionScope,
+                animatedContentScope = animatedContentScope,
+                onDelete = { target ->
+                    inDeleting = true
+                    scope.launch {
+                        try {
+                            state.database.inSuspendedTransaction {
+                                Accounts.deleteWhere(limit = 1) { id eq target.id }
+                                accountList.remove(target)
+                            }
+                        } finally {
+                            inDeleting = false
                         }
-                    } finally {
-                        inDeleting = false
                     }
-                }
-            },
-            onSelect = onSelect
-        )
-    }
+                },
+                onSelect = onSelect
+            )
+        }
 
+        // 左上角返回欢迎页按钮
+        IconButton(
+            onClick = onBackToWelcome,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(16.dp)
+        ) {
+            Icon(
+                painter = painterResource(Res.drawable.icon_home),
+                contentDescription = "返回欢迎页"
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class)

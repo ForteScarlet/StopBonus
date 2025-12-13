@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.kotlinSerialization)
     // https://conveyor.hydraulic.dev/14.0/configs/maven-gradle/#gradle
     //id("dev.hydraulic.conveyor") version "1.9"
     idea
@@ -62,12 +63,54 @@ dependencies {
     runtimeOnly(libs.logback.classic)
 
     implementation(libs.kotlinx.coroutine.core)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.hikariCP)
     implementation(libs.bundles.exposed)
     implementation(libs.koalaPlot.core)
 
     // https://www.sauronsoftware.it/projects/junique/index.php
     // implementation(libs.junique)
+}
+
+// BuildConfig 生成任务
+val buildConfigDir = layout.buildDirectory.dir("generated/source/buildConfig/main/kotlin")
+
+val generateBuildConfig by tasks.registering {
+    val outputDir = buildConfigDir.get().asFile
+    outputs.dir(outputDir)
+
+    doLast {
+        val buildConfigFile = File(outputDir, "config/BuildConfig.kt")
+        buildConfigFile.parentFile.mkdirs()
+        buildConfigFile.writeText(
+            """
+            package config
+
+            /**
+             * 编译时生成的构建配置
+             *
+             * 由 Gradle 在编译时自动生成，请勿手动修改
+             */
+            object BuildConfig {
+                const val VERSION = "$appVersion"
+                const val APP_NAME = "$appName"
+                const val GITHUB_URL = "https://github.com/ForteScarlet/StopBonus"
+            }
+            """.trimIndent()
+        )
+    }
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    dependsOn(generateBuildConfig)
+}
+
+kotlin {
+    sourceSets {
+        main {
+            kotlin.srcDir(buildConfigDir)
+        }
+    }
 }
 
 compose.resources {

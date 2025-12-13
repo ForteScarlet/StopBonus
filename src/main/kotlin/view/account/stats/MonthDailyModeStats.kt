@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import common.Dimensions
+import config.LocalAppConfig
 import database.entity.BonusRecord
 import database.entity.BonusRecords
 import io.github.koalaplot.core.ChartLayout
@@ -34,7 +35,10 @@ import org.jetbrains.exposed.sql.and
 import view.account.PageViewState
 import view.account.record.format
 import view.common.StatsTypeSelector
-import java.time.*
+import java.time.Duration
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.ZonedDateTime
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -164,7 +168,7 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
     @OptIn(ExperimentalKoalaPlotApi::class)
     @Composable
     private fun CountContent(state: PageViewState) {
-        val zone = ZoneId.systemDefault()
+        val zone = LocalAppConfig.current.zoneId
 
         val startDate = LocalDate.of(yearMonth.year, yearMonth.month, 1)
         val startDateTime = ZonedDateTime.of(startDate.atTime(0, 0), zone).toInstant()
@@ -271,7 +275,7 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
     @OptIn(ExperimentalKoalaPlotApi::class, ExperimentalFoundationApi::class)
     @Composable
     private fun DurationContent(state: PageViewState) {
-        val zone = ZoneId.systemDefault()
+        val zone = LocalAppConfig.current.zoneId
 
         val startDate = LocalDate.of(yearMonth.year, yearMonth.month, 1)
         val startDateTime = ZonedDateTime.of(startDate.atTime(0, 0), zone).toInstant()

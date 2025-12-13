@@ -11,6 +11,10 @@ import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
+import config.AppConfigState
+import config.BuildConfig
+import config.ConfigManager
+import config.LocalAppConfig
 import database.connectDatabaseOperator
 import kotlinx.coroutines.Dispatchers
 import love.forte.bonus.bonus_self_desktop.generated.resources.BTT
@@ -20,6 +24,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.slf4j.LoggerFactory
 import view.App
 import view.AppState
+import view.welcome.WelcomeNavHost
 import java.awt.Toolkit
 import java.nio.file.Path
 import kotlin.io.path.Path
@@ -91,12 +96,19 @@ fun main() {
         logger.error("UncaughtExceptionHandler on Thread[{}]", t, e)
     }
 
+    // 加载应用配置
+    val initialConfig = ConfigManager.load()
+
     // 初始化数据库连接
     val databaseOp = connectDatabaseOperator(dataDir = storeAppPath(), schemaName = "bonus")
 
     application {
         val scope = rememberCoroutineScope { Dispatchers.Default }
         val materialThemeState = rememberMaterialThemeState()
+        val configState = remember { AppConfigState(initialConfig) }
+
+        // 导航状态
+        var showWelcome by remember { mutableStateOf(true) }
 
         val winSize = kotlin.runCatching {
             with(Toolkit.getDefaultToolkit().screenSize) {
@@ -125,6 +137,7 @@ fun main() {
                     }
                     Separator()
                     Item("Exit") {
+                        databaseOp.close()
                         exitApplication()
                     }
                 }
@@ -134,7 +147,7 @@ fun main() {
         Window(
             icon = Logo(),
             state = winState,
-            title = "别奖励了!",
+            title = "别奖励了! v${BuildConfig.VERSION}",
             visible = !winState.isMinimized,
             enabled = !winState.isMinimized,
             onCloseRequest = {
@@ -142,21 +155,38 @@ fun main() {
                 databaseOp.close()
             }
         ) {
-            MaterialTheme(
-                colors = materialThemeState.colors,
-                typography = materialThemeState.typography,
-                shapes = materialThemeState.shapes
-            ) {
-                App(
-                    remember {
-                        AppState(
-                            winState,
-                            materialThemeState,
-                            scope,
-                            databaseOp
+            // 窗口焦点恢复：从托盘恢复时置顶
+            LaunchedEffect(winState.isMinimized) {
+                if (!winState.isMinimized) {
+                    window.toFront()
+                    window.requestFocus()
+                }
+            }
+
+            CompositionLocalProvider(LocalAppConfig provides configState) {
+                MaterialTheme(
+                    colors = materialThemeState.colors,
+                    typography = materialThemeState.typography,
+                    shapes = materialThemeState.shapes
+                ) {
+                    if (showWelcome) {
+                        WelcomeNavHost(
+                            onEnterApp = { showWelcome = false }
+                        )
+                    } else {
+                        App(
+                            state = remember {
+                                AppState(
+                                    winState,
+                                    materialThemeState,
+                                    scope,
+                                    databaseOp
+                                )
+                            },
+                            onBackToWelcome = { showWelcome = true }
                         )
                     }
-                )
+                }
             }
         }
 

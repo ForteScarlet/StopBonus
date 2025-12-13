@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import common.Dimensions
+import config.LocalAppConfig
 import database.entity.BonusRecords
 import io.github.koalaplot.core.ChartLayout
 import io.github.koalaplot.core.Symbol
@@ -131,7 +132,7 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
         }
     }
 
-    private fun startAndEndInstant(zone: ZoneId = ZoneId.systemDefault()): Pair<Instant, Instant> {
+    private fun startAndEndInstant(zone: ZoneId): Pair<Instant, Instant> {
         val startDateTime = ZonedDateTime.of(
             LocalDate.ofYearDay(year.value, 1),
             LocalTime.MIN,
@@ -153,7 +154,8 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
     @OptIn(ExperimentalKoalaPlotApi::class)
     @Composable
     private fun CountContent(state: PageViewState) {
-        val (startDateTime, endDateTime) = startAndEndInstant()
+        val zoneId = LocalAppConfig.current.zoneId
+        val (startDateTime, endDateTime) = startAndEndInstant(zoneId)
 
 
         data class Data(
@@ -274,7 +276,8 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
     @OptIn(ExperimentalKoalaPlotApi::class)
     @Composable
     private fun DurationContent(state: PageViewState) {
-        val (startDateTime, endDateTime) = startAndEndInstant()
+        val zoneId = LocalAppConfig.current.zoneId
+        val (startDateTime, endDateTime) = startAndEndInstant(zoneId)
 
         data class Data(
             // 横轴：月份

@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import common.Emojis
 import common.Limits
+import config.LocalAppConfig
 import database.entity.*
 import kotlinx.coroutines.launch
 import love.forte.bonus.bonus_self_desktop.generated.resources.Res
@@ -115,8 +116,9 @@ object AccountHomeView : AccountViewPageSelector {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AccountHome(state: PageViewState) {
+    val zoneId = LocalAppConfig.current.zoneId
     val nowMillis = System.currentTimeMillis()
-    val nowLocalDateTime = LocalDateTime.now()
+    val nowLocalDateTime = LocalDateTime.now(zoneId)
 
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
@@ -130,7 +132,7 @@ private fun AccountHome(state: PageViewState) {
         initialDisplayMode = DisplayMode.Input,
         selectableDates = object : SelectableDates {
             override fun isSelectableDate(utcTimeMillis: Long): Boolean =
-                Instant.ofEpochMilli(utcTimeMillis).atZone(ZoneId.systemDefault())
+                Instant.ofEpochMilli(utcTimeMillis).atZone(zoneId)
                     .toLocalDate() <= nowLocalDateTime.toLocalDate()
         }
     )
@@ -146,7 +148,7 @@ private fun AccountHome(state: PageViewState) {
         val timeValue = startTimePickerValue
             ?: return null
 
-        return selectedStartDateInstantValue.atZone(ZoneId.systemDefault())
+        return selectedStartDateInstantValue.atZone(zoneId)
             .toLocalDate()
             .atTime(timeValue)
     }
@@ -163,7 +165,7 @@ private fun AccountHome(state: PageViewState) {
         initialDisplayMode = DisplayMode.Input,
         selectableDates = object : SelectableDates {
             override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                val date = Instant.ofEpochMilli(utcTimeMillis).atZone(ZoneId.systemDefault()).toLocalDate()
+                val date = Instant.ofEpochMilli(utcTimeMillis).atZone(zoneId).toLocalDate()
                 val notInFuture = date <= nowLocalDateTime.toLocalDate()
                 val afterStartDate = selectedStartDateTime?.toLocalDate()?.let { date >= it } ?: true
                 return notInFuture && afterStartDate
@@ -185,7 +187,7 @@ private fun AccountHome(state: PageViewState) {
         val timeValue = endTimePickerValue
             ?: return null
 
-        return selectedEndDateInstantValue.atZone(ZoneId.systemDefault())
+        return selectedEndDateInstantValue.atZone(zoneId)
             .toLocalDate()
             .atTime(timeValue)
     }
@@ -221,7 +223,7 @@ private fun AccountHome(state: PageViewState) {
         var showSelectStartDate by remember { mutableStateOf(false) }
         if (showSelectStartDate) {
             // val nowInstant0 = Instant.now()
-            val nowTime0 = Instant.now().atZone(ZoneId.systemDefault()).toLocalDateTime()
+            val nowTime0 = Instant.now().atZone(zoneId).toLocalDateTime()
             // val nowTime0 =  LocalTime.now()
             val startTimePickerState = rememberTimePickerState(
                 is24Hour = true,
@@ -304,7 +306,7 @@ private fun AccountHome(state: PageViewState) {
         // end date & time
         var showEndDateTime by remember { mutableStateOf(false) }
         if (showEndDateTime) {
-            val nowTime0 = Instant.now().atZone(ZoneId.systemDefault()).toLocalDateTime()
+            val nowTime0 = Instant.now().atZone(zoneId).toLocalDateTime()
             val endTimePickerState = rememberTimePickerState(
                 is24Hour = true,
                 initialHour = nowTime0.hour,
@@ -426,9 +428,9 @@ private fun AccountHome(state: PageViewState) {
                                         this.account = Account.findById(account.id)!! // TODO null ?
                                         this.duration = duration
                                         this.startTime =
-                                            ZonedDateTime.of(selectedStartDateTime, ZoneId.systemDefault()).toInstant()
+                                            ZonedDateTime.of(selectedStartDateTime, zoneId).toInstant()
                                         this.endTime =
-                                            ZonedDateTime.of(selectedEndDateTime, ZoneId.systemDefault()).toInstant()
+                                            ZonedDateTime.of(selectedEndDateTime, zoneId).toInstant()
                                         this.score = score.value.toUInt()
                                         this.remark = remarkValue
                                         weapon?.also { w ->

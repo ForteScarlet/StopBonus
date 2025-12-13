@@ -10,10 +10,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import common.Emojis
+import config.LocalAppConfig
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.ZoneId
 
 /**
  * 统一的日期时间选择对话框
@@ -83,7 +82,8 @@ fun DateTimePickerDialog(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun rememberCurrentTimePickerState(): TimePickerState {
-    val nowTime = Instant.now().atZone(ZoneId.systemDefault()).toLocalDateTime()
+    val zoneId = LocalAppConfig.current.zoneId
+    val nowTime = Instant.now().atZone(zoneId).toLocalDateTime()
     return rememberTimePickerState(
         is24Hour = true,
         initialHour = nowTime.hour,

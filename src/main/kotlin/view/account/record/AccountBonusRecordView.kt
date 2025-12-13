@@ -1,6 +1,5 @@
 package view.account.record
 
-import FontBTTFamily
 import FontLXGWNeoXiHeiScreenFamily
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
@@ -13,13 +12,17 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.*
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import config.LocalAppConfig
 import database.entity.BonusRecord
 import database.entity.BonusRecordView
 import database.entity.BonusRecords
@@ -38,7 +41,6 @@ import view.account.PageViewState
 import view.account.SimpleAccountViewPageSelector
 import view.common.DeleteConfirmDialog
 import java.time.Duration
-import java.time.ZoneId
 
 
 /**
@@ -164,8 +166,9 @@ private fun ListItemRecord(
             }
         },
         supportingContent = {
-            val start = record.startTime.atZone(ZoneId.systemDefault())
-            val end = record.endTime.atZone(ZoneId.systemDefault())
+            val zoneId = LocalAppConfig.current.zoneId
+            val start = record.startTime.atZone(zoneId)
+            val end = record.endTime.atZone(zoneId)
             val startDate = start.toLocalDate()
             val endDate = end.toLocalDate()
             val startTime = start.toLocalTime()
