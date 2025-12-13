@@ -26,8 +26,15 @@ jobs:
           cache: 'gradle'
       - uses: gradle/actions/setup-gradle@v3
 
-      - name: Package distributables for ${{ runner.os }}
-        run: gradle packageDistributionForCurrentOS --info --stacktrace --warning-mode all
+#      - name: Package distributables for ${{ runner.os }}
+#        run: gradle packageDistributionForCurrentOS --info --stacktrace --warning-mode all
+
+
+      - name: Create and Package distributable for ${{ runner.os }}
+        run: gradle createReleaseDistributable packageReleaseDistributionForCurrentOS --info --stacktrace --warning-mode all
+
+#      - name: Package installers for ${{ runner.os }}
+#        run: gradle packageReleaseDistributionForCurrentOS --info --stacktrace --warning-mode all
 
       - name: Create portable zip archive (Windows)
         if: runner.os == 'Windows'
@@ -50,10 +57,11 @@ jobs:
           APP_DIR="build/compose/binaries/main-release/app"
           if [ -d "$APP_DIR/StopBonus.app" ]; then
             cd "$APP_DIR"
-            zip -r "StopBonus-macos-${VERSION}.zip" "StopBonus.app"
-            echo "Created: $APP_DIR/StopBonus-macos-${VERSION}.zip"
+            # -r: recursive, -y: preserve symlinks (important for .app bundles)
+            zip -ry "StopBonus-macos-${VERSION}.zip" "StopBonus.app"
+            echo "Created: StopBonus-macos-${VERSION}.zip"
           else
-            echo "Warning: StopBonus.app not found at $APP_DIR/StopBonus.app"
+            echo "Error: StopBonus.app directory not found at $APP_DIR/StopBonus.app"
             exit 1
           fi
 
