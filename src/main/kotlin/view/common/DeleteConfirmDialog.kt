@@ -1,8 +1,11 @@
 package view.common
 
 import FontBTTFamily
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import love.forte.bonus.bonus_self_desktop.generated.resources.Res
 import love.forte.bonus.bonus_self_desktop.generated.resources.icon_warning
 import org.jetbrains.compose.resources.painterResource
@@ -33,18 +36,32 @@ fun DeleteConfirmDialog(
         confirmButton = {
             TextButton(
                 onClick = onConfirm,
-                enabled = !isDeleting
-            ) {
-                Text(
-                    text = if (isDeleting) "删除中..." else "删除",
-                    color = MaterialTheme.colorScheme.error
+                enabled = !isDeleting,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error,
+                    disabledContentColor = MaterialTheme.colorScheme.error.copy(alpha = 0.38f)
                 )
+            ) {
+                if (isDeleting) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp,
+                        color = LocalContentColor.current
+                    )
+                } else {
+                    Text("删除")
+                }
             }
         },
         dismissButton = if (!isDeleting) {
             {
-                TextButton(onClick = onDismiss) {
-                    Text("取消", color = MaterialTheme.colorScheme.primary)
+                TextButton(
+                    onClick = onDismiss,
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    Text("取消")
                 }
             }
         } else null

@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
  * @param modifier 外层 Box 的修饰符，默认为 fillMaxSize
  * @param iconSize 图标大小
  * @param iconTint 图标颜色，默认使用主题的 onSurfaceVariant 色
+ * @param textColor 文字颜色，默认使用主题的 onSurfaceVariant 色
  */
 @Composable
 fun EmptyState(
@@ -31,7 +32,8 @@ fun EmptyState(
     message: String,
     modifier: Modifier = Modifier.fillMaxSize(),
     iconSize: Dp = 200.dp,
-    iconTint: Color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+    iconTint: Color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+    textColor: Color = MaterialTheme.colorScheme.onSurfaceVariant
 ) {
     Box(
         modifier = modifier,
@@ -48,7 +50,7 @@ fun EmptyState(
                 text = message,
                 fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = textColor
             )
         }
     }
