@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
+import java.time.format.FormatStyle
 import java.util.*
 
 /**
@@ -14,41 +14,12 @@ import java.util.*
  */
 object DateTimeFormatters {
 
-    private val dateFormatter = DateTimeFormatter.ofPattern("yyyy年M月d日", Locale.CHINA)
-    private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+    private val dateFormatter = DateTimeFormatter
+        .ofLocalizedDate(FormatStyle.MEDIUM).withLocale(Locale.CHINA)
+    // .ofPattern("yyyy年M月d日", Locale.CHINA)
 
-    /**
-     * 人类友好的相对日期格式化
-     *
-     * @param targetDate 目标日期
-     * @param referenceDate 参考日期（通常为今天）
-     * @return "今天"、"昨天"、"前天"、"X天前"、"X周前"、"X个月前"、或完整日期
-     */
-    fun formatRelativeDate(
-        targetDate: LocalDate,
-        referenceDate: LocalDate
-    ): String {
-        val daysDiff = ChronoUnit.DAYS.between(targetDate, referenceDate)
-        val monthsDiff = ChronoUnit.MONTHS.between(targetDate, referenceDate)
-
-        return when {
-            daysDiff < 0L -> targetDate.format(dateFormatter) // 未来日期显示完整格式
-            daysDiff == 0L -> "今天"
-            daysDiff == 1L -> "昨天"
-            daysDiff == 2L -> "前天"
-            daysDiff in 3L..6L -> "${daysDiff}天前"
-            daysDiff in 7L..13L -> "1周前"
-            daysDiff in 14L..20L -> "2周前"
-            daysDiff in 21L..29L -> "3周前"
-            monthsDiff == 1L -> "1个月前"
-            monthsDiff == 2L -> "2个月前"
-            monthsDiff == 3L -> "3个月前"
-            monthsDiff in 4L..5L -> "${monthsDiff}个月前"
-            monthsDiff in 6L..8L -> "半年前"
-            monthsDiff in 9L..11L -> "约1年前"
-            else -> targetDate.format(dateFormatter)
-        }
-    }
+    private val timeFormatter = DateTimeFormatter
+        .ofLocalizedTime(FormatStyle.SHORT).withLocale(Locale.CHINA)
 
     /**
      * 格式化时间（24小时制，无秒）
