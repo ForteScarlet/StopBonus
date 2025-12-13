@@ -15,7 +15,7 @@ val appName = "StopBonus"
 val appPackage = "love.forte.bonus"
 val appMenuGroup = "forteApp"
 val appNameWithPackage = "$appPackage.$appName"
-val appVersion = "1.0.16"
+val appVersion = "1.0.17"
 
 group = appPackage
 version = appVersion
