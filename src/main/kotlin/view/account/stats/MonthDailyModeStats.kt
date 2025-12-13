@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
@@ -34,6 +35,7 @@ import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
 import org.jetbrains.exposed.sql.and
 import view.account.PageViewState
 import view.account.record.format
+import view.common.MonthSelector
 import view.common.StatsTypeSelector
 import java.time.Duration
 import java.time.LocalDate
@@ -63,24 +65,60 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
         Text("日统计")
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
     @Composable
     override fun TopBar(state: PageViewState) {
         val now = YearMonth.now()
         var year by remember { mutableStateOf<Int?>(yearMonth.year) }
         var month by remember { mutableStateOf<Int?>(yearMonth.monthValue) }
 
-        //var type by remember { mutableStateOf(this.type) }
         var typeExpanded by remember { mutableStateOf(false) }
+        var monthExpanded by remember { mutableStateOf(false) }
 
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(
-                horizontal = Dimensions.TopBarHorizontalPadding,
-                vertical = Dimensions.TopBarVerticalPadding
-            ),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(15.dp, Alignment.CenterHorizontally)
+        // 年份变化时，检查月份是否需要调整
+        LaunchedEffect(year) {
+            val yv = year
+            val mv = month
+            if (yv != null && mv != null) {
+                // 如果是当前年且月份超过当前月，调整为当前月
+                if (yv == now.year && mv > now.monthValue) {
+                    month = now.monthValue
+                }
+            }
+        }
+
+        val onConfirm: () -> Unit = {
+            val yv = year
+            val mv = month
+            if (yv != null && mv != null) {
+                yearMonth = YearMonth.of(yv, mv)
+            }
+            this@MonthDailyModeStats.type = type
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = Dimensions.TopBarHorizontalPadding,
+                    vertical = Dimensions.TopBarVerticalPadding
+                )
+                .onKeyEvent { keyEvent ->
+                    if (keyEvent.key == Key.Enter && keyEvent.type == KeyEventType.KeyUp) {
+                        val yv = year
+                        val mv = month
+                        if (yv != null && mv != null) {
+                            onConfirm()
+                        }
+                        true
+                    } else false
+                },
+            contentAlignment = Alignment.Center
         ) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(Dimensions.StandardSpacing),
+                verticalArrangement = Arrangement.spacedBy(Dimensions.FlowRowVerticalSpacing),
+            ) {
 
             // 统计类型选择器
             StatsTypeSelector(
@@ -90,7 +128,7 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
                 onTypeChange = { type = it }
             )
 
-
+            // 年份输入框
             OutlinedTextField(
                 value = year?.toString() ?: "",
                 onValueChange = { value ->
@@ -109,48 +147,29 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
                 },
                 label = { Text("年") },
                 singleLine = true,
+                modifier = Modifier.widthIn(min = Dimensions.SelectorMinWidth, max = Dimensions.YearInputWidth),
             )
 
-            OutlinedTextField(
-                value = month?.toString() ?: "",
-                onValueChange = { value ->
-                    if (value.isEmpty()) {
-                        month = null
-                        return@OutlinedTextField
-                    }
-                    value.toIntOrNull()?.also { monthValue ->
-                        month = when {
-                            year == now.year -> when {
-                                monthValue > now.month.value -> now.month.value
-                                monthValue < 0 -> abs(monthValue)
-                                monthValue == 0 -> 1
-                                else -> monthValue
-                            }
-
-                            monthValue > 12 -> 12
-                            monthValue < 0 -> abs(monthValue)
-                            monthValue == 0 -> 1
-                            else -> monthValue
-                        }
-                    }
-                },
-                label = { Text("月") },
-                singleLine = true,
+            // 月份下拉选择器
+            MonthSelector(
+                selectedMonth = month,
+                year = year,
+                expanded = monthExpanded,
+                onExpandedChange = { monthExpanded = it },
+                onMonthChange = { month = it }
             )
 
             val yv = year
             val mv = month
 
-            OutlinedButton(
+            // 确认按钮
+            FilledTonalButton(
                 enabled = yv != null && mv != null,
-                onClick = {
-                    if (yv != null && mv != null) {
-                        yearMonth = YearMonth.of(yv, mv)
-                    }
-                    this@MonthDailyModeStats.type = type
-                },
+                onClick = onConfirm,
+                modifier = Modifier.align(Alignment.CenterVertically),
             ) {
-                Text("确定")
+                Text("确定", fontFamily = FontLXGWNeoXiHeiScreenFamily())
+            }
             }
         }
     }

@@ -14,6 +14,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.key.*
+import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
@@ -62,20 +64,42 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
         Text("月统计")
     }
 
+    @OptIn(ExperimentalLayoutApi::class)
     @Composable
     override fun TopBar(state: PageViewState) {
         val now = YearMonth.now()
         var year by remember { mutableStateOf<Int?>(year.value) }
         var typeExpanded by remember { mutableStateOf(false) }
 
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(
-                horizontal = Dimensions.TopBarHorizontalPadding,
-                vertical = Dimensions.TopBarVerticalPadding
-            ),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(15.dp, Alignment.CenterHorizontally)
+        val onConfirm: () -> Unit = {
+            val yv = year
+            if (yv != null) {
+                this@YearMonthlyModeStats.year = Year.of(yv)
+            }
+            this@YearMonthlyModeStats.type = type
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = Dimensions.TopBarHorizontalPadding,
+                    vertical = Dimensions.TopBarVerticalPadding
+                )
+                .onKeyEvent { keyEvent ->
+                    if (keyEvent.key == Key.Enter && keyEvent.type == KeyEventType.KeyUp) {
+                        if (year != null) {
+                            onConfirm()
+                        }
+                        true
+                    } else false
+                },
+            contentAlignment = Alignment.Center
         ) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(Dimensions.StandardSpacing),
+                verticalArrangement = Arrangement.spacedBy(Dimensions.FlowRowVerticalSpacing),
+            ) {
 
             // 统计类型选择器
             StatsTypeSelector(
@@ -85,7 +109,7 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
                 onTypeChange = { type = it }
             )
 
-
+            // 年份输入框
             OutlinedTextField(
                 value = year?.toString() ?: "",
                 onValueChange = { value ->
@@ -104,20 +128,19 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
                 },
                 label = { Text("年") },
                 singleLine = true,
+                modifier = Modifier.widthIn(min = Dimensions.SelectorMinWidth, max = Dimensions.YearInputWidth),
             )
 
             val yv = year
 
-            OutlinedButton(
+            // 确认按钮
+            FilledTonalButton(
                 enabled = yv != null,
-                onClick = {
-                    if (yv != null) {
-                        this@YearMonthlyModeStats.year = Year.of(yv)
-                    }
-                    this@YearMonthlyModeStats.type = type
-                },
+                onClick = onConfirm,
+                modifier = Modifier.align(Alignment.CenterVertically),
             ) {
-                Text("确定")
+                Text("确定", fontFamily = FontLXGWNeoXiHeiScreenFamily())
+            }
             }
         }
     }

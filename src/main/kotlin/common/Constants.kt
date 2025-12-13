@@ -27,4 +27,10 @@ object Dimensions {
     val TopBarHorizontalPadding = 70.dp
     val TopBarVerticalPadding = 50.dp
     val StandardSpacing = 15.dp
+
+    // 选择器相关尺寸
+    val SelectorMinWidth = 120.dp
+    val SelectorMaxWidth = 160.dp
+    val YearInputWidth = 120.dp
+    val FlowRowVerticalSpacing = 12.dp
 }

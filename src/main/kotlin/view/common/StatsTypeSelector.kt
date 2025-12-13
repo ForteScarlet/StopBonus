@@ -1,8 +1,11 @@
 package view.common
 
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import common.Dimensions
 import view.account.stats.StatsType
 
 /**
@@ -24,7 +27,9 @@ fun StatsTypeSelector(
         onExpandedChange = onExpandedChange,
     ) {
         OutlinedTextField(
-            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+            modifier = Modifier
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                .widthIn(min = Dimensions.SelectorMinWidth, max = 180.dp),
             value = currentType.title,
             readOnly = true,
             onValueChange = { },
