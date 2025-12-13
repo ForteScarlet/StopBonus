@@ -122,7 +122,7 @@ private fun AccountHome(state: PageViewState) {
 
     val nowInstant = Instant.now(clock)
     val nowMillis = nowInstant.toEpochMilli()
-    val nowLocalDateTime = LocalDateTime.now(clock)
+    val nowLocalDateTime = LocalDateTime.ofInstant(nowInstant, zoneId)
 
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
@@ -179,9 +179,6 @@ private fun AccountHome(state: PageViewState) {
 
     val selectedEndDateMillis = endDatePickerState.selectedDateMillis
     val selectedEndDateInstant = selectedEndDateMillis?.let { Instant.ofEpochMilli(it) }
-    // val selectedEndDateTime = selectedEndDateInstant?.atZone(ZoneId.systemDefault())
-    //     ?.toLocalDate()
-    //     ?.atTime(endTimePickerState.hour, endTimePickerState.minute)
 
     var endTimePickerValue by remember { mutableStateOf<LocalTime?>(null) }
 
@@ -197,12 +194,6 @@ private fun AccountHome(state: PageViewState) {
     }
 
     val selectedEndDateTime = selectedEndDateTime()
-
-    // val endTimePickerState = rememberTimePickerState(
-    //     is24Hour = true,
-    //     initialHour = nowTime.hour,
-    //     initialMinute = nowTime.minute
-    // )
 
     var weapon by remember { mutableStateOf<WeaponView?>(null) }
     val score = remember { SliderState(value = 10f, steps = 8, valueRange = 1f..10f) }
@@ -239,7 +230,7 @@ private fun AccountHome(state: PageViewState) {
                     TextButton(onClick = {
                         startDatePickerState.selectedDateMillis = nowMillis
                         startTimePickerValue = nowLocalDateTime.toLocalTime()
-                        showSelectStartDate = false
+                        // showSelectStartDate = false
                     }) {
                         Text(
                             "现在${Emojis.CLOCK}",
