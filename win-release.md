@@ -1,12 +1,6 @@
 ```
 compose
     binaries
-        main
-          app
-            StopBonus
-                StopBonus.exe
-          exe
-          msi
         main-release
           app
             StopBonus
