@@ -1,12 +1,12 @@
 package database.entity
 
+import config.ClockProvider
 import org.jetbrains.exposed.dao.*
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.javatime.timestamp
-import java.time.Instant
 
-private fun currentInstant() = Instant.now()
+private fun currentInstant() = ClockProvider.now()
 
 abstract class BaseIntIdTable : IntIdTable {
     constructor(name: String) : super(name)

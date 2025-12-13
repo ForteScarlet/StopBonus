@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
+import common.DateTimeFormatters
 import common.Emojis
 import common.Limits
 import config.LocalAppConfig
@@ -30,7 +31,6 @@ import view.account.AccountViewPage
 import view.account.AccountViewPageSelector
 import view.account.PageViewState
 import java.time.*
-import java.time.format.DateTimeFormatter
 
 /**
  *
@@ -116,14 +116,18 @@ object AccountHomeView : AccountViewPageSelector {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AccountHome(state: PageViewState) {
-    val zoneId = LocalAppConfig.current.zoneId
-    val nowMillis = System.currentTimeMillis()
-    val nowLocalDateTime = LocalDateTime.now(zoneId)
+    val configState = LocalAppConfig.current
+    val clock = configState.clock
+    val zoneId = configState.zoneId
+
+    val nowInstant = Instant.now(clock)
+    val nowMillis = nowInstant.toEpochMilli()
+    val nowLocalDateTime = LocalDateTime.now(clock)
 
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
 
-    val nowYear = Year.now()
+    val nowYear = Year.now(clock)
 
     val startDatePickerState = rememberDatePickerState(
         initialSelectedDateMillis = null,
@@ -158,7 +162,7 @@ private fun AccountHome(state: PageViewState) {
 
     val endDatePickerState = rememberDatePickerState(
         initialSelectedDateMillis = null,
-        initialDisplayedMonthMillis = selectedStartDateMillis ?: System.currentTimeMillis(),
+        initialDisplayedMonthMillis = selectedStartDateMillis ?: nowMillis,
         yearRange = selectedStartDateTime?.let {
             it.year..nowYear.value
         } ?: 1900..nowYear.value,
@@ -222,9 +226,7 @@ private fun AccountHome(state: PageViewState) {
         // start date
         var showSelectStartDate by remember { mutableStateOf(false) }
         if (showSelectStartDate) {
-            // val nowInstant0 = Instant.now()
-            val nowTime0 = Instant.now().atZone(zoneId).toLocalDateTime()
-            // val nowTime0 =  LocalTime.now()
+            val nowTime0 = nowLocalDateTime
             val startTimePickerState = rememberTimePickerState(
                 is24Hour = true,
                 initialHour = nowTime0.hour,
@@ -235,9 +237,8 @@ private fun AccountHome(state: PageViewState) {
                 onDismissRequest = { showSelectStartDate = false },
                 dismissButton = {
                     TextButton(onClick = {
-                        val now = LocalDateTime.now()
-                        startDatePickerState.selectedDateMillis = System.currentTimeMillis()
-                        startTimePickerValue = now.toLocalTime()
+                        startDatePickerState.selectedDateMillis = nowMillis
+                        startTimePickerValue = nowLocalDateTime.toLocalTime()
                         showSelectStartDate = false
                     }) {
                         Text(
@@ -294,7 +295,7 @@ private fun AccountHome(state: PageViewState) {
 
         AnimatedVisibility(visible = selectedStartDateTime != null) {
             Text(
-                text = selectedStartDateTime?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) ?: "",
+                text = selectedStartDateTime?.let { DateTimeFormatters.formatDateTime(it) } ?: "",
                 fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                 fontSize = TextUnit(15f, TextUnitType.Sp),
                 modifier = Modifier
@@ -306,7 +307,7 @@ private fun AccountHome(state: PageViewState) {
         // end date & time
         var showEndDateTime by remember { mutableStateOf(false) }
         if (showEndDateTime) {
-            val nowTime0 = Instant.now().atZone(zoneId).toLocalDateTime()
+            val nowTime0 = nowLocalDateTime
             val endTimePickerState = rememberTimePickerState(
                 is24Hour = true,
                 initialHour = nowTime0.hour,
@@ -317,9 +318,8 @@ private fun AccountHome(state: PageViewState) {
                 onDismissRequest = { showEndDateTime = false },
                 dismissButton = {
                     TextButton(onClick = {
-                        val now = LocalDateTime.now()
-                        endDatePickerState.selectedDateMillis = System.currentTimeMillis()
-                        endTimePickerValue = now.toLocalTime()
+                        endDatePickerState.selectedDateMillis = nowMillis
+                        endTimePickerValue = nowLocalDateTime.toLocalTime()
                         showEndDateTime = false
                     }) {
                         Text(
@@ -376,7 +376,7 @@ private fun AccountHome(state: PageViewState) {
 
         AnimatedVisibility(selectedEndDateTime != null) {
             Text(
-                text = selectedEndDateTime?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) ?: "",
+                text = selectedEndDateTime?.let { DateTimeFormatters.formatDateTime(it) } ?: "",
                 fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                 fontSize = TextUnit(15f, TextUnitType.Sp),
                 modifier = Modifier

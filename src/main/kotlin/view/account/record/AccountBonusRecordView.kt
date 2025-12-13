@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import common.DateTimeFormatters
 import config.LocalAppConfig
 import database.entity.BonusRecord
 import database.entity.BonusRecordView
@@ -41,6 +42,7 @@ import view.account.PageViewState
 import view.account.SimpleAccountViewPageSelector
 import view.common.DeleteConfirmDialog
 import java.time.Duration
+import java.time.temporal.ChronoUnit
 
 
 /**
@@ -166,7 +168,9 @@ private fun ListItemRecord(
             }
         },
         supportingContent = {
-            val zoneId = LocalAppConfig.current.zoneId
+            val configState = LocalAppConfig.current
+            val zoneId = configState.zoneId
+
             val start = record.startTime.atZone(zoneId)
             val end = record.endTime.atZone(zoneId)
             val startDate = start.toLocalDate()
@@ -176,15 +180,22 @@ private fun ListItemRecord(
             val remark = record.remark
             val score = record.score
 
+            // 明确日期格式
+            val startDateDisplay = DateTimeFormatters.formatDate(startDate)
+            val startTimeDisplay = DateTimeFormatters.formatTime(startTime)
+            val endTimeDisplay = DateTimeFormatters.formatTime(endTime)
+            val daysDiff = ChronoUnit.DAYS.between(startDate, endDate)
+
             Column {
-                if (startDate == endDate) {
-                    Text("从 $startDate 的 $startTime 开始, 直到 $endTime", fontFamily = FontLXGWNeoXiHeiScreenFamily())
-                } else {
-                    Text(
-                        "从 $startDate 的 $startTime 开始, 直到 $endDate 的 $endTime",
-                        fontFamily = FontLXGWNeoXiHeiScreenFamily()
-                    )
+                val timeRangeText = when {
+                    daysDiff == 0L -> "$startDateDisplay $startTimeDisplay 开始, 直到 $endTimeDisplay"
+                    daysDiff == 1L -> "$startDateDisplay $startTimeDisplay 开始, 直到次日 $endTimeDisplay"
+                    else -> {
+                        val endDateDisplay = DateTimeFormatters.formatDate(endDate)
+                        "$startDateDisplay $startTimeDisplay 开始, 直到 $endDateDisplay $endTimeDisplay"
+                    }
                 }
+                Text(timeRangeText, fontFamily = FontLXGWNeoXiHeiScreenFamily())
                 // 评分
                 Row {
                     Text("评分: ", fontWeight = FontWeight.Bold, fontFamily = FontLXGWNeoXiHeiScreenFamily())

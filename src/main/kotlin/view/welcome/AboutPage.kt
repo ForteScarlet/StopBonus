@@ -86,7 +86,7 @@ fun AboutPage(onBack: () -> Unit) {
             // 开源地址
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    "开源地址",
+                    "项目地址",
                     fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant

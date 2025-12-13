@@ -11,10 +11,7 @@ import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
-import config.AppConfigState
-import config.BuildConfig
-import config.ConfigManager
-import config.LocalAppConfig
+import config.*
 import database.connectDatabaseOperator
 import kotlinx.coroutines.Dispatchers
 import love.forte.bonus.bonus_self_desktop.generated.resources.BTT
@@ -98,6 +95,9 @@ fun main() {
 
     // 加载应用配置
     val initialConfig = ConfigManager.load()
+
+    // 初始化全局 Clock 提供者
+    ClockProvider.initialize(initialConfig.zoneId())
 
     // 初始化数据库连接
     val databaseOp = connectDatabaseOperator(dataDir = storeAppPath(), schemaName = "bonus")
