@@ -1,12 +1,8 @@
 package view.common
 
 import FontBTTFamily
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import love.forte.bonus.bonus_self_desktop.generated.resources.Res
 import love.forte.bonus.bonus_self_desktop.generated.resources.icon_warning
 import org.jetbrains.compose.resources.painterResource
@@ -27,7 +23,7 @@ fun DeleteConfirmDialog(
     onDismiss: () -> Unit
 ) {
     AlertDialog(
-        icon = { Icon(painterResource(Res.drawable.icon_warning), "Warning") },
+        icon = { Icon(painterResource(Res.drawable.icon_warning), "警告") },
         title = { Text(title, fontFamily = FontBTTFamily()) },
         onDismissRequest = {
             if (!isDeleting) {
@@ -35,12 +31,22 @@ fun DeleteConfirmDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text("删除", color = Color.Red)
+            TextButton(
+                onClick = onConfirm,
+                enabled = !isDeleting
+            ) {
+                Text(
+                    text = if (isDeleting) "删除中..." else "删除",
+                    color = MaterialTheme.colorScheme.error
+                )
             }
         },
         dismissButton = if (!isDeleting) {
-            { TextButton(onClick = onDismiss) { Text("取消") } }
+            {
+                TextButton(onClick = onDismiss) {
+                    Text("取消", color = MaterialTheme.colorScheme.primary)
+                }
+            }
         } else null
     )
 }

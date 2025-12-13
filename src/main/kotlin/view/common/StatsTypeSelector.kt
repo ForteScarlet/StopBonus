@@ -1,7 +1,7 @@
 package view.common
 
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import view.account.stats.StatsType
 
@@ -24,10 +24,10 @@ fun StatsTypeSelector(
         onExpandedChange = onExpandedChange,
     ) {
         OutlinedTextField(
-            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable),
+            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
             value = currentType.title,
             readOnly = true,
-            onValueChange = { onExpandedChange(true) },
+            onValueChange = { },
             label = { Text("统计类型") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             colors = ExposedDropdownMenuDefaults.textFieldColors(),

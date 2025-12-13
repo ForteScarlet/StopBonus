@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,18 +21,20 @@ import androidx.compose.ui.unit.dp
  *
  * @param icon 图标资源
  * @param message 提示消息
+ * @param modifier 外层 Box 的修饰符，默认为 fillMaxSize
  * @param iconSize 图标大小
- * @param iconTint 图标颜色
+ * @param iconTint 图标颜色，默认使用主题的 onSurfaceVariant 色
  */
 @Composable
 fun EmptyState(
     icon: Painter,
     message: String,
-    iconSize: Dp = 300.dp,
-    iconTint: Color = Color.LightGray.copy(alpha = .25f)
+    modifier: Modifier = Modifier.fillMaxSize(),
+    iconSize: Dp = 200.dp,
+    iconTint: Color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
 ) {
     Box(
-        Modifier.fillMaxSize(),
+        modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -41,7 +44,12 @@ fun EmptyState(
                 modifier = Modifier.size(iconSize),
                 tint = iconTint
             )
-            Text(message, fontFamily = FontLXGWNeoXiHeiScreenFamily())
+            Text(
+                text = message,
+                fontFamily = FontLXGWNeoXiHeiScreenFamily(),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
