@@ -9,6 +9,7 @@ plugins {
     // https://conveyor.hydraulic.dev/14.0/configs/maven-gradle/#gradle
     //id("dev.hydraulic.conveyor") version "1.9"
     idea
+
 }
 
 val appName = "StopBonus"
@@ -75,6 +76,7 @@ dependencies {
 // BuildConfig 生成任务
 val buildConfigDir = layout.buildDirectory.dir("generated/source/buildConfig/main/kotlin")
 
+// TODO https://github.com/yshrsmz/BuildKonfig
 val generateBuildConfig by tasks.registering {
     val outputDir = buildConfigDir.get().asFile
     outputs.dir(outputDir)

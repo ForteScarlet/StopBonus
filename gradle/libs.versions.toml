@@ -15,6 +15,10 @@ exposed = "0.57.0" # TODO 1.0.0-rc-3
 #koalaPlot = "0.5.3"
 koalaPlot = "0.7.1"
 
+# https://www.hydraulic.dev/
+# https://github.com/hydraulic-software/conveyor/tree/master/gradle-plugin
+# TODO
+conveyor = "1.12"
 
 [libraries]
 # logback
@@ -54,3 +58,4 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+conveyor = { id = "dev.hydraulic.conveyor", version.ref = "conveyor" }
