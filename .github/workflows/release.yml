@@ -29,6 +29,34 @@ jobs:
       - name: Package distributables for ${{ runner.os }}
         run: gradle packageDistributionForCurrentOS --info --stacktrace --warning-mode all
 
+      - name: Create portable zip archive (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $VERSION = $env:GITHUB_REF_NAME -replace '^v',''
+          $appDir = "build/compose/binaries/main-release/app"
+          if (Test-Path "$appDir/StopBonus") {
+            Compress-Archive -Path "$appDir/StopBonus" -DestinationPath "$appDir/StopBonus-windows-${VERSION}.zip"
+            Write-Host "Created: $appDir/StopBonus-windows-${VERSION}.zip"
+          } else {
+            Write-Host "Warning: StopBonus directory not found at $appDir/StopBonus"
+            exit 1
+          }
+
+      - name: Create portable zip archive (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          APP_DIR="build/compose/binaries/main-release/app"
+          if [ -d "$APP_DIR/StopBonus.app" ]; then
+            cd "$APP_DIR"
+            zip -r "StopBonus-macos-${VERSION}.zip" "StopBonus.app"
+            echo "Created: $APP_DIR/StopBonus-macos-${VERSION}.zip"
+          else
+            echo "Warning: StopBonus.app not found at $APP_DIR/StopBonus.app"
+            exit 1
+          fi
+
       - name: Upload logs
         uses: actions/upload-artifact@v4
         if: ${{ always() }}
@@ -44,7 +72,7 @@ jobs:
           retention-days: 1
           path: |
             build/compose/binaries/main-release/*/StopBonus-*.*
-            build/compose/binaries/main-release/app/StopBonus.app
+            build/compose/binaries/main-release/app/StopBonus-*.zip
             
 
 # mac: build/compose/binaries/main-release/app/StopBonus.app
@@ -76,7 +104,7 @@ jobs:
       - name: Create Github Release
         uses: softprops/action-gh-release@v2
         with:
-          files: 'distributions/*/StopBonus-*.*'
+          files: 'distributions/**/StopBonus-*.*'
 #          files: StopBonus-${{ github.ref_name }}.exe
           token: ${{ secrets.PUSH_TOKEN }}
           generate_release_notes: true
