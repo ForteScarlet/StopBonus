@@ -1,7 +1,6 @@
 package view.account.weapon
 
 import FontBTTFamily
-import FontLXGWNeoXiHeiScreenFamily
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.desktop.ui.tooling.preview.Preview
@@ -16,16 +15,11 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import database.entity.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import love.forte.bonus.bonus_self_desktop.generated.resources.Res
-import love.forte.bonus.bonus_self_desktop.generated.resources.icon_add
-import love.forte.bonus.bonus_self_desktop.generated.resources.icon_delete
-import love.forte.bonus.bonus_self_desktop.generated.resources.icon_face
-import love.forte.bonus.bonus_self_desktop.generated.resources.icon_warning
+import love.forte.bonus.bonus_self_desktop.generated.resources.*
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
@@ -125,7 +119,12 @@ private inline fun NewWeapon(
 ) {
     var creating by remember { mutableStateOf(false) }
 
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true) { it == SheetValue.Hidden }
+    // 允许展开（禁止“部分展开”由 skipPartiallyExpanded 控制）
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    // 进入组合后立即展开以显示 sheet
+    LaunchedEffect(Unit) {
+        sheetState.show()
+    }
     val scrollable = rememberScrollState()
 
     ModalBottomSheet(
