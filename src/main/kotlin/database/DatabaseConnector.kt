@@ -17,10 +17,18 @@ import kotlin.io.path.Path
 import kotlin.io.path.div
 import kotlin.io.path.pathString
 
+/**
+ * 数据库操作封装类
+ *
+ * 提供事务管理和数据库操作的统一入口
+ */
 class DatabaseOperator(val database: Database) {
     fun close() {
     }
 
+    /**
+     * 在挂起事务中执行数据库操作（用于协程环境）
+     */
     suspend inline fun <T> inSuspendedTransaction(
         context: CoroutineContext? = null,
         transactionIsolation: Int? = null,
@@ -31,6 +39,9 @@ class DatabaseOperator(val database: Database) {
         transactionIsolation = transactionIsolation,
     ) { statement() }
 
+    /**
+     * 在同步事务中执行数据库操作
+     */
     inline fun <T> inTransaction(
         transactionIsolation: Int = database.transactionManager.defaultIsolationLevel,
         readOnly: Boolean = database.transactionManager.defaultReadOnly,
@@ -47,6 +58,15 @@ class DatabaseOperator(val database: Database) {
 private val DEFAULT_DATA_DIR = Path("./data")
 private const val DATA_FILE_NAME = "bonus.d"
 
+/**
+ * 创建数据库连接操作器
+ *
+ * 使用 HikariCP 连接池和 H2 嵌入式数据库
+ *
+ * @param dataDir 数据存储目录
+ * @param schemaName 数据库 schema 名称
+ * @return 数据库操作器实例
+ */
 fun connectDatabaseOperator(dataDir: Path = DEFAULT_DATA_DIR, schemaName: String): DatabaseOperator {
     val schema = Schema(schemaName)
     // val dialect = H2Dialect()
@@ -92,6 +112,9 @@ private inline fun hikariConfig(block: HikariConfig.() -> Unit): HikariConfig = 
 }
 
 
+/**
+ * 初始化数据库 schema 和表结构
+ */
 fun Database.init(schema: Schema) {
     transaction(this) {
         if (!schema.exists()) {

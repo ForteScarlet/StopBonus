@@ -27,6 +27,15 @@ import kotlin.io.path.Path
 
 private const val APPID = "love.forte.bonus.bonus_self_desktop"
 
+/**
+ * 获取应用数据存储路径
+ *
+ * 优先级：
+ * 1. DEBUG 模式下使用 ./data
+ * 2. Windows: %LOCALAPPDATA%/StopBonus/data
+ * 3. 其他: $HOME/StopBonus/data
+ * 4. 默认: ./data
+ */
 fun storeAppPath(): Path {
     if (System.getenv("DEBUG").toBoolean() || System.getProperty("debug").toBoolean()) {
         return Path("./data")
@@ -68,23 +77,21 @@ fun FontLXGWNeoXiHeiScreenFamily() = FontFamily(FontLXGWNeoXiHeiScreen())
 
 private val logger = LoggerFactory.getLogger("MAIN")
 
-// private fun checkInstance(handler: MessageHandler) {
-//     var alreadyRunning = false
-//     try {
-//         JUnique.acquireLock(APPID, handler)
-//         alreadyRunning = false
-//     } catch (e: AlreadyLockedException) {
-//         alreadyRunning = true
-//     }
-//
-//     JUnique.releaseLock(APPID)
-// }
-
+/**
+ * 应用程序入口点
+ *
+ * 初始化流程：
+ * 1. 设置全局异常处理器
+ * 2. 连接 H2 数据库
+ * 3. 启动 Compose Desktop 窗口
+ */
 fun main() {
+    // 设置全局未捕获异常处理器
     Thread.setDefaultUncaughtExceptionHandler { t, e ->
         logger.error("UncaughtExceptionHandler on Thread[{}]", t, e)
     }
 
+    // 初始化数据库连接
     val databaseOp = connectDatabaseOperator(dataDir = storeAppPath(), schemaName = "bonus")
 
     application {

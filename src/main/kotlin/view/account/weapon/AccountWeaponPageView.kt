@@ -31,6 +31,8 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import view.account.PageViewState
 import view.account.SimpleAccountViewPageSelector
+import view.common.DeleteConfirmDialog
+import view.common.EmptyState
 
 
 /**
@@ -222,21 +224,10 @@ private inline fun NewWeapon(
 
 @Composable
 private fun ShowEmpty() {
-    Box(
-        Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                painterResource(Res.drawable.icon_warning),
-                contentDescription = "啥也没有",
-                modifier = Modifier.size(300.dp),
-                tint = Color.LightGray.copy(alpha = .25f)
-            )
-
-            Text("欲善其事必利其器", fontFamily = FontLXGWNeoXiHeiScreenFamily())
-        }
-    }
+    EmptyState(
+        icon = painterResource(Res.drawable.icon_warning),
+        message = "欲善其事必利其器"
+    )
 }
 
 
@@ -274,44 +265,28 @@ private fun LazyItemScope.ListItemWeapon(
         var deleteConfirm by remember { mutableStateOf(false) }
         if (deleteConfirm) {
             var onDeleting by remember(deleteConfirm) { mutableStateOf(false) }
-            AlertDialog(
-                icon = { Icon(painterResource(Res.drawable.icon_warning), "Warning") },
-                title = { Text("删除「${weapon.name}」?", fontFamily = FontBTTFamily()) },
-                onDismissRequest = {
-                    if (!onDeleting) {
-                        deleteConfirm = false
-                    }
-                },
-                confirmButton = {
-                    TextButton(onClick = {
-                        onDeleting = true
-                        // do delete
-                        scope.launch {
-                            val name = weapon.name
-                            try {
-                                state.accountState.database.inSuspendedTransaction {
-                                    Weapons.deleteWhere(limit = 1) { id eq weapon.id }
-                                }
-
-                                scope.launch {
-                                    state.snackbarHostState.showSnackbar("「$name」已删除", withDismissAction = true)
-                                }
-
-                                onDelete(weapon)
-                            } finally {
-                                deleteConfirm = false
-                                onDeleting = false
+            DeleteConfirmDialog(
+                title = "删除「${weapon.name}」?",
+                isDeleting = onDeleting,
+                onConfirm = {
+                    onDeleting = true
+                    scope.launch {
+                        val name = weapon.name
+                        try {
+                            state.accountState.database.inSuspendedTransaction {
+                                Weapons.deleteWhere(limit = 1) { id eq weapon.id }
                             }
+                            scope.launch {
+                                state.snackbarHostState.showSnackbar("「$name」已删除", withDismissAction = true)
+                            }
+                            onDelete(weapon)
+                        } finally {
+                            deleteConfirm = false
+                            onDeleting = false
                         }
-                    }) {
-                        Text("删除", color = Color.Red)
                     }
                 },
-                dismissButton = if (!onDeleting) {
-                    {
-                        TextButton(onClick = { deleteConfirm = false }) { Text("取消") }
-                    }
-                } else null
+                onDismiss = { deleteConfirm = false }
             )
         }
 

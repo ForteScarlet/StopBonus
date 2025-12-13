@@ -18,7 +18,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import database.entity.BonusRecord
@@ -30,7 +29,6 @@ import kotlinx.coroutines.launch
 import love.forte.bonus.bonus_self_desktop.generated.resources.Res
 import love.forte.bonus.bonus_self_desktop.generated.resources.icon_date_range
 import love.forte.bonus.bonus_self_desktop.generated.resources.icon_delete
-import love.forte.bonus.bonus_self_desktop.generated.resources.icon_warning
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.exposed.dao.with
 import org.jetbrains.exposed.sql.SortOrder
@@ -38,6 +36,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import view.account.PageViewState
 import view.account.SimpleAccountViewPageSelector
+import view.common.DeleteConfirmDialog
 import java.time.Duration
 import java.time.ZoneId
 
@@ -127,46 +126,30 @@ private fun ListItemRecord(
     var deleteConfirm by remember { mutableStateOf(false) }
     if (deleteConfirm) {
         var onDeleting by remember(deleteConfirm) { mutableStateOf(false) }
-        AlertDialog(
-            icon = { Icon(painterResource(Res.drawable.icon_warning), "Warning") },
-            title = { Text("删除这条奖励记录?", fontFamily = FontBTTFamily()) },
-            onDismissRequest = {
-                if (!onDeleting) {
-                    deleteConfirm = false
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    onDeleting = true
-                    // do delete
-                    scope.launch {
-                        try {
-                            state.accountState.database.inSuspendedTransaction {
-                                BonusRecords.deleteWhere(limit = 1) { BonusRecords.id eq record.id }
-                            }
-
-                            scope.launch {
-                                state.snackbarHostState.showSnackbar(
-                                    "奖励记录已删除",
-                                    withDismissAction = true
-                                )
-                            }
-
-                            onDelete(record)
-                        } finally {
-                            deleteConfirm = false
-                            onDeleting = false
+        DeleteConfirmDialog(
+            title = "删除这条奖励记录?",
+            isDeleting = onDeleting,
+            onConfirm = {
+                onDeleting = true
+                scope.launch {
+                    try {
+                        state.accountState.database.inSuspendedTransaction {
+                            BonusRecords.deleteWhere(limit = 1) { BonusRecords.id eq record.id }
                         }
+                        scope.launch {
+                            state.snackbarHostState.showSnackbar(
+                                "奖励记录已删除",
+                                withDismissAction = true
+                            )
+                        }
+                        onDelete(record)
+                    } finally {
+                        deleteConfirm = false
+                        onDeleting = false
                     }
-                }) {
-                    Text("删除", color = Color.Red)
                 }
             },
-            dismissButton = if (!onDeleting) {
-                {
-                    TextButton(onClick = { deleteConfirm = false }) { Text("取消") }
-                }
-            } else null
+            onDismiss = { deleteConfirm = false }
         )
     }
 

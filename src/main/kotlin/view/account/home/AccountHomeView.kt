@@ -16,6 +16,8 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
+import common.Emojis
+import common.Limits
 import database.entity.*
 import kotlinx.coroutines.launch
 import love.forte.bonus.bonus_self_desktop.generated.resources.Res
@@ -28,9 +30,6 @@ import view.account.AccountViewPageSelector
 import view.account.PageViewState
 import java.time.*
 import java.time.format.DateTimeFormatter
-
-private const val EMOJI_ANGRY = "\uD83D\uDE21"
-private const val EMOJI_CLOCK = "\u23F1"
 
 /**
  *
@@ -240,7 +239,7 @@ private fun AccountHome(state: PageViewState) {
                         showSelectStartDate = false
                     }) {
                         Text(
-                            "现在$EMOJI_CLOCK",
+                            "现在${Emojis.CLOCK}",
                             fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                         )
                     }
@@ -251,7 +250,7 @@ private fun AccountHome(state: PageViewState) {
                         showSelectStartDate = false
                     }) {
                         Text(
-                            "就是这时$EMOJI_ANGRY",
+                            "就是这时${Emojis.ANGRY}",
                             fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                         )
                     }
@@ -262,7 +261,7 @@ private fun AccountHome(state: PageViewState) {
                         state = startDatePickerState,
                         title = {
                             Text(
-                                "什么时候开始打的$EMOJI_ANGRY",
+                                "什么时候开始打的${Emojis.ANGRY}",
                                 fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                                 modifier = Modifier.padding(PaddingValues(start = 24.dp, end = 12.dp, top = 16.dp))
                             )
@@ -284,7 +283,7 @@ private fun AccountHome(state: PageViewState) {
             onClick = { showSelectStartDate = true }
         ) {
             Text(
-                "什么时候开始打的$EMOJI_ANGRY$EMOJI_ANGRY",
+                "什么时候开始打的${Emojis.ANGRY}${Emojis.ANGRY}",
                 fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                 fontSize = TextUnit(50f, TextUnitType.Sp),
                 modifier = Modifier
@@ -322,7 +321,7 @@ private fun AccountHome(state: PageViewState) {
                         showEndDateTime = false
                     }) {
                         Text(
-                            "现在$EMOJI_CLOCK",
+                            "现在${Emojis.CLOCK}",
                             fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                         )
                     }
@@ -333,7 +332,7 @@ private fun AccountHome(state: PageViewState) {
                         showEndDateTime = false
                     }) {
                         Text(
-                            "就是这时$EMOJI_ANGRY",
+                            "就是这时${Emojis.ANGRY}",
                             fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                         )
                     }
@@ -344,7 +343,7 @@ private fun AccountHome(state: PageViewState) {
                         state = endDatePickerState,
                         title = {
                             Text(
-                                "什么时候打完的$EMOJI_ANGRY",
+                                "什么时候打完的${Emojis.ANGRY}",
                                 fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                                 modifier = Modifier.padding(PaddingValues(start = 24.dp, end = 12.dp, top = 16.dp))
                             )
@@ -365,7 +364,7 @@ private fun AccountHome(state: PageViewState) {
                 onClick = { showEndDateTime = true }
             ) {
                 Text(
-                    "什么时候打完的$EMOJI_ANGRY$EMOJI_ANGRY",
+                    "什么时候打完的${Emojis.ANGRY}${Emojis.ANGRY}",
                     fontFamily = FontLXGWNeoXiHeiScreenFamily(),
                     fontSize = TextUnit(50f, TextUnitType.Sp),
                     modifier = Modifier
@@ -401,10 +400,10 @@ private fun AccountHome(state: PageViewState) {
             // 备注
             OutlinedTextField(
                 value = remarkValue,
-                onValueChange = { remarkValue = if (it.length <= 500) it else it.substring(0, 500) },
+                onValueChange = { remarkValue = if (it.length <= Limits.REMARK_MAX_LENGTH) it else it.substring(0, Limits.REMARK_MAX_LENGTH) },
                 label = { Text("备注") },
                 placeholder = { Text("备注") },
-                supportingText = { Text("${remarkValue.length} / 500") },
+                supportingText = { Text("${remarkValue.length} / ${Limits.REMARK_MAX_LENGTH}") },
             )
         }
 
@@ -466,7 +465,7 @@ private fun AccountHome(state: PageViewState) {
                 if (duration != null) {
                     if (duration.isNegative) {
                         Text(
-                            "时光回溯是吧！$EMOJI_ANGRY",
+                            "时光回溯是吧！${Emojis.ANGRY}",
                             modifier = Modifier
                                 .align(Alignment.CenterVertically),
                             fontFamily = FontBTTFamily(),
@@ -482,7 +481,7 @@ private fun AccountHome(state: PageViewState) {
                         )
                     } else {
                         Text(
-                            "就打就打$EMOJI_ANGRY$EMOJI_ANGRY$EMOJI_ANGRY",
+                            "就打就打${Emojis.ANGRY}${Emojis.ANGRY}${Emojis.ANGRY}",
                             modifier = Modifier
                                 .align(Alignment.CenterVertically),
                             fontFamily = FontBTTFamily(),
@@ -535,7 +534,7 @@ private inline fun WeaponSelector(
                 textAlign = TextAlign.Center
             ),
             placeholder = { Text("选择武器") },
-            label = { Text("用的什么武器$EMOJI_ANGRY") },
+            label = { Text("用的什么武器${Emojis.ANGRY}") },
             singleLine = true,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
         )

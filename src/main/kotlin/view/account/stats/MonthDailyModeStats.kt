@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import common.Dimensions
 import database.entity.BonusRecord
 import database.entity.BonusRecords
 import io.github.koalaplot.core.ChartLayout
@@ -32,6 +33,7 @@ import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
 import org.jetbrains.exposed.sql.and
 import view.account.PageViewState
 import view.account.record.format
+import view.common.StatsTypeSelector
 import java.time.*
 import kotlin.math.abs
 import kotlin.math.max
@@ -68,42 +70,21 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
         var typeExpanded by remember { mutableStateOf(false) }
 
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 70.dp, vertical = 50.dp),
+            modifier = Modifier.fillMaxWidth().padding(
+                horizontal = Dimensions.TopBarHorizontalPadding,
+                vertical = Dimensions.TopBarVerticalPadding
+            ),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(15.dp, Alignment.CenterHorizontally)
         ) {
 
-            ExposedDropdownMenuBox(
+            // 统计类型选择器
+            StatsTypeSelector(
+                currentType = type,
                 expanded = typeExpanded,
                 onExpandedChange = { typeExpanded = it },
-            ) {
-                OutlinedTextField(
-                    // modifier = Modifier.menuAnchor(),
-                    modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable),
-                    value = type.title,
-                    readOnly = true,
-                    onValueChange = { typeExpanded = true },
-                    label = { Text("统计类型") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = typeExpanded) },
-                    colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                )
-
-                ExposedDropdownMenu(
-                    expanded = typeExpanded,
-                    onDismissRequest = { typeExpanded = false },
-                ) {
-                    for (t in StatsType.entries) {
-                        DropdownMenuItem(
-                            text = { Text(t.title) },
-                            onClick = {
-                                type = t
-                                typeExpanded = false
-                            },
-                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-                        )
-                    }
-                }
-            }
+                onTypeChange = { type = it }
+            )
 
 
             OutlinedTextField(
