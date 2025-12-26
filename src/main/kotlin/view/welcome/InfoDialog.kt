@@ -8,13 +8,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import config.BuildConfig
+import view.common.StopBonusTextButton
 
 /**
  * 应用信息对话框
@@ -68,7 +68,7 @@ fun InfoDialog(onDismiss: () -> Unit) {
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) {
+            StopBonusTextButton(onClick = onDismiss) {
                 Text("确定", fontFamily = FontLXGWNeoXiHeiScreenFamily())
             }
         }

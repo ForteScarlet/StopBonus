@@ -27,6 +27,7 @@ import view.account.PageViewState
 import view.account.SimpleAccountViewPageSelector
 import view.common.DeleteConfirmDialog
 import view.common.EmptyState
+import view.common.StopBonusOutlinedButton
 
 
 /**
@@ -169,7 +170,7 @@ private inline fun NewWeapon(
             Row(
                 horizontalArrangement = Arrangement.spacedBy(10.dp, alignment = Alignment.CenterHorizontally)
             ) {
-                OutlinedButton(
+                StopBonusOutlinedButton(
                     onClick = {
                         onDismiss()
                     }
@@ -177,7 +178,7 @@ private inline fun NewWeapon(
                     Text("取消")
                 }
 
-                OutlinedButton(
+                StopBonusOutlinedButton(
                     enabled = !creating && name.isNotBlank(),
                     onClick = {
                         creating = true
@@ -187,7 +188,7 @@ private inline fun NewWeapon(
                                 state.snackbarHostState.showSnackbar("武器名不可为空", withDismissAction = true)
                             }
                             creating = false
-                            return@OutlinedButton
+                            return@StopBonusOutlinedButton
                         }
 
                         scope.launch {

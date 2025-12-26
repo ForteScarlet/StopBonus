@@ -1,5 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="MainKt" type="JetRunConfigurationType" nameIsGenerated="true">
+  <configuration default="false" name="Run Main Debug" type="JetRunConfigurationType">
+    <envs>
+      <env name="DEBUG" value="true" />
+    </envs>
     <option name="MAIN_CLASS_NAME" value="MainKt" />
     <module name="bonus-self-desktop.main" />
     <shortenClasspath name="NONE" />

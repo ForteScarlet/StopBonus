@@ -34,7 +34,7 @@ fun DeleteConfirmDialog(
             }
         },
         confirmButton = {
-            TextButton(
+            StopBonusTextButton(
                 onClick = onConfirm,
                 enabled = !isDeleting,
                 colors = ButtonDefaults.textButtonColors(
@@ -55,7 +55,7 @@ fun DeleteConfirmDialog(
         },
         dismissButton = if (!isDeleting) {
             {
-                TextButton(
+                StopBonusTextButton(
                     onClick = onDismiss,
                     colors = ButtonDefaults.textButtonColors(
                         contentColor = MaterialTheme.colorScheme.primary

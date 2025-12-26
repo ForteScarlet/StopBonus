@@ -13,6 +13,8 @@ import config.LocalAppConfig
 import love.forte.bonus.bonus_self_desktop.generated.resources.Res
 import love.forte.bonus.bonus_self_desktop.generated.resources.icon_arrow_back
 import org.jetbrains.compose.resources.painterResource
+import view.common.StopBonusFilledTonalButton
+import view.common.StopBonusTextButton
 
 /**
  * 配置页面
@@ -110,13 +112,13 @@ fun ConfigPage(onBack: () -> Unit) {
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(onClick = onBack) {
+                StopBonusTextButton(onClick = onBack) {
                     Text("取消", fontFamily = FontLXGWNeoXiHeiScreenFamily())
                 }
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                FilledTonalButton(onClick = {
+                StopBonusFilledTonalButton(onClick = {
                     configState.updateTimezone(selectedTimezone)
                     onBack()
                 }) {

@@ -30,6 +30,8 @@ import org.jetbrains.exposed.sql.SizedCollection
 import view.account.AccountViewPage
 import view.account.AccountViewPageSelector
 import view.account.PageViewState
+import view.common.StopBonusElevatedButton
+import view.common.StopBonusTextButton
 import java.time.*
 
 /**
@@ -236,7 +238,7 @@ private fun AccountHome(state: PageViewState) {
             DatePickerDialog(
                 onDismissRequest = { showSelectStartDate = false },
                 dismissButton = {
-                    TextButton(onClick = {
+                    StopBonusTextButton(onClick = {
                         startDatePickerState.selectedDateMillis = nowMillis
                         startTimePickerValue = nowLocalDateTime.toLocalTime()
                         showSelectStartDate = false
@@ -248,7 +250,7 @@ private fun AccountHome(state: PageViewState) {
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = {
+                    StopBonusTextButton(onClick = {
                         startTimePickerValue = LocalTime.of(startTimePickerState.hour, startTimePickerState.minute)
                         showSelectStartDate = false
                     }) {
@@ -280,7 +282,7 @@ private fun AccountHome(state: PageViewState) {
 
         }
 
-        TextButton(
+        StopBonusTextButton(
             modifier = Modifier.fillMaxWidth()
                 .align(Alignment.CenterHorizontally),
             onClick = { showSelectStartDate = true }
@@ -317,7 +319,7 @@ private fun AccountHome(state: PageViewState) {
             DatePickerDialog(
                 onDismissRequest = { showEndDateTime = false },
                 dismissButton = {
-                    TextButton(onClick = {
+                    StopBonusTextButton(onClick = {
                         endDatePickerState.selectedDateMillis = nowMillis
                         endTimePickerValue = nowLocalDateTime.toLocalTime()
                         showEndDateTime = false
@@ -329,7 +331,7 @@ private fun AccountHome(state: PageViewState) {
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = {
+                    StopBonusTextButton(onClick = {
                         endTimePickerValue = LocalTime.of(endTimePickerState.hour, endTimePickerState.minute)
                         showEndDateTime = false
                     }) {
@@ -360,7 +362,7 @@ private fun AccountHome(state: PageViewState) {
         }
 
         AnimatedVisibility(selectedStartDateMillis != null) {
-            TextButton(
+            StopBonusTextButton(
                 modifier = Modifier.fillMaxWidth()
                     .align(Alignment.CenterHorizontally),
                 onClick = { showEndDateTime = true }
@@ -412,7 +414,7 @@ private fun AccountHome(state: PageViewState) {
         var recording by remember { mutableStateOf(false) }
 
         AnimatedVisibility(selectedStartDateTime != null && selectedEndDateTime != null) {
-            ElevatedButton(
+            StopBonusElevatedButton(
                 enabled = !recording && duration != null && duration.isPositive(),
                 modifier = Modifier.fillMaxWidth()
                     .align(Alignment.CenterHorizontally),

@@ -13,6 +13,8 @@ import config.BuildConfig
 import love.forte.bonus.bonus_self_desktop.generated.resources.Res
 import love.forte.bonus.bonus_self_desktop.generated.resources.icon_info
 import org.jetbrains.compose.resources.painterResource
+import view.common.StopBonusElevatedButton
+import view.common.StopBonusOutlinedButton
 
 /**
  * 欢迎区域导航容器
@@ -101,7 +103,7 @@ private fun WelcomeHomePage(
                 horizontalArrangement = Arrangement.spacedBy(32.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                ElevatedButton(
+                StopBonusElevatedButton(
                     onClick = onEnter,
                     modifier = Modifier.size(width = 160.dp, height = 60.dp)
                 ) {
@@ -112,7 +114,7 @@ private fun WelcomeHomePage(
                     )
                 }
 
-                OutlinedButton(
+                StopBonusOutlinedButton(
                     onClick = onConfig,
                     modifier = Modifier.size(width = 160.dp, height = 60.dp)
                 ) {

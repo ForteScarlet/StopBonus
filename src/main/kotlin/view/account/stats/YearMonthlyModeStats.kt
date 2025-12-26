@@ -37,6 +37,7 @@ import org.jetbrains.exposed.sql.javatime.year
 import view.account.PageViewState
 import view.account.record.format
 import view.common.StatsTypeSelector
+import view.common.StopBonusFilledTonalButton
 import java.time.*
 import java.time.format.TextStyle
 import java.util.*
@@ -134,7 +135,7 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
             val yv = year
 
             // 确认按钮
-            FilledTonalButton(
+            StopBonusFilledTonalButton(
                 enabled = yv != null,
                 onClick = onConfirm,
                 modifier = Modifier.align(Alignment.CenterVertically),

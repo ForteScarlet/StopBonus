@@ -25,6 +25,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import view.AppState
+import view.common.StopBonusElevatedButton
 
 class LoginState(
     val appState: AppState,
@@ -174,7 +175,7 @@ private inline fun AccountList(
                                         horizontalArrangement = Arrangement.SpaceEvenly
                                     ) {
                                         if (!isInDeleteConfirm) {
-                                            ElevatedButton(
+                                            StopBonusElevatedButton(
                                                 onClick = {
                                                     onSelect(item)
                                                 },
@@ -183,7 +184,7 @@ private inline fun AccountList(
                                             }
                                         }
 
-                                        ElevatedButton(
+                                        StopBonusElevatedButton(
                                             onClick = {
                                                 if (!isInDeleteConfirm) {
                                                     inDeleteConfirm = true

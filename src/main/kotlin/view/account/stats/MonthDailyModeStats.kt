@@ -37,6 +37,7 @@ import view.account.PageViewState
 import view.account.record.format
 import view.common.MonthSelector
 import view.common.StatsTypeSelector
+import view.common.StopBonusFilledTonalButton
 import java.time.Duration
 import java.time.LocalDate
 import java.time.YearMonth
@@ -163,7 +164,7 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
             val mv = month
 
             // 确认按钮
-            FilledTonalButton(
+            StopBonusFilledTonalButton(
                 enabled = yv != null && mv != null,
                 onClick = onConfirm,
                 modifier = Modifier.align(Alignment.CenterVertically),
