@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.buildConfig)
     // https://conveyor.hydraulic.dev/14.0/configs/maven-gradle/#gradle
     //id("dev.hydraulic.conveyor") version "1.9"
     idea
@@ -72,45 +73,15 @@ dependencies {
     // implementation(libs.junique)
 }
 
-// BuildConfig 生成任务
-val buildConfigDir = layout.buildDirectory.dir("generated/source/buildConfig/main/kotlin")
-
-val generateBuildConfig by tasks.registering {
-    val outputDir = buildConfigDir.get().asFile
-    outputs.dir(outputDir)
-
-    doLast {
-        val buildConfigFile = File(outputDir, "config/BuildConfig.kt")
-        buildConfigFile.parentFile.mkdirs()
-        buildConfigFile.writeText(
-            """
-            package config
-
-            /**
-             * 编译时生成的构建配置
-             *
-             * 由 Gradle 在编译时自动生成，请勿手动修改
-             */
-            object BuildConfig {
-                const val VERSION = "$appVersion"
-                const val APP_NAME = "$appName"
-                const val GITHUB_URL = "https://github.com/ForteScarlet/StopBonus"
-            }
-            """.trimIndent()
-        )
+buildConfig {
+    packageName("config")
+    useKotlinOutput {
+        internalVisibility = true
     }
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    dependsOn(generateBuildConfig)
-}
-
-kotlin {
-    sourceSets {
-        main {
-            kotlin.srcDir(buildConfigDir)
-        }
-    }
+    documentation.set("编译时生成的构建配置, 编译时自动生成，请勿手动修改")
+    buildConfigField("VERSION", appVersion)
+    buildConfigField("APP_NAME", appName)
+    buildConfigField("GITHUB_URL", "https://github.com/ForteScarlet/StopBonus")
 }
 
 compose.resources {
@@ -129,7 +100,6 @@ compose.desktop {
     application {
         mainClass = "MainKt"
         jvmArgs += listOf(
-            "-server",
             "-XX:ErrorFile=.logs/hs_err.log",
             "-XX:-HeapDumpOnOutOfMemoryError",
             "-XX:HeapDumpPath=.logs/dump.hprof",
