@@ -1,9 +1,5 @@
 @file:Suppress("FunctionName")
 
-import androidx.compose.material.Colors
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Shapes
-import androidx.compose.material.Typography
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontFamily
@@ -21,6 +17,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.slf4j.LoggerFactory
 import view.App
 import view.AppState
+import view.common.StopBonusTheme
 import view.welcome.WelcomeNavHost
 import java.awt.Toolkit
 import java.nio.file.Path
@@ -104,7 +101,6 @@ fun main() {
 
     application {
         val scope = rememberCoroutineScope { Dispatchers.Default }
-        val materialThemeState = rememberMaterialThemeState()
         val configState = remember { AppConfigState(initialConfig) }
 
         // 导航状态
@@ -164,11 +160,7 @@ fun main() {
             }
 
             CompositionLocalProvider(LocalAppConfig provides configState) {
-                MaterialTheme(
-                    colors = materialThemeState.colors,
-                    typography = materialThemeState.typography,
-                    shapes = materialThemeState.shapes
-                ) {
+                StopBonusTheme {
                     if (showWelcome) {
                         WelcomeNavHost(
                             onEnterApp = { showWelcome = false }
@@ -178,7 +170,6 @@ fun main() {
                             state = remember {
                                 AppState(
                                     winState,
-                                    materialThemeState,
                                     scope,
                                     databaseOp
                                 )
@@ -190,58 +181,5 @@ fun main() {
             }
         }
 
-    }
-}
-
-@Suppress("MemberVisibilityCanBePrivate", "unused")
-class MaterialThemeState(
-    colorsState: MutableState<Colors>,
-    typographyState: MutableState<Typography>,
-    shapesState: MutableState<Shapes>,
-) {
-    var colors: Colors by colorsState
-    var typography: Typography by typographyState
-    var shapes: Shapes by shapesState
-}
-
-@Composable
-private fun newTypography(): Typography {
-    val fontBTT = FontFamily(FontBTT()) // , SystemFont("serif")
-    val fontLXGW = FontFamily(FontLXGWNeoXiHeiScreen())
-    // val family = FontFamily(FontBTT(), FontLXGWNeoXiHeiScreen())
-    val def = MaterialTheme.typography
-    return def.copy(
-        h1 = def.h1.copy(fontFamily = fontBTT),
-        h2 = def.h2.copy(fontFamily = fontBTT),
-        h3 = def.h3.copy(fontFamily = fontBTT),
-        h4 = def.h4.copy(fontFamily = fontLXGW),
-        h5 = def.h5.copy(fontFamily = fontLXGW),
-        h6 = def.h6.copy(fontFamily = fontLXGW),
-        subtitle1 = def.subtitle1.copy(fontFamily = fontLXGW),
-        subtitle2 = def.subtitle2.copy(fontFamily = fontLXGW),
-        body1 = def.body1.copy(fontFamily = fontLXGW),
-        body2 = def.body2.copy(fontFamily = fontLXGW),
-        button = def.button.copy(fontFamily = fontLXGW),
-        caption = def.caption.copy(fontFamily = fontLXGW),
-        overline = def.overline.copy(fontFamily = fontLXGW),
-    )
-}
-
-@Composable
-fun rememberMaterialThemeState(
-    initColors: Colors = MaterialTheme.colors,
-    initTypography: Typography = newTypography(),
-    initShapes: Shapes = MaterialTheme.shapes
-): MaterialThemeState {
-    val colors = remember { mutableStateOf(initColors) }
-    val typography = remember { mutableStateOf(initTypography) }
-    val shapes = remember { mutableStateOf(initShapes) }
-
-    return remember {
-        MaterialThemeState(
-            colors,
-            typography,
-            shapes,
-        )
     }
 }

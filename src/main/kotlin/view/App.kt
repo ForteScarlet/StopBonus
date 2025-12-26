@@ -1,6 +1,5 @@
 package view
 
-import MaterialThemeState
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
@@ -30,7 +29,6 @@ import view.login.LoginView
 
 class AppState(
     val winState: WindowState,
-    val materialThemeState: MaterialThemeState,
     val scope: CoroutineScope,
     val databaseOperator: DatabaseOperator
 )
