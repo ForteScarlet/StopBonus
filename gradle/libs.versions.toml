@@ -16,6 +16,9 @@ exposed = "0.57.0" # TODO 1.0.0-rc-3
 #koalaPlot = "0.5.3"
 koalaPlot = "0.7.1"
 
+# https://conveyor.hydraulic.dev/21.0/configs/maven-gradle/#gradle
+conveyor = "1.12"
+
 [libraries]
 # logback
 logback-classic = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
@@ -55,3 +58,4 @@ kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 buildConfig = { id = "com.github.gmazzo.buildconfig", version.ref = "buildconfig" }
+conveyor = { id = "dev.hydraulic.conveyor", version.ref = "conveyor" }

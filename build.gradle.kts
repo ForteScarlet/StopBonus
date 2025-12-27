@@ -1,5 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.io.File
 
 plugins {
     alias(libs.plugins.kotlinJvm)
@@ -7,8 +8,8 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.buildConfig)
-    // https://conveyor.hydraulic.dev/14.0/configs/maven-gradle/#gradle
-    //id("dev.hydraulic.conveyor") version "1.9"
+    // https://conveyor.hydraulic.dev/21.0/configs/maven-gradle/#gradle
+    alias(libs.plugins.conveyor)
     // https://docs.gradle.com/develocity/gradle/current/gradle-plugin/
     idea
 }
@@ -17,7 +18,7 @@ val appName = "StopBonus"
 val appPackage = "love.forte.bonus"
 val appMenuGroup = "forteApp"
 val appNameWithPackage = "$appPackage.$appName"
-val appVersion = "1.0.17"
+val appVersion = "1.0.20"
 
 group = appPackage
 version = appVersion
@@ -47,11 +48,31 @@ dependencies {
     // compose.desktop.currentOs should be used in launcher-sourceSet
     // (in a separate module for demo project and in testMain).
     // With compose.desktop.common you will also lose @Preview functionality
-    implementation(compose.desktop.currentOs) {
-        // 仅使用 Material3，排除 Material(2) 相关依赖
+
+    val excludeMaterial2: Action<ExternalModuleDependency> = Action {
         exclude(group = "org.jetbrains.compose.material", module = "material")
         exclude(group = "org.jetbrains.compose.material", module = "material-desktop")
     }
+
+    linuxAmd64(compose.desktop.linux_x64, excludeMaterial2)
+    linuxAarch64(compose.desktop.linux_arm64, excludeMaterial2)
+    windowsAmd64(compose.desktop.windows_x64, excludeMaterial2)
+    windowsAarch64(compose.desktop.windows_arm64, excludeMaterial2)
+    macAmd64(compose.desktop.macos_x64, excludeMaterial2)
+    macAarch64(compose.desktop.macos_arm64, excludeMaterial2)
+
+    // linuxAmd64(compose.desktop.linux_x64)
+    // linuxAarch64(compose.desktop.linux_arm64)
+    // windowsAmd64(compose.desktop.windows_x64)
+    // windowsAarch64(compose.desktop.windows_arm64)
+    // macAmd64(compose.desktop.macos_x64)
+    // macAarch64(compose.desktop.macos_arm64)
+
+    // implementation(compose.desktop.currentOs) {
+    //     exclude(group = "org.jetbrains.compose.material", module = "material")
+    //     exclude(group = "org.jetbrains.compose.material", module = "material-desktop")
+    // }
+
     implementation(compose.ui)
     implementation(compose.uiUtil)
     implementation(compose.uiTooling)
@@ -63,7 +84,6 @@ dependencies {
 
     // https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-navigation-routing.html
     // implementation("org.jetbrains.androidx.navigation:navigation-compose:2.8.0-alpha10")
-
 
     implementation(libs.h2db)
     runtimeOnly(libs.logback.classic)
@@ -162,4 +182,18 @@ idea {
     this.module {
         isDownloadSources = true
     }
+}
+
+// https://conveyor.hydraulic.dev/21.0/configs/maven-gradle/#gradle
+tasks.register<Exec>("convey") {
+    group = "conveyor"
+
+    val dir = layout.buildDirectory.dir("packages")
+    outputs.dir(dir)
+    dependsOn("jar", "writeConveyorConfig")
+
+    workingDir(layout.projectDirectory)
+    commandLine("conveyor", "make", "--output-dir", dir.get(), "site")
+
+    // conveyor make --output-dir /Users/forte/IdeaProjects/StopBonus/build/packages site
 }
