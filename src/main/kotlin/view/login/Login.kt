@@ -5,9 +5,6 @@ import androidx.compose.animation.SharedTransitionScope.ResizeMode.Companion.Sca
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Button
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,6 +22,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import view.AppState
+import view.common.StopBonusButton
 import view.common.StopBonusElevatedButton
 
 class LoginState(
@@ -240,7 +238,7 @@ inline fun NewAccount(
                 label = { Text("账户名称") },
             )
 
-            Button(
+            StopBonusButton(
                 onClick = {
                     inSave = true
                     state.scope.launch {

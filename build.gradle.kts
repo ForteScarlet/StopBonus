@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.buildConfig)
     // https://conveyor.hydraulic.dev/14.0/configs/maven-gradle/#gradle
     //id("dev.hydraulic.conveyor") version "1.9"
+    // https://docs.gradle.com/develocity/gradle/current/gradle-plugin/
     idea
 }
 
@@ -46,7 +47,11 @@ dependencies {
     // compose.desktop.currentOs should be used in launcher-sourceSet
     // (in a separate module for demo project and in testMain).
     // With compose.desktop.common you will also lose @Preview functionality
-    implementation(compose.desktop.currentOs)
+    implementation(compose.desktop.currentOs) {
+        // 仅使用 Material3，排除 Material(2) 相关依赖
+        exclude(group = "org.jetbrains.compose.material", module = "material")
+        exclude(group = "org.jetbrains.compose.material", module = "material-desktop")
+    }
     implementation(compose.ui)
     implementation(compose.uiUtil)
     implementation(compose.uiTooling)

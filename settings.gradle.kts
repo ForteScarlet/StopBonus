@@ -16,4 +16,14 @@ dependencyResolutionManagement {
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     }
 }
+
+plugins {
+    // https://docs.gradle.com/develocity/gradle/current/gradle-plugin/
+    id("com.gradle.develocity") version("4.3")
+}
+
+develocity {
+    // configuration
+}
+
 rootProject.name = "bonus-self-desktop"

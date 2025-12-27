@@ -1,7 +1,7 @@
 [versions]
 compose-plugin = "1.9.3"
 # Kotlin
-kotlin = "2.2.21"
+kotlin = "2.3.0"
 buildconfig = "6.0.7"
 kotlinx-coroutines = "1.10.1"
 kotlinx-serialization = "1.9.0"
@@ -15,7 +15,6 @@ exposed = "0.57.0" # TODO 1.0.0-rc-3
 # https://koalaplot.github.io/
 #koalaPlot = "0.5.3"
 koalaPlot = "0.7.1"
-
 
 [libraries]
 # logback

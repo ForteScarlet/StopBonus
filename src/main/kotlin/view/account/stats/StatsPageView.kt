@@ -12,6 +12,7 @@ import org.jetbrains.compose.resources.painterResource
 import view.account.PageViewState
 import view.account.SimpleAccountViewPageSelector
 import view.account.stats.StatsType.COUNT
+import view.common.StopBonusButtonDefaults
 import java.time.Year
 import java.time.YearMonth
 
@@ -91,6 +92,7 @@ private fun MainStatsPageView(state: PageViewState) {
                     for (mode in modes) {
                         NavigationDrawerItem(
                             selected = selected == mode,
+                            shape = StopBonusButtonDefaults.Shape,
                             label = { mode.Label(state) },
                             onClick = {
                                 selected = mode

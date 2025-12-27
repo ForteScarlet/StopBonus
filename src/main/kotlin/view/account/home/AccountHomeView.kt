@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -30,6 +31,7 @@ import org.jetbrains.exposed.sql.SizedCollection
 import view.account.AccountViewPage
 import view.account.AccountViewPageSelector
 import view.account.PageViewState
+import view.common.StopBonusButtonDefaults
 import view.common.StopBonusElevatedButton
 import view.common.StopBonusTextButton
 import java.time.*
@@ -44,6 +46,7 @@ object AccountHomeView : AccountViewPageSelector {
     override fun navigationDrawerItem(
         state: PageViewState,
         selected: AccountViewPage?,
+        shape: Shape,
         onSelect: (AccountViewPage?) -> Unit
     ) {
         Row(
@@ -53,6 +56,7 @@ object AccountHomeView : AccountViewPageSelector {
             NavigationDrawerItem(
                 modifier = Modifier.fillMaxWidth(.5f),
                 selected = this == selected,
+                shape = shape,
                 onClick = {
                     onSelect(if (AccountHomePage == selected) null else AccountHomePage)
                 },
@@ -68,6 +72,7 @@ object AccountHomeView : AccountViewPageSelector {
             NavigationDrawerItem(
                 modifier = Modifier.clickable(false) {}.hoverable(remember { MutableInteractionSource() }, false),
                 selected = false, // TODO
+                shape = shape,
                 onClick = {
                     // onSelect(if (thisPage == selected) null else thisPage)
                 },
@@ -96,14 +101,6 @@ object AccountHomeView : AccountViewPageSelector {
     private fun menuIcon(@Suppress("UNUSED_PARAMETER") state: PageViewState) {
         Icon(painterResource(Res.drawable.icon_home), "Home icon")
     }
-    //
-    // @Composable
-    // override fun menuLabel(state: PageViewState) {
-    //     Row {
-    //     Text("我打了😢", fontFamily = FontLXGWNeoXiHeiScreenFamily())
-    //     Text("现在开打😡", fontFamily = FontLXGWNeoXiHeiScreenFamily())
-    //     }
-    // }
 
     private data object AccountHomePage : AccountViewPage {
         @Composable
@@ -404,7 +401,10 @@ private fun AccountHome(state: PageViewState) {
             // 备注
             OutlinedTextField(
                 value = remarkValue,
-                onValueChange = { remarkValue = if (it.length <= Limits.REMARK_MAX_LENGTH) it else it.substring(0, Limits.REMARK_MAX_LENGTH) },
+                onValueChange = {
+                    remarkValue =
+                        if (it.length <= Limits.REMARK_MAX_LENGTH) it else it.substring(0, Limits.REMARK_MAX_LENGTH)
+                },
                 label = { Text("备注") },
                 placeholder = { Text("备注") },
                 supportingText = { Text("${remarkValue.length} / ${Limits.REMARK_MAX_LENGTH}") },

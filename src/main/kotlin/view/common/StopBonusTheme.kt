@@ -3,17 +3,8 @@ package view.common
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Colors
-import androidx.compose.material.MaterialTheme as Material2Theme
-import androidx.compose.material.Shapes as Material2Shapes
-import androidx.compose.material.Typography as Material2Typography
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
-import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.MaterialTheme as Material3Theme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Shapes as Material3Shapes
-import androidx.compose.material3.Typography as Material3Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -22,6 +13,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.Shapes as Material3Shapes
+import androidx.compose.material3.Typography as Material3Typography
 
 private val fontBTT = Font("font/BTT.ttf")
 private val fontLXGWNeoXiHeiScreen = Font("font/LXGWNeoXiHeiScreen.ttf")
@@ -93,13 +86,7 @@ private val StopBonusDarkColorScheme = darkColorScheme(
     scrim = Color(0x99000000),
 )
 
-private val StopBonusMaterial2Shapes = Material2Shapes(
-    small = RoundedCornerShape(8.dp),
-    medium = RoundedCornerShape(12.dp),
-    large = RoundedCornerShape(16.dp),
-)
-
-private val StopBonusMaterial3Shapes = Material3Shapes(
+private val StopBonusShapes = Material3Shapes(
     extraSmall = RoundedCornerShape(8.dp),
     small = RoundedCornerShape(10.dp),
     medium = RoundedCornerShape(12.dp),
@@ -107,25 +94,7 @@ private val StopBonusMaterial3Shapes = Material3Shapes(
     extraLarge = RoundedCornerShape(28.dp),
 )
 
-private val StopBonusMaterial2Typography = Material2Typography().let { def ->
-    def.copy(
-        h1 = def.h1.copy(fontFamily = fontBTTFamily),
-        h2 = def.h2.copy(fontFamily = fontBTTFamily),
-        h3 = def.h3.copy(fontFamily = fontBTTFamily),
-        h4 = def.h4.copy(fontFamily = fontLXGWNeoXiHeiScreenFamily),
-        h5 = def.h5.copy(fontFamily = fontLXGWNeoXiHeiScreenFamily),
-        h6 = def.h6.copy(fontFamily = fontLXGWNeoXiHeiScreenFamily),
-        subtitle1 = def.subtitle1.copy(fontFamily = fontLXGWNeoXiHeiScreenFamily),
-        subtitle2 = def.subtitle2.copy(fontFamily = fontLXGWNeoXiHeiScreenFamily),
-        body1 = def.body1.copy(fontFamily = fontLXGWNeoXiHeiScreenFamily),
-        body2 = def.body2.copy(fontFamily = fontLXGWNeoXiHeiScreenFamily),
-        button = def.button.copy(fontFamily = fontLXGWNeoXiHeiScreenFamily),
-        caption = def.caption.copy(fontFamily = fontLXGWNeoXiHeiScreenFamily),
-        overline = def.overline.copy(fontFamily = fontLXGWNeoXiHeiScreenFamily),
-    )
-}
-
-private val StopBonusMaterial3Typography = Material3Typography().let { def ->
+private val StopBonusTypography = Material3Typography().let { def ->
     def.copy(
         displayLarge = def.displayLarge.copy(fontFamily = fontBTTFamily),
         displayMedium = def.displayMedium.copy(fontFamily = fontBTTFamily),
@@ -145,62 +114,27 @@ private val StopBonusMaterial3Typography = Material3Typography().let { def ->
     )
 }
 
-private fun ColorScheme.toMaterial2Colors(isDark: Boolean): Colors =
-    if (isDark) {
-        darkColors(
-            primary = primary,
-            primaryVariant = primaryContainer,
-            secondary = secondary,
-            secondaryVariant = secondaryContainer,
-            background = background,
-            surface = surface,
-            error = error,
-            onPrimary = onPrimary,
-            onSecondary = onSecondary,
-            onBackground = onBackground,
-            onSurface = onSurface,
-            onError = onError,
-        )
-    } else {
-        lightColors(
-            primary = primary,
-            primaryVariant = primaryContainer,
-            secondary = secondary,
-            secondaryVariant = secondaryContainer,
-            background = background,
-            surface = surface,
-            error = error,
-            onPrimary = onPrimary,
-            onSecondary = onSecondary,
-            onBackground = onBackground,
-            onSurface = onSurface,
-            onError = onError,
-        )
-    }
-
 @Composable
 fun StopBonusTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
     val colorScheme = if (darkTheme) StopBonusDarkColorScheme else StopBonusLightColorScheme
-    val material2Colors = colorScheme.toMaterial2Colors(isDark = darkTheme)
 
-    Material3Theme(
+    MaterialTheme(
         colorScheme = colorScheme,
-        typography = StopBonusMaterial3Typography,
-        shapes = StopBonusMaterial3Shapes,
+        typography = StopBonusTypography,
+        shapes = StopBonusShapes,
     ) {
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = colorScheme.background,
-        ) {
-            Material2Theme(
-                colors = material2Colors,
-                typography = StopBonusMaterial2Typography,
-                shapes = StopBonusMaterial2Shapes,
-                content = content,
-            )
-        }
+            color = MaterialTheme.colorScheme.background,
+            content = content
+        )
     }
 }
+
+/* https://grabient.com/HQNhE4BpgFhBmaIDsJowIzOvC0BMArIUhvtKjBRgByQaw1TDwAMr0NM+QA?angle=45 */
+/*
+background: linear-gradient(45deg, #4159d0 0.000%, #c84fc0 50.000%, #ffcd70 100.000%);
+ */
