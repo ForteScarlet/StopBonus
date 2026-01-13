@@ -327,9 +327,8 @@ tasks.register<Exec>("conveyCi") {
     dependsOn("jar", "writeConveyorConfig")
 
     workingDir(layout.projectDirectory)
-
-
-    workingDir(layout.projectDirectory)
+    standardOutput = System.out
+    errorOutput = System.err
     doFirst {
         val javaHome = file(System.getProperty("java.home"))
         environment("JAVA_HOME", javaHome.absolutePath)
@@ -350,15 +349,7 @@ tasks.register<Exec>("conveyCi") {
             add("--passphrase=env:CONVEYOR_KEY_PASSPHRASE")
             add("site")
         }
-        commandLine(
-            conveyor.absolutePath,
-            "-f ci.conveyor.conf",
-            "--console=plain",
-            "--show-log=error",
-            "make",
-            "--output-dir",
-            dir.absolutePath,
-            "site"
-        )
+        commandLine(commandLineArgs)
+
     }
 }

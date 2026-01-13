@@ -32,9 +32,6 @@ jobs:
         with:
           node-version: 24
 
-      - name: Write signing key file
-        run: echo "${{ env.CONVEYOR_ROOT_KEY }}" > signkey.gpg
-
       - name: Install Conveyor CLI
         run: npm i -g --no-fund --no-audit @hydraulic/conveyor@${CONVEYOR_VERSION}
 
@@ -43,7 +40,7 @@ jobs:
         run: |
           set -euxo pipefail
           VERSION="${GITHUB_REF_NAME#v}"
-          CONVEYOR_AGREE_TO_LICENSE=1 ./gradlew --no-daemon --stacktrace -PappVersion="$VERSION" conveyCi
+          CONVEYOR_AGREE_TO_LICENSE=1 ./gradlew --no-daemon --stacktrace -PappVersion="$VERSION" convey
 
       - name: Upload build output (for debugging)
         if: ${{ always() }}
