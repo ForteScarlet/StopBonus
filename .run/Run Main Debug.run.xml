@@ -6,6 +6,7 @@
     <option name="MAIN_CLASS_NAME" value="MainKt" />
     <module name="bonus-self-desktop.main" />
     <shortenClasspath name="NONE" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     <method v="2">
       <option name="Make" enabled="true" />
       <option name="com.soywiz.korge.intellij.UpdateResourceBeforeRunTask" enabled="false" />

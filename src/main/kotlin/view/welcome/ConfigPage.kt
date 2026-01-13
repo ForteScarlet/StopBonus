@@ -19,6 +19,7 @@ import storeAppPath
 import view.common.StopBonusFilledTonalButton
 import view.common.StopBonusTextButton
 import java.awt.Desktop
+import kotlin.io.path.Path
 
 /**
  * 配置页面
@@ -33,6 +34,7 @@ fun ConfigPage(onBack: () -> Unit) {
     var selectedTimezone by remember { mutableStateOf(configState.config.timezone) }
     val dataDir = remember { ConfigManager.appDataDir() }
     val storeDir = remember { storeAppPath().toAbsolutePath() }
+    val logDir = remember { Path(".logs").toAbsolutePath() }
     var openDirError by remember { mutableStateOf<String?>(null) }
 
     openDirError?.let { message ->
@@ -138,6 +140,37 @@ fun ConfigPage(onBack: () -> Unit) {
                         Icon(
                             painter = painterResource(Res.drawable.icon_home),
                             contentDescription = "打开数据目录"
+                        )
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // 日志目录（只读展示）
+            OutlinedTextField(
+                label = { Text("日志存储目录") },
+                value = logDir.toString(),
+                onValueChange = {},
+                readOnly = true,
+                singleLine = true,
+                trailingIcon = {
+                    IconButton(onClick = {
+                        runCatching {
+                            val dirFile = logDir.toFile().apply { mkdirs() }
+                            if (!Desktop.isDesktopSupported() || !Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
+                                error("当前系统不支持打开目录。")
+                            }
+                            Desktop.getDesktop().open(dirFile)
+                        }.onFailure { e ->
+                            openDirError = buildString {
+                                appendLine(dataDir)
+                                append(e.message ?: e.toString())
+                            }.trim()
+                        }
+                    }) {
+                        Icon(
+                            painter = painterResource(Res.drawable.icon_home),
+                            contentDescription = "打开日志目录"
                         )
                     }
                 },
