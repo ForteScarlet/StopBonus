@@ -9,12 +9,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import config.AppConfig
+import config.ConfigManager
 import config.LocalAppConfig
 import love.forte.bonus.bonus_self_desktop.generated.resources.Res
 import love.forte.bonus.bonus_self_desktop.generated.resources.icon_arrow_back
+import love.forte.bonus.bonus_self_desktop.generated.resources.icon_home
 import org.jetbrains.compose.resources.painterResource
+import storeAppPath
 import view.common.StopBonusFilledTonalButton
 import view.common.StopBonusTextButton
+import java.awt.Desktop
 
 /**
  * 配置页面
@@ -27,6 +31,22 @@ fun ConfigPage(onBack: () -> Unit) {
     val configState = LocalAppConfig.current
     var expanded by remember { mutableStateOf(false) }
     var selectedTimezone by remember { mutableStateOf(configState.config.timezone) }
+    val dataDir = remember { ConfigManager.appDataDir() }
+    val storeDir = remember { storeAppPath().toAbsolutePath() }
+    var openDirError by remember { mutableStateOf<String?>(null) }
+
+    openDirError?.let { message ->
+        AlertDialog(
+            onDismissRequest = { openDirError = null },
+            title = { Text("打开目录失败", fontFamily = FontLXGWNeoXiHeiScreenFamily()) },
+            text = { Text(message, fontFamily = FontLXGWNeoXiHeiScreenFamily()) },
+            confirmButton = {
+                StopBonusTextButton(onClick = { openDirError = null }) {
+                    Text("确定", fontFamily = FontLXGWNeoXiHeiScreenFamily())
+                }
+            },
+        )
+    }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -62,6 +82,68 @@ fun ConfigPage(onBack: () -> Unit) {
             modifier = Modifier.widthIn(max = 400.dp).padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
+            // 配置存储目录（只读展示）
+            OutlinedTextField(
+                label = { Text("配置存储目录") },
+                value = dataDir.toString(),
+                onValueChange = {},
+                readOnly = true,
+                singleLine = true,
+                trailingIcon = {
+                    IconButton(onClick = {
+                        runCatching {
+                            val dirFile = dataDir.toFile().apply { mkdirs() }
+                            if (!Desktop.isDesktopSupported() || !Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
+                                error("当前系统不支持打开目录。")
+                            }
+                            Desktop.getDesktop().open(dirFile)
+                        }.onFailure { e ->
+                            openDirError = buildString {
+                                appendLine(dataDir)
+                                append(e.message ?: e.toString())
+                            }.trim()
+                        }
+                    }) {
+                        Icon(
+                            painter = painterResource(Res.drawable.icon_home),
+                            contentDescription = "打开配置目录"
+                        )
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // 数据存储目录（只读展示）
+            OutlinedTextField(
+                label = { Text("数据存储目录") },
+                value = storeDir.toString(),
+                onValueChange = {},
+                readOnly = true,
+                singleLine = true,
+                trailingIcon = {
+                    IconButton(onClick = {
+                        runCatching {
+                            val dirFile = storeDir.toFile().apply { mkdirs() }
+                            if (!Desktop.isDesktopSupported() || !Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
+                                error("当前系统不支持打开目录。")
+                            }
+                            Desktop.getDesktop().open(dirFile)
+                        }.onFailure { e ->
+                            openDirError = buildString {
+                                appendLine(dataDir)
+                                append(e.message ?: e.toString())
+                            }.trim()
+                        }
+                    }) {
+                        Icon(
+                            painter = painterResource(Res.drawable.icon_home),
+                            contentDescription = "打开数据目录"
+                        )
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+
             // 时区设置
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)

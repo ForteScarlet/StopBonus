@@ -1,7 +1,6 @@
 import hydraulic.conveyor.gradle.ConveyorConfigTask
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import java.io.File
 
 plugins {
     alias(libs.plugins.kotlinJvm)
@@ -113,7 +112,7 @@ val appName = "StopBonus"
 val appPackage = "love.forte.bonus"
 val appMenuGroup = "forteApp"
 val appNameWithPackage = "$appPackage.$appName"
-val defaultAppVersion = "1.0.21"
+val defaultAppVersion = "1.0.22"
 val appVersion = resolveAppVersion(defaultAppVersion)
 val conveyorJdkVendorOverride = run {
     val fromProperty = providers.gradleProperty(conveyorJdkVendorPropertyName).orNull?.trim()
@@ -211,6 +210,7 @@ buildConfig {
     buildConfigField("VERSION", appVersion)
     buildConfigField("APP_NAME", appName)
     buildConfigField("GITHUB_URL", "https://github.com/ForteScarlet/StopBonus")
+    buildConfigField("DOWNLOAD_URL", "https://fortescarlet.github.io/StopBonus/download")
 }
 
 compose.resources {
@@ -297,6 +297,8 @@ tasks.register<Exec>("convey") {
     dependsOn("jar", "writeConveyorConfig")
 
     workingDir(layout.projectDirectory)
+    standardOutput = System.out
+    errorOutput = System.err
     doFirst {
         val javaHome = file(System.getProperty("java.home"))
         environment("JAVA_HOME", javaHome.absolutePath)

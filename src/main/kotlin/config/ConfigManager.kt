@@ -49,10 +49,17 @@ object ConfigManager {
     }
 
     /**
+     * 获取应用数据目录（用于 UI 展示/打开等只读用途）
+     */
+    fun appDataDir(): Path {
+        return appDataPath().toAbsolutePath().normalize()
+    }
+
+    /**
      * 获取配置文件路径（应用数据目录）
      */
-    private fun configFilePath(): Path {
-        return appDataPath().resolve(CONFIG_FILE_NAME)
+    fun configFilePath(): Path {
+        return appDataDir().resolve(CONFIG_FILE_NAME)
     }
 
     /**

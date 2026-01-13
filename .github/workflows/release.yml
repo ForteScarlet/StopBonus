@@ -68,7 +68,11 @@ jobs:
             build/packages/**/*.exe
           body: |
             ## 下载说明
-
+            
+            推荐前往 [**下载页**](https://fortescarlet.github.io/StopBonus/download) 下载应用程序或安装包。
+  
+            下述列表为自行下载包体时可能会用到的 Assets 信息说明。
+            
             | 文件 | 系统平台 | 类型/用途 |
             |------|----------|----------|
             | `stopbonus-*-windows-amd64.zip` | Windows | 免安装 |
