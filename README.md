@@ -1,9 +1,14 @@
 # 别奖励了😡
 
 ## 安装
-### 从 Release 下载安装包
 
-前往 [latest release](https://github.com/ForteScarlet/StopBonus/releases/latest) 下载合适的安装包安装：
+### 下载安装包
+
+前往 [下载页](https://fortescarlet.github.io/StopBonus/download) 下载安装包。
+
+### 从 Release 下载
+
+前往 [latest release](https://github.com/ForteScarlet/StopBonus/releases/latest) 自行选择并下载合适的安装包安装：
 
 - `.zip` 格式的文件为解压**免安装**版本，对于 Windows 用户比较推荐这个类型，目前支持 Windows 系统的和 macOS 系统的。
 - 其他的安装包格式请参考自己的系统选择适合的安装包使用。
