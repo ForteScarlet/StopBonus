@@ -1,0 +1,23 @@
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+    <channel>
+        <title>StopBonus Changelog</title>
+        <link>https://fortescarlet.github.io/StopBonus/appcast-aarch64.rss</link>
+        <description>Most recent changes with links to updates.</description>
+        <language>en</language>
+        <item>
+            <title>Version 1.0.20</title>
+            <link>https://fortescarlet.github.io/StopBonus/</link>
+            <sparkle:version>1.0.20.0</sparkle:version>
+            <sparkle:shortVersionString>1.0.20</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <description>
+                <![CDATA[ New release: version 1.0.20 ]]>
+            </description>
+            <pubDate>Tue, 13 Jan 2026 09:01:10 GMT</pubDate>
+            <enclosure url="https://fortescarlet.github.io/StopBonus/stopbonus-1.0.20-mac-aarch64.zip" 
+                       length="81072001" 
+                       type="application/octet-stream" 
+                       sparkle:edSignature="MyIvfQ/so8hybAECKeNZt5zr6oCImpW+tJamYVwk4ZxXAmntSDqNHLzI2dQDdyJIAq+CtCBNngr7tPsD6VqhDg=="/>
+        </item>
+    </channel>
+</rss>

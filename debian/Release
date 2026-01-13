@@ -1,0 +1,18 @@
+Architectures: amd64
+Components: main
+Date: Tue, 13 Jan 2026 09:02:26 GMT
+Description: Public archive for StopBonus
+Origin: StopBonus
+Suite: debian
+MD5Sum:
+ d47f052169b4ce74369fa3c06384c717               629 Packages
+ 92b2002032a3d621d3cb4aa0910d3768               484 Packages.xz
+SHA1:
+ 58f867d1b1aa5020f1bbdf19a1c1f2fe684a0de6               629 Packages
+ 1d0ad2ac707bfa2a86c9b4d1fb2560832a06174c               484 Packages.xz
+SHA256:
+ 5760af76be3ba687cf38dda4ecbcf89b244b01c79eb5bf92a5fc050fcc6184c4               629 Packages
+ b31950d0e408319cc53bdd039ec927d1f6dea26a3ad741a982724a8c801ca241               484 Packages.xz
+SHA512:
+ 0412fe993759d878e7e58bbd85648c4a3a3539fb27a5f173ae98c05426bd6621ccc15b8a4f51ebc62d8ab1ee60c8adbdf47b3c8a3ba93fd751a8f427c3e922d8               629 Packages
+ 860b0da60e05e292d0666659474a8ac45062d4818e0b87c2b803eafd797458d5b9b8108ac9fe3e1e5ccd0fd8986c7832376eddd7b7ccf18b6bac7fc7270c481a               484 Packages.xz
