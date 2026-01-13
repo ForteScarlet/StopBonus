@@ -317,3 +317,48 @@ tasks.register<Exec>("convey") {
         )
     }
 }
+
+
+tasks.register<Exec>("conveyCi") {
+    group = "conveyor"
+
+    val outputDir = layout.buildDirectory.dir("packages")
+    outputs.dir(outputDir)
+    dependsOn("jar", "writeConveyorConfig")
+
+    workingDir(layout.projectDirectory)
+
+
+    workingDir(layout.projectDirectory)
+    doFirst {
+        val javaHome = file(System.getProperty("java.home"))
+        environment("JAVA_HOME", javaHome.absolutePath)
+
+        val dir = outputDir.get().asFile
+        // Conveyor 默认使用 SAFE_REPLACE：当输出目录内容被改动时会拒绝覆盖。
+        // `build/` 下的产物可安全重建，因此这里先清理输出目录，避免 “output dir changed” 导致构建失败。
+        project.delete(dir)
+        val conveyor = resolveConveyorExecutable()
+        // --passphrase=env:PASSPHRASE
+        val commandLineArgs = buildList {
+            add(conveyor.absolutePath)
+            add("--console=plain")
+            add("--show-log=error")
+            add("make")
+            add("--output-dir")
+            add(dir.absolutePath)
+            add("--passphrase=env:CONVEYOR_KEY_PASSPHRASE")
+            add("site")
+        }
+        commandLine(
+            conveyor.absolutePath,
+            "-f ci.conveyor.conf",
+            "--console=plain",
+            "--show-log=error",
+            "make",
+            "--output-dir",
+            dir.absolutePath,
+            "site"
+        )
+    }
+}

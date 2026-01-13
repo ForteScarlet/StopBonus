@@ -43,7 +43,7 @@ jobs:
         run: |
           set -euxo pipefail
           VERSION="${GITHUB_REF_NAME#v}"
-          CONVEYOR_AGREE_TO_LICENSE=1 ./gradlew --no-daemon --stacktrace -PappVersion="$VERSION" convey --conveyor-args="--signing-key signkey.gpg --passphrase ${{ env.CONVEYOR_KEY_PASSPHRASE }}"
+          CONVEYOR_AGREE_TO_LICENSE=1 ./gradlew --no-daemon --stacktrace -PappVersion="$VERSION" conveyCi
 
       - name: Upload build output (for debugging)
         if: ${{ always() }}
@@ -77,8 +77,6 @@ jobs:
             | `stopbonus-*-mac-*.zip` | macOS | 免安装（.app） |
             | `stopbonus-*-linux-amd64.tar.gz` | Linux | 免安装 |
             | `debian/*.deb` | Debian/Ubuntu | 安装包 |
-
-            **提示**：自动更新依赖 GitHub Pages（`gh-pages` 分支）上的更新站点内容。
 
       - name: Prepare GitHub Pages content
         run: touch build/packages/.nojekyll
