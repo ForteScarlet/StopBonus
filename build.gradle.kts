@@ -338,15 +338,15 @@ tasks.register<Exec>("conveyCi") {
         // `build/` 下的产物可安全重建，因此这里先清理输出目录，避免 “output dir changed” 导致构建失败。
         project.delete(dir)
         val conveyor = resolveConveyorExecutable()
-        // --passphrase=env:PASSPHRASE
+
         val commandLineArgs = buildList {
             add(conveyor.absolutePath)
+            add("-f ci.conveyor.conf")
             add("--console=plain")
             add("--show-log=error")
             add("make")
             add("--output-dir")
             add(dir.absolutePath)
-            add("--passphrase=env:CONVEYOR_KEY_PASSPHRASE")
             add("site")
         }
         commandLine(commandLineArgs)
