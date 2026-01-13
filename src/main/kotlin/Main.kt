@@ -20,37 +20,79 @@ import view.AppState
 import view.common.StopBonusTheme
 import view.welcome.WelcomeNavHost
 import java.awt.Toolkit
+import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption
 import kotlin.io.path.Path
 
 
 private const val APPID = "love.forte.bonus.bonus_self_desktop"
+private const val DATA_DIR_NAME = "StopBonus"
 
 /**
  * 获取应用数据存储路径
  *
  * 优先级：
  * 1. DEBUG 模式下使用 ./data
- * 2. Windows: %LOCALAPPDATA%/StopBonus/data
- * 3. 其他: $HOME/StopBonus/data
- * 4. 默认: ./data
+ * 2. Windows: $USER_HOME/AppData/Local/StopBonus/data（避免 MSIX 虚拟化路径偏移）
+ * 3. 其他: %LOCALAPPDATA%/StopBonus/data
+ * 4. 再退回 $HOME/StopBonus/data
+ * 5. 默认: ./data
  */
 fun storeAppPath(): Path {
     if (System.getenv("DEBUG").toBoolean() || System.getProperty("debug").toBoolean()) {
         return Path("./data")
     }
 
-    val localAppData = System.getenv("LOCALAPPDATA")
-    if (localAppData != null) {
-        return Path(localAppData, "StopBonus", "data")
+    val userHome = System.getProperty("user.home")
+    val isWindows = System.getProperty("os.name").orEmpty().contains("windows", ignoreCase = true)
+
+    if (isWindows && userHome != null) {
+        // 直接使用用户主目录，避免安装器重定向 LOCALAPPDATA 至 Packages/<PackageId>/LocalCache
+        return Path(userHome, "AppData", "Local", DATA_DIR_NAME, "data")
     }
 
-    val userHome = System.getProperty("user.home")
+    val localAppData = System.getenv("LOCALAPPDATA")
+    if (localAppData != null) {
+        return Path(localAppData, DATA_DIR_NAME, "data")
+    }
+
     if (userHome != null) {
-        return Path(userHome, "StopBonus", "data")
+        return Path(userHome, DATA_DIR_NAME, "data")
     }
 
     return Path("./data")
+}
+
+/**
+ * 将旧版（受 MSIX 重定向影响的）数据目录搬迁到新的真实目录，避免用户数据丢失。
+ * 仅在目标目录为空时触发，避免覆盖用户已存在的数据。
+ */
+private fun migrateFromLegacyPathIfNeeded(target: Path) {
+    val legacyLocalAppData = System.getenv("LOCALAPPDATA") ?: return
+    val legacyPath = Path(legacyLocalAppData, DATA_DIR_NAME, "data").toAbsolutePath().normalize()
+    val targetPath = target.toAbsolutePath().normalize()
+
+    if (legacyPath == targetPath) return
+    if (!Files.exists(legacyPath)) return
+    if (Files.exists(targetPath) && Files.list(targetPath).use { it.findAny().isPresent }) return
+
+    runCatching {
+        Files.createDirectories(targetPath)
+        Files.walk(legacyPath).use { stream ->
+            stream.forEach { source ->
+                val dest = targetPath.resolve(legacyPath.relativize(source))
+                if (Files.isDirectory(source)) {
+                    Files.createDirectories(dest)
+                } else {
+                    Files.copy(source, dest, StandardCopyOption.REPLACE_EXISTING)
+                }
+            }
+        }
+        logger.info("migrate data: {} -> {}", legacyPath, targetPath)
+    }.onFailure { e ->
+        logger.warn("migrate data failed: {} -> {}", legacyPath, targetPath, e)
+    }
 }
 
 
@@ -97,7 +139,9 @@ fun main() {
     ClockProvider.initialize(initialConfig.zoneId())
 
     // 初始化数据库连接
-    val databaseOp = connectDatabaseOperator(dataDir = storeAppPath(), schemaName = "bonus")
+    val dataPath = storeAppPath()
+    migrateFromLegacyPathIfNeeded(dataPath)
+    val databaseOp = connectDatabaseOperator(dataDir = dataPath, schemaName = "bonus")
 
     application {
         val scope = rememberCoroutineScope { Dispatchers.Default }

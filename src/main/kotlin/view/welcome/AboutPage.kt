@@ -3,9 +3,10 @@ package view.welcome
 import FontLXGWNeoXiHeiScreenFamily
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
@@ -16,6 +17,8 @@ import config.BuildConfig
 import love.forte.bonus.bonus_self_desktop.generated.resources.Res
 import love.forte.bonus.bonus_self_desktop.generated.resources.icon_arrow_back
 import org.jetbrains.compose.resources.painterResource
+import view.common.StopBonusFilledTonalButton
+import view.common.StopBonusTextButton
 
 private const val KIB: Long = 1024L
 private const val MIB: Long = 1024L * KIB
@@ -39,6 +42,9 @@ private fun formatBytes(bytes: Long): String {
 @Composable
 fun AboutPage(onBack: () -> Unit) {
     val uriHandler = LocalUriHandler.current
+    var showSysProps by remember { mutableStateOf(false) }
+    var showEnvVars by remember { mutableStateOf(false) }
+
     val runtimeInfo = remember {
         val runtime = Runtime.getRuntime()
         val total = runtime.totalMemory()
@@ -144,6 +150,19 @@ fun AboutPage(onBack: () -> Unit) {
                 }
             }
 
+            // 系统属性 / 环境变量
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                StopBonusFilledTonalButton(onClick = { showSysProps = true }) {
+                    Text("系统属性", fontFamily = FontLXGWNeoXiHeiScreenFamily())
+                }
+                StopBonusFilledTonalButton(onClick = { showEnvVars = true }) {
+                    Text("系统变量", fontFamily = FontLXGWNeoXiHeiScreenFamily())
+                }
+            }
+
             // 开源地址
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -187,4 +206,72 @@ fun AboutPage(onBack: () -> Unit) {
             }
         }
     }
+
+    if (showSysProps) {
+        val props = remember {
+            System.getProperties()
+                .stringPropertyNames()
+                .sorted()
+                .map { key -> key to (System.getProperty(key) ?: "") }
+        }
+        KeyValueDialog(
+            title = "系统属性",
+            items = props,
+            onDismiss = { showSysProps = false }
+        )
+    }
+
+    if (showEnvVars) {
+        val envs = remember {
+            System.getenv()
+                .toSortedMap()
+                .map { (k, v) -> k to v }
+        }
+        KeyValueDialog(
+            title = "系统变量",
+            items = envs,
+            onDismiss = { showEnvVars = false }
+        )
+    }
+}
+
+@Composable
+private fun KeyValueDialog(
+    title: String,
+    items: List<Pair<String, String>>,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title, fontFamily = FontLXGWNeoXiHeiScreenFamily()) },
+        text = {
+            Column(
+                modifier = Modifier
+                    .heightIn(max = 360.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items.forEach { (key, value) ->
+                    Column {
+                        Text(
+                            key,
+                            fontFamily = FontLXGWNeoXiHeiScreenFamily(),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 13.sp
+                        )
+                        Text(
+                            value.ifBlank { "-" },
+                            fontFamily = FontLXGWNeoXiHeiScreenFamily(),
+                            fontSize = 13.sp
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            StopBonusTextButton(onClick = onDismiss) {
+                Text("关闭", fontFamily = FontLXGWNeoXiHeiScreenFamily())
+            }
+        }
+    )
 }
