@@ -1,4 +1,4 @@
-name: Release (Conveyor)
+name: Release
 on:
   push:
     tags:
@@ -38,7 +38,7 @@ jobs:
         run: |
           set -euxo pipefail
           VERSION="${GITHUB_REF_NAME#v}"
-          ./gradlew --no-daemon --stacktrace -PappVersion="$VERSION" convey
+          ./gradlew --no-daemon --stacktrace -PappVersion="$VERSION" convey --agree-to-license=1
 
       - name: Upload build output (for debugging)
         if: ${{ always() }}
