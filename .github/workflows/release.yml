@@ -1,135 +1,87 @@
-name: Package release
+name: Release (Conveyor)
 on:
   push:
     tags:
-      - v**
-env:
-  IS_CI: true
+      - 'v*'
 
 permissions:
   contents: write
 
+env:
+  CONVEYOR_VERSION: 21.0.0
+
 jobs:
-  package:
-    name: Package release
-    strategy:
-      matrix:
-        os: [ macos-latest, windows-latest, ubuntu-latest ]
-    runs-on: ${{ matrix.os }}
+  release:
+    name: Build & publish
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-java@v4
+      - uses: gradle/wrapper-validation-action@v3
+
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 17
-          cache: 'gradle'
+
       - uses: gradle/actions/setup-gradle@v5
 
-#      - name: Package distributables for ${{ runner.os }}
-#        run: gradle packageDistributionForCurrentOS --info --stacktrace --warning-mode all
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
 
+      - name: Install Conveyor CLI
+        run: npm i -g --no-fund --no-audit @hydraulic/conveyor@${CONVEYOR_VERSION}
 
-      - name: Create and Package distributable for ${{ runner.os }}
-        run: gradle createReleaseDistributable packageReleaseDistributionForCurrentOS --info --stacktrace --warning-mode all
-
-#      - name: Package installers for ${{ runner.os }}
-#        run: gradle packageReleaseDistributionForCurrentOS --info --stacktrace --warning-mode all
-
-      - name: Create portable zip archive (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
+      - name: Build packages + update site
+        shell: bash
         run: |
-          $VERSION = $env:GITHUB_REF_NAME -replace '^v',''
-          $appDir = "build/compose/binaries/main-release/app"
-          if (Test-Path "$appDir/StopBonus") {
-            Compress-Archive -Path "$appDir/StopBonus" -DestinationPath "$appDir/StopBonus-windows-${VERSION}.zip"
-            Write-Host "Created: $appDir/StopBonus-windows-${VERSION}.zip"
-          } else {
-            Write-Host "Warning: StopBonus directory not found at $appDir/StopBonus"
-            exit 1
-          }
+          set -euxo pipefail
+          VERSION="${GITHUB_REF_NAME#v}"
+          ./gradlew --no-daemon --stacktrace -PappVersion="$VERSION" convey
 
-      - name: Create portable zip archive (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          VERSION=${GITHUB_REF_NAME#v}
-          APP_DIR="build/compose/binaries/main-release/app"
-          if [ -d "$APP_DIR/StopBonus.app" ]; then
-            cd "$APP_DIR"
-            # -r: recursive, -y: preserve symlinks (important for .app bundles)
-            zip -ry "StopBonus-macos-${VERSION}.zip" "StopBonus.app"
-            echo "Created: StopBonus-macos-${VERSION}.zip"
-          else
-            echo "Error: StopBonus.app directory not found at $APP_DIR/StopBonus.app"
-            exit 1
-          fi
-
-      - name: Upload logs
-        uses: actions/upload-artifact@v6
+      - name: Upload build output (for debugging)
         if: ${{ always() }}
+        uses: actions/upload-artifact@v4
         with:
-          name: logs-${{ runner.os }}
-          path: 'build\compose\logs\**'
-          retention-days: 3
-
-      - name: Upload package
-        uses: actions/upload-artifact@v6
-        with:
-          name: distributions-${{ matrix.os }}
-          retention-days: 1
+          name: conveyor-site-and-packages
+          retention-days: 7
           path: |
-            build/compose/binaries/main-release/*/StopBonus-*.*
-            build/compose/binaries/main-release/app/StopBonus-*.zip
-            
+            build/packages/**
 
-# mac: build/compose/binaries/main-release/app/StopBonus.app
-
-#  files: |
-#    build/compose/binaries/main/app/HashHash-${{ runner.os }}-standalone.zip
-#    build/compose/binaries/main/dmg/*
-#    build/compose/binaries/main/exe/*
-#    build/compose/binaries/main/msi/*
-#    build/compose/binaries/main/deb/*
-#    build/compose/binaries/main/rpm/*
-#    build/compose/jars/*
-
-
-  create-release:
-    name: Create release
-    runs-on: ubuntu-latest
-    needs: package
-    steps:
-      # 下载文件
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          pattern: distributions-*
-          merge-multiple: true
-          path: distributions
-
-        # Create gitHub release
-      - name: Create Github Release
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: 'distributions/**/StopBonus-*.*'
-          token: ${{ secrets.PUSH_TOKEN }}
           generate_release_notes: true
-          append_body: true
+          files: |
+            build/packages/**/*.zip
+            build/packages/**/*.tar.gz
+            build/packages/**/*.deb
+            build/packages/**/*.msix
+            build/packages/**/*.appinstaller
+            build/packages/**/*.crt
+            build/packages/**/*.exe
           body: |
-            ## 📦 Assets 说明
+            ## 下载说明
 
-            | 文件 | 系统平台 | 类型 |
-            |------|----------|------|
-            | `StopBonus-windows-*.zip` | Windows | 免安装 |
-            | `StopBonus-macos-*.zip` | macOS | 免安装 |
-            | `StopBonus-*.exe` / `*.msi` | Windows | 安装器 |
-            | `StopBonus-*.dmg` / `*.pkg` | macOS | 安装器 |
-            | `StopBonus-*.deb` | Linux (Debian/Ubuntu) | 安装器 |
-            | `StopBonus-*.rpm` | Linux (Fedora/RHEL) | 安装器 |
-            
-            **其他说明:**
-            
-            1. Windows 用户比较推荐直接下载免安装版本，因为在 Windows 系统上安装器体验不佳。
-            2. Linux 系统平台暂未提供免安装版本。
+            | 文件 | 系统平台 | 类型/用途 |
+            |------|----------|----------|
+            | `stopbonus-*-windows-amd64.zip` | Windows | 免安装 |
+            | `stopbonus-*.x64.msix` + `stopbonus.appinstaller` | Windows | MSIX 安装/更新 |
+            | `stopbonus.exe` | Windows | 安装器 |
+            | `stopbonus-*-mac-*.zip` | macOS | 免安装（.app） |
+            | `stopbonus-*-linux-amd64.tar.gz` | Linux | 免安装 |
+            | `debian/*.deb` | Debian/Ubuntu | 安装包 |
 
+            **提示**：自动更新依赖 GitHub Pages（`gh-pages` 分支）上的更新站点内容。
+
+      - name: Prepare GitHub Pages content
+        run: touch build/packages/.nojekyll
+
+      - name: Publish update site to GitHub Pages (gh-pages)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: build/packages
+          publish_branch: gh-pages
+          force_orphan: true

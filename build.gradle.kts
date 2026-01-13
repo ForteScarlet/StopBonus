@@ -14,11 +14,84 @@ plugins {
     idea
 }
 
+val appVersionPropertyName = "appVersion"
+val appVersionEnvName = "APP_VERSION"
+val conveyorExecutablePropertyName = "conveyorExecutable"
+val conveyorExecutableEnvName = "CONVEYOR_EXECUTABLE"
+
+fun Project.resolveAppVersion(defaultVersion: String): String {
+    val fromProperty = providers.gradleProperty(appVersionPropertyName).orNull?.trim()
+    if (!fromProperty.isNullOrEmpty()) return fromProperty
+
+    val fromEnv = providers.environmentVariable(appVersionEnvName).orNull?.trim()
+    if (!fromEnv.isNullOrEmpty()) return fromEnv
+
+    val fromTag = providers.environmentVariable("GITHUB_REF_NAME").orNull?.trim()?.removePrefix("v")
+    if (!fromTag.isNullOrEmpty()) return fromTag
+
+    return defaultVersion
+}
+
+fun File.isUsableExecutable(): Boolean = isFile && canExecute()
+
+fun Project.resolveConveyorExecutable(): File {
+    fun findConfiguredExecutable(configuredPath: String?): File? {
+        val trimmed = configuredPath?.trim().orEmpty()
+        if (trimmed.isEmpty()) return null
+        val resolved = file(trimmed)
+        if (resolved.isUsableExecutable()) return resolved
+        throw GradleException("Conveyor 可执行文件不可用：$resolved")
+    }
+
+    val fromProperty = findConfiguredExecutable(providers.gradleProperty(conveyorExecutablePropertyName).orNull)
+    if (fromProperty != null) return fromProperty
+
+    val fromEnv = findConfiguredExecutable(providers.environmentVariable(conveyorExecutableEnvName).orNull)
+    if (fromEnv != null) return fromEnv
+
+    val isWindows = System.getProperty("os.name").lowercase().contains("windows")
+    val executableNames = if (isWindows) listOf("conveyor.cmd", "conveyor.exe", "conveyor.bat", "conveyor") else listOf("conveyor")
+
+    val fromPath = System.getenv("PATH")
+        ?.split(File.pathSeparatorChar)
+        ?.asSequence()
+        ?.flatMap { dir -> executableNames.asSequence().map { name -> File(dir, name) } }
+        ?.firstOrNull { it.isUsableExecutable() }
+    if (fromPath != null) return fromPath
+
+    val homeDir = File(System.getProperty("user.home"))
+    val commonDirs = listOf(
+        File("/opt/homebrew/bin"),
+        File("/usr/local/bin"),
+        homeDir.resolve(".local/bin"),
+        homeDir.resolve("bin"),
+        homeDir.resolve(".volta/bin"),
+    )
+    val fromCommonDirs = commonDirs
+        .asSequence()
+        .filter { it.isDirectory }
+        .flatMap { dir -> executableNames.asSequence().map { name -> dir.resolve(name) } }
+        .firstOrNull { it.isUsableExecutable() }
+    if (fromCommonDirs != null) return fromCommonDirs
+
+    val nvmDir = homeDir.resolve(".nvm/versions/node")
+    val fromNvm = nvmDir.listFiles()
+        ?.asSequence()
+        ?.filter { it.isDirectory }
+        ?.flatMap { nodeDir -> executableNames.asSequence().map { name -> nodeDir.resolve("bin").resolve(name) } }
+        ?.firstOrNull { it.isUsableExecutable() }
+    if (fromNvm != null) return fromNvm
+
+    val installHint = "建议用 npm 全局安装：npm i -g @hydraulic/conveyor（或显式传入 -P$conveyorExecutablePropertyName=...）"
+    throw GradleException("找不到 Conveyor 可执行文件（conveyor）。$installHint")
+}
+
 val appName = "StopBonus"
 val appPackage = "love.forte.bonus"
 val appMenuGroup = "forteApp"
 val appNameWithPackage = "$appPackage.$appName"
-val appVersion = "1.0.20"
+val defaultAppVersion = "1.0.20"
+val appVersion = resolveAppVersion(defaultAppVersion)
 
 group = appPackage
 version = appVersion
@@ -188,12 +261,17 @@ idea {
 tasks.register<Exec>("convey") {
     group = "conveyor"
 
-    val dir = layout.buildDirectory.dir("packages")
-    outputs.dir(dir)
+    val outputDir = layout.buildDirectory.dir("packages")
+    outputs.dir(outputDir)
     dependsOn("jar", "writeConveyorConfig")
 
     workingDir(layout.projectDirectory)
-    commandLine("conveyor", "make", "--output-dir", dir.get(), "site")
+    doFirst {
+        val javaHome = file(System.getProperty("java.home"))
+        environment("JAVA_HOME", javaHome.absolutePath)
 
-    // conveyor make --output-dir /Users/forte/IdeaProjects/StopBonus/build/packages site
+        val dir = outputDir.get().asFile
+        val conveyor = resolveConveyorExecutable()
+        commandLine(conveyor.absolutePath, "make", "--output-dir", dir.absolutePath, "site")
+    }
 }
