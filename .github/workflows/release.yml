@@ -38,7 +38,7 @@ jobs:
         run: |
           set -euxo pipefail
           VERSION="${GITHUB_REF_NAME#v}"
-          ./gradlew --no-daemon --stacktrace -PappVersion="$VERSION" convey --agree-to-license=1
+          CONVEYOR_AGREE_TO_LICENSE=1 ./gradlew --no-daemon --stacktrace -PappVersion="$VERSION" convey
 
       - name: Upload build output (for debugging)
         if: ${{ always() }}

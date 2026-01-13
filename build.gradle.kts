@@ -1,3 +1,4 @@
+import hydraulic.conveyor.gradle.ConveyorConfigTask
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.File
@@ -18,6 +19,8 @@ val appVersionPropertyName = "appVersion"
 val appVersionEnvName = "APP_VERSION"
 val conveyorExecutablePropertyName = "conveyorExecutable"
 val conveyorExecutableEnvName = "CONVEYOR_EXECUTABLE"
+val conveyorJdkVendorPropertyName = "conveyorJdkVendor"
+val conveyorJdkVendorEnvName = "CONVEYOR_JDK_VENDOR"
 
 fun Project.resolveAppVersion(defaultVersion: String): String {
     val fromProperty = providers.gradleProperty(appVersionPropertyName).orNull?.trim()
@@ -30,6 +33,26 @@ fun Project.resolveAppVersion(defaultVersion: String): String {
     if (!fromTag.isNullOrEmpty()) return fromTag
 
     return defaultVersion
+}
+
+fun Project.resolveConveyorJdkVendor(defaultVendor: String): String {
+    fun normalize(input: String): String = when (input.trim().lowercase()) {
+        "azul", "azul systems", "azul-systems" -> "azul systems"
+        "adoptium", "temurin", "eclipse" -> "adoptium"
+        "amazon", "corretto" -> "amazon"
+        "microsoft" -> "microsoft"
+        "openjdk" -> "openjdk"
+        "jetbrains", "jbr" -> "jetbrains"
+        else -> input.trim()
+    }
+
+    val fromProperty = providers.gradleProperty(conveyorJdkVendorPropertyName).orNull?.trim()
+    if (!fromProperty.isNullOrEmpty()) return normalize(fromProperty)
+
+    val fromEnv = providers.environmentVariable(conveyorJdkVendorEnvName).orNull?.trim()
+    if (!fromEnv.isNullOrEmpty()) return normalize(fromEnv)
+
+    return normalize(defaultVendor)
 }
 
 fun File.isUsableExecutable(): Boolean = isFile && canExecute()
@@ -92,9 +115,20 @@ val appMenuGroup = "forteApp"
 val appNameWithPackage = "$appPackage.$appName"
 val defaultAppVersion = "1.0.20"
 val appVersion = resolveAppVersion(defaultAppVersion)
+val conveyorJdkVendorOverride = run {
+    val fromProperty = providers.gradleProperty(conveyorJdkVendorPropertyName).orNull?.trim()
+    val fromEnv = providers.environmentVariable(conveyorJdkVendorEnvName).orNull?.trim()
+    val raw = fromProperty?.takeIf { it.isNotEmpty() } ?: fromEnv?.takeIf { it.isNotEmpty() }
+    if (raw.isNullOrEmpty()) null else resolveConveyorJdkVendor(raw)
+}
 
 group = appPackage
 version = appVersion
+
+tasks.withType<ConveyorConfigTask>().configureEach {
+    // 仅在显式指定时覆盖（避免改变默认产线与缓存命中）。
+    conveyorJdkVendorOverride?.let { jvmVendorValue.set(it) }
+}
 
 repositories {
     mavenCentral()
@@ -102,16 +136,13 @@ repositories {
     google()
 }
 
-java {
-    toolchain {
-        this.languageVersion.set(JavaLanguageVersion.of(17))
-    }
-}
-
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+        vendor.set(JvmVendorSpec.JETBRAINS)
+    }
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
+        jvmTarget.set(JvmTarget.JVM_21)
     }
 }
 
@@ -271,7 +302,18 @@ tasks.register<Exec>("convey") {
         environment("JAVA_HOME", javaHome.absolutePath)
 
         val dir = outputDir.get().asFile
+        // Conveyor 默认使用 SAFE_REPLACE：当输出目录内容被改动时会拒绝覆盖。
+        // `build/` 下的产物可安全重建，因此这里先清理输出目录，避免 “output dir changed” 导致构建失败。
+        project.delete(dir)
         val conveyor = resolveConveyorExecutable()
-        commandLine(conveyor.absolutePath, "make", "--output-dir", dir.absolutePath, "site")
+        commandLine(
+            conveyor.absolutePath,
+            "--console=plain",
+            "--show-log=error",
+            "make",
+            "--output-dir",
+            dir.absolutePath,
+            "site"
+        )
     }
 }
