@@ -1,6 +1,8 @@
 import hydraulic.conveyor.gradle.ConveyorConfigTask
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.time.Year
+import java.time.ZoneId
 
 plugins {
     alias(libs.plugins.kotlinJvm)
@@ -78,7 +80,8 @@ fun Project.resolveConveyorExecutable(): File {
     if (fromEnv != null) return fromEnv
 
     val isWindows = System.getProperty("os.name").lowercase().contains("windows")
-    val executableNames = if (isWindows) listOf("conveyor.cmd", "conveyor.exe", "conveyor.bat", "conveyor") else listOf("conveyor")
+    val executableNames =
+        if (isWindows) listOf("conveyor.cmd", "conveyor.exe", "conveyor.bat", "conveyor") else listOf("conveyor")
 
     val fromPath = System.getenv("PATH")
         ?.split(File.pathSeparatorChar)
@@ -110,7 +113,8 @@ fun Project.resolveConveyorExecutable(): File {
         ?.firstOrNull { it.isUsableExecutable() }
     if (fromNvm != null) return fromNvm
 
-    val installHint = "建议用 npm 全局安装：npm i -g @hydraulic/conveyor（或显式传入 -P$conveyorExecutablePropertyName=...）"
+    val installHint =
+        "建议用 npm 全局安装：npm i -g @hydraulic/conveyor（或显式传入 -P$conveyorExecutablePropertyName=...）"
     throw GradleException("找不到 Conveyor 可执行文件（conveyor）。$installHint")
 }
 
@@ -251,7 +255,8 @@ compose.desktop {
             packageVersion = appVersion
             vendor = "Forte Scarlet"
             description = "DO NOT BONUS YOURSELF!"
-            copyright = "Copyright © 2024-2026 Forte Scarlet. All rights reserved."
+            copyright =
+                "Copyright © 2024-${Year.now(ZoneId.of("Asia/Shanghai")).value} Forte Scarlet. All rights reserved."
 
             linux {
                 shortcut = true
