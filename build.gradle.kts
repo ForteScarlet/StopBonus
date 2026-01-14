@@ -21,6 +21,12 @@ val conveyorExecutableEnvName = "CONVEYOR_EXECUTABLE"
 val conveyorJdkVendorPropertyName = "conveyorJdkVendor"
 val conveyorJdkVendorEnvName = "CONVEYOR_JDK_VENDOR"
 
+val appName = "StopBonus"
+val appPackage = "love.forte.bonus"
+val appMenuGroup = "forteApp"
+val appNameWithPackage = "$appPackage.$appName"
+val defaultAppVersion = "1.0.24"
+
 fun Project.resolveAppVersion(defaultVersion: String): String {
     val fromProperty = providers.gradleProperty(appVersionPropertyName).orNull?.trim()
     if (!fromProperty.isNullOrEmpty()) return fromProperty
@@ -108,11 +114,7 @@ fun Project.resolveConveyorExecutable(): File {
     throw GradleException("找不到 Conveyor 可执行文件（conveyor）。$installHint")
 }
 
-val appName = "StopBonus"
-val appPackage = "love.forte.bonus"
-val appMenuGroup = "forteApp"
-val appNameWithPackage = "$appPackage.$appName"
-val defaultAppVersion = "1.0.23"
+
 val appVersion = resolveAppVersion(defaultAppVersion)
 val conveyorJdkVendorOverride = run {
     val fromProperty = providers.gradleProperty(conveyorJdkVendorPropertyName).orNull?.trim()
