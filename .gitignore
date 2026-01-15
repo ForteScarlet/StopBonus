@@ -46,9 +46,14 @@ bin/
 .logs
 .kotlin
 .claude
+AGENTS.md
+CLAUDE.md
+.conveyor
+.tasks
 
 generated.conveyor.conf
 
 .idea/**
 !.idea/.gitignore
 !.idea/runConfigurations
+
