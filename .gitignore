@@ -57,3 +57,4 @@ generated.conveyor.conf
 !.idea/.gitignore
 !.idea/runConfigurations
 
+.gradle-user

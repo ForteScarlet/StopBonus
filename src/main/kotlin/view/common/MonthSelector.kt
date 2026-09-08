@@ -1,10 +1,8 @@
 package view.common
 
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import common.Dimensions
 import java.time.Month
 import java.time.YearMonth
 import java.time.format.TextStyle
@@ -47,20 +45,22 @@ fun MonthSelector(
         onExpandedChange = { onExpandedChange(it && canExpand) },
         modifier = modifier
     ) {
-        OutlinedTextField(
-            modifier = Modifier
-                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                .widthIn(min = Dimensions.SelectorMinWidth, max = Dimensions.SelectorMaxWidth),
-            value = selectedMonth?.let { "${it}月" } ?: "",
-            readOnly = true,
-            onValueChange = { },
-            label = { Text("月") },
-            placeholder = { Text(if (canExpand) "选择" else "先选年") },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded && canExpand) },
-            colors = ExposedDropdownMenuDefaults.textFieldColors(),
-            singleLine = true,
-            enabled = canExpand,
-        )
+        // OutlinedTextField(
+        //     modifier = Modifier
+        //         .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+        //         .widthIn(min = Dimensions.SelectorMinWidth, max = Dimensions.SelectorMaxWidth),
+        //     value = selectedMonth?.let { "${it}月" } ?: "",
+        //     readOnly = true,
+        //     onValueChange = { },
+        //     label = { Text("月") },
+        //     placeholder = { Text(if (canExpand) "选择" else "先选年") },
+        //     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded && canExpand) },
+        //     colors = ExposedDropdownMenuDefaults.textFieldColors(),
+        //     singleLine = true,
+        //     enabled = canExpand,
+        // )
+
+        DropdownMenuDecorationBox(value = selectedMonth?.let { "${it}月" } ?: "", expanded, canExpand)
 
         ExposedDropdownMenu(
             expanded = expanded && canExpand,
@@ -80,3 +80,5 @@ fun MonthSelector(
         }
     }
 }
+
+

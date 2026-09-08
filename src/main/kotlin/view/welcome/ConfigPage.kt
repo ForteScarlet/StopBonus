@@ -11,6 +11,9 @@ import androidx.compose.ui.unit.sp
 import config.AppConfig
 import config.ConfigManager
 import config.LocalAppConfig
+import io.github.vinceglb.filekit.FileKit
+import io.github.vinceglb.filekit.PlatformFile
+import io.github.vinceglb.filekit.dialogs.openFileWithDefaultApplication
 import love.forte.bonus.bonus_self_desktop.generated.resources.Res
 import love.forte.bonus.bonus_self_desktop.generated.resources.icon_arrow_back
 import love.forte.bonus.bonus_self_desktop.generated.resources.icon_home
@@ -18,8 +21,9 @@ import org.jetbrains.compose.resources.painterResource
 import storeAppPath
 import view.common.StopBonusFilledTonalButton
 import view.common.StopBonusTextButton
-import java.awt.Desktop
+import java.nio.file.Path
 import kotlin.io.path.Path
+import kotlin.io.path.createDirectories
 
 /**
  * 配置页面
@@ -93,17 +97,8 @@ fun ConfigPage(onBack: () -> Unit) {
                 singleLine = true,
                 trailingIcon = {
                     IconButton(onClick = {
-                        runCatching {
-                            val dirFile = dataDir.toFile().apply { mkdirs() }
-                            if (!Desktop.isDesktopSupported() || !Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
-                                error("当前系统不支持打开目录。")
-                            }
-                            Desktop.getDesktop().open(dirFile)
-                        }.onFailure { e ->
-                            openDirError = buildString {
-                                appendLine(dataDir)
-                                append(e.message ?: e.toString())
-                            }.trim()
+                        openDirectory(dataDir).onFailure { error ->
+                            openDirError = directoryOpenError(dataDir, error)
                         }
                     }) {
                         Icon(
@@ -124,17 +119,8 @@ fun ConfigPage(onBack: () -> Unit) {
                 singleLine = true,
                 trailingIcon = {
                     IconButton(onClick = {
-                        runCatching {
-                            val dirFile = storeDir.toFile().apply { mkdirs() }
-                            if (!Desktop.isDesktopSupported() || !Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
-                                error("当前系统不支持打开目录。")
-                            }
-                            Desktop.getDesktop().open(dirFile)
-                        }.onFailure { e ->
-                            openDirError = buildString {
-                                appendLine(dataDir)
-                                append(e.message ?: e.toString())
-                            }.trim()
+                        openDirectory(storeDir).onFailure { error ->
+                            openDirError = directoryOpenError(storeDir, error)
                         }
                     }) {
                         Icon(
@@ -155,17 +141,8 @@ fun ConfigPage(onBack: () -> Unit) {
                 singleLine = true,
                 trailingIcon = {
                     IconButton(onClick = {
-                        runCatching {
-                            val dirFile = logDir.toFile().apply { mkdirs() }
-                            if (!Desktop.isDesktopSupported() || !Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
-                                error("当前系统不支持打开目录。")
-                            }
-                            Desktop.getDesktop().open(dirFile)
-                        }.onFailure { e ->
-                            openDirError = buildString {
-                                appendLine(dataDir)
-                                append(e.message ?: e.toString())
-                            }.trim()
+                        openDirectory(logDir).onFailure { error ->
+                            openDirError = directoryOpenError(logDir, error)
                         }
                     }) {
                         Icon(
@@ -243,3 +220,13 @@ fun ConfigPage(onBack: () -> Unit) {
         }
     }
 }
+
+private fun openDirectory(directory: Path): Result<Unit> = runCatching {
+    directory.createDirectories()
+    FileKit.openFileWithDefaultApplication(PlatformFile(directory.toString()))
+}
+
+private fun directoryOpenError(directory: Path, error: Throwable): String = buildString {
+    appendLine(directory)
+    append(error.message ?: error.toString())
+}.trim()

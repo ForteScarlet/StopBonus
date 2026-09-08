@@ -17,6 +17,10 @@ exposed = "1.5.0"
 koalaPlot = "0.12.1"
 # https://github.com/brettwooldridge/HikariCP
 hikariCP = "7.1.0"
+# https://github.com/vinceglb/FileKit
+filekit = "0.16.0"
+# https://poi.apache.org/
+apachePoi = "5.5.1"
 
 # https://conveyor.hydraulic.dev/21.0/configs/maven-gradle/#gradle
 conveyor = "2.0"
@@ -43,6 +47,9 @@ exposed-javaTime = { group = "org.jetbrains.exposed", name = "exposed-java-time"
 koalaPlot-core = { group = "io.github.koalaplot", name = "koalaplot-core", version.ref = "koalaPlot" }
 
 hikariCP = { module = "com.zaxxer:HikariCP", version.ref = "hikariCP" }
+
+filekit-dialogs-compose = { group = "io.github.vinceglb", name = "filekit-dialogs-compose", version.ref = "filekit" }
+apache-poi-ooxml = { group = "org.apache.poi", name = "poi-ooxml", version.ref = "apachePoi" }
 
 [bundles]
 exposed = ["exposed-core", "exposed-dao", "exposed-jdbc", "exposed-javaTime"]
