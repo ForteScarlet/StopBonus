@@ -27,7 +27,8 @@ import love.forte.bonus.bonus_self_desktop.generated.resources.Res
 import love.forte.bonus.bonus_self_desktop.generated.resources.icon_clear
 import love.forte.bonus.bonus_self_desktop.generated.resources.icon_home
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.exposed.sql.SizedCollection
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.SizedCollection
 import view.account.AccountViewPage
 import view.account.AccountViewPageSelector
 import view.account.PageViewState

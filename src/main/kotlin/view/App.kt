@@ -3,9 +3,9 @@ package view
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.animation.SharedTransitionScope.ResizeMode.Companion.ScaleToBounds
+import androidx.compose.animation.SharedTransitionScope.ResizeMode.Companion.scaleToBounds
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -81,7 +81,7 @@ fun FrameWindowScope.App(
                                         .sharedBounds(
                                             rememberSharedContentState("title-${targetAccountView.id}"),
                                             animatedVisibilityScope = this@AnimatedContent,
-                                            resizeMode = ScaleToBounds()
+                                            resizeMode = scaleToBounds()
                                         )
                                         .hoverable(hoverState),
                                     //fontFamily = FontBTTFamily(),

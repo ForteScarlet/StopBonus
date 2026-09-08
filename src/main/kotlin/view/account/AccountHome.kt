@@ -25,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import database.DatabaseOperator
 import database.entity.AccountView
-import org.jetbrains.exposed.sql.Transaction
+import org.jetbrains.exposed.v1.core.Transaction
 import view.AppState
 import view.account.home.AccountHomeView
 import view.account.record.AccountBonusRecordView
@@ -122,4 +122,3 @@ fun AccountHome(state: AccountState) {
 
 
 }
-

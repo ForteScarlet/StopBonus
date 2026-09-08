@@ -34,10 +34,10 @@ import love.forte.bonus.bonus_self_desktop.generated.resources.Res
 import love.forte.bonus.bonus_self_desktop.generated.resources.icon_date_range
 import love.forte.bonus.bonus_self_desktop.generated.resources.icon_delete
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.exposed.dao.with
-import org.jetbrains.exposed.sql.SortOrder
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.v1.core.SortOrder
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
+import org.jetbrains.exposed.v1.dao.with
 import view.account.PageViewState
 import view.account.SimpleAccountViewPageSelector
 import view.common.DeleteConfirmDialog
