@@ -24,7 +24,10 @@ import config.LocalAppConfig
 import database.entity.BonusRecords
 import io.github.koalaplot.core.ChartLayout
 import io.github.koalaplot.core.Symbol
-import io.github.koalaplot.core.bar.*
+import io.github.koalaplot.core.bar.BarScope
+import io.github.koalaplot.core.bar.GroupedVerticalBarPlot
+import io.github.koalaplot.core.bar.VerticalBarPlot
+import io.github.koalaplot.core.bar.verticalSolidBar
 import io.github.koalaplot.core.legend.ColumnLegend
 import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
@@ -33,13 +36,12 @@ import io.github.koalaplot.core.xygraph.XYGraph
 import io.github.koalaplot.core.xygraph.rememberAxisContent
 import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
 import org.jetbrains.exposed.v1.core.*
-import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.javatime.month
 import org.jetbrains.exposed.v1.javatime.year
+import org.jetbrains.exposed.v1.jdbc.select
 import view.account.PageViewState
 import view.account.record.format
 import view.common.StatsTypeSelector
-import view.common.StopBonusFilledTonalButton
 import java.time.*
 import java.time.format.TextStyle
 import java.util.*
@@ -104,46 +106,53 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
                 verticalArrangement = Arrangement.spacedBy(Dimensions.FlowRowVerticalSpacing),
             ) {
 
-            // 统计类型选择器
-            StatsTypeSelector(
-                currentType = type,
-                expanded = typeExpanded,
-                onExpandedChange = { typeExpanded = it },
-                onTypeChange = { type = it }
-            )
-
-            // 年份输入框
-            OutlinedTextField(
-                value = year?.toString() ?: "",
-                onValueChange = { value ->
-                    if (value.isEmpty()) {
-                        year = null
-                        return@OutlinedTextField
+                // 统计类型选择器
+                StatsTypeSelector(
+                    currentType = type,
+                    expanded = typeExpanded,
+                    onExpandedChange = { typeExpanded = it },
+                    onTypeChange = {
+                        type = it
+                        onConfirm()
                     }
-                    value.toIntOrNull()?.also { yearValue ->
-                        year = when {
-                            yearValue > now.year -> now.year
-                            yearValue == 0 -> 1
-                            yearValue < 0 -> abs(yearValue)
-                            else -> yearValue
+                )
+
+                // 年份输入框
+                OutlinedTextField(
+                    value = year?.toString() ?: "",
+                    onValueChange = { value ->
+                        if (value.isEmpty()) {
+                            year = null
+                            return@OutlinedTextField
                         }
-                    }
-                },
-                label = { Text("年") },
-                singleLine = true,
-                modifier = Modifier.widthIn(min = Dimensions.SelectorMinWidth, max = Dimensions.YearInputWidth),
-            )
+                        value.toIntOrNull()?.also { yearValue ->
+                            val newYearValue = when {
+                                yearValue > now.year -> now.year
+                                yearValue == 0 -> 1
+                                yearValue < 0 -> abs(yearValue)
+                                else -> yearValue
+                            }
+                            year = newYearValue
+                            if (newYearValue in 2000..2999) {
+                                onConfirm()
+                            }
+                        }
+                    },
+                    label = { Text("年") },
+                    singleLine = true,
+                    modifier = Modifier.widthIn(min = Dimensions.SelectorMinWidth, max = Dimensions.YearInputWidth),
+                )
 
-            val yv = year
+                val yv = year
 
-            // 确认按钮
-            StopBonusFilledTonalButton(
-                enabled = yv != null,
-                onClick = onConfirm,
-                modifier = Modifier.align(Alignment.CenterVertically),
-            ) {
-                Text("确定", fontFamily = FontLXGWNeoXiHeiScreenFamily())
-            }
+                // 确认按钮
+                // StopBonusFilledTonalButton(
+                //     enabled = yv != null,
+                //     onClick = onConfirm,
+                //     modifier = Modifier.align(Alignment.CenterVertically),
+                // ) {
+                //     Text("确定", fontFamily = FontLXGWNeoXiHeiScreenFamily())
+                // }
             }
         }
     }

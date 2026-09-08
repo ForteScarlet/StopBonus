@@ -3,11 +3,13 @@ package view.account.stats
 import FontBTTFamily
 import FontLXGWNeoXiHeiScreenFamily
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,6 +21,7 @@ import androidx.compose.ui.input.key.*
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastZip
 import common.Dimensions
 import config.LocalAppConfig
 import database.entity.BonusRecord
@@ -32,7 +35,7 @@ import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import io.github.koalaplot.core.xygraph.CategoryAxisModel
 import io.github.koalaplot.core.xygraph.XYGraph
 import io.github.koalaplot.core.xygraph.rememberAxisContent
-import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
+import io.github.koalaplot.core.xygraph.rememberIntLinearAxisModel
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.between
 import org.jetbrains.exposed.v1.core.eq
@@ -40,13 +43,11 @@ import view.account.PageViewState
 import view.account.record.format
 import view.common.MonthSelector
 import view.common.StatsTypeSelector
-import view.common.StopBonusFilledTonalButton
 import java.time.Duration
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZonedDateTime
 import kotlin.math.abs
-import kotlin.math.max
 
 
 /**
@@ -69,7 +70,6 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
         Text("日统计")
     }
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
     @Composable
     override fun TopBar(state: PageViewState) {
         val now = YearMonth.now()
@@ -97,7 +97,7 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
             if (yv != null && mv != null) {
                 yearMonth = YearMonth.of(yv, mv)
             }
-            this@MonthDailyModeStats.type = type
+            // this@MonthDailyModeStats.type = type
         }
 
         Box(
@@ -122,58 +122,70 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(Dimensions.StandardSpacing),
                 verticalArrangement = Arrangement.spacedBy(Dimensions.FlowRowVerticalSpacing),
+                itemVerticalAlignment = Alignment.CenterVertically
             ) {
-
-            // 统计类型选择器
-            StatsTypeSelector(
-                currentType = type,
-                expanded = typeExpanded,
-                onExpandedChange = { typeExpanded = it },
-                onTypeChange = { type = it }
-            )
-
-            // 年份输入框
-            OutlinedTextField(
-                value = year?.toString() ?: "",
-                onValueChange = { value ->
-                    if (value.isEmpty()) {
-                        year = null
-                        return@OutlinedTextField
+                // 统计类型选择器
+                StatsTypeSelector(
+                    currentType = type,
+                    expanded = typeExpanded,
+                    onExpandedChange = { typeExpanded = it },
+                    onTypeChange = {
+                        type = it
+                        onConfirm()
                     }
-                    value.toIntOrNull()?.also { yearValue ->
-                        year = when {
-                            yearValue > now.year -> now.year
-                            yearValue == 0 -> 1
-                            yearValue < 0 -> abs(yearValue)
-                            else -> yearValue
+                )
+
+                // 年份输入框
+                OutlinedTextField(
+                    value = year?.toString() ?: "",
+                    onValueChange = { value ->
+                        if (value.isEmpty()) {
+                            year = null
+                            return@OutlinedTextField
                         }
-                    }
-                },
-                label = { Text("年") },
-                singleLine = true,
-                modifier = Modifier.widthIn(min = Dimensions.SelectorMinWidth, max = Dimensions.YearInputWidth),
-            )
+                        value.toIntOrNull()?.also { yearValue ->
+                            val newYearValue = when {
+                                yearValue > now.year -> now.year
+                                yearValue == 0 -> 1
+                                yearValue < 0 -> abs(yearValue)
+                                else -> yearValue
+                            }
+                            year = newYearValue
+                            if (newYearValue in 2000..2999) {
+                                onConfirm()
+                            }
+                        }
+                    },
+                    label = { Text("年") },
+                    singleLine = true,
+                    modifier = Modifier.widthIn(min = Dimensions.SelectorMinWidth, max = Dimensions.YearInputWidth)
+                        //.border(1.dp, Color.Red),
+                )
 
-            // 月份下拉选择器
-            MonthSelector(
-                selectedMonth = month,
-                year = year,
-                expanded = monthExpanded,
-                onExpandedChange = { monthExpanded = it },
-                onMonthChange = { month = it }
-            )
+                // 月份下拉选择器
+                MonthSelector(
+                    selectedMonth = month,
+                    year = year,
+                    expanded = monthExpanded,
+                    onExpandedChange = { monthExpanded = it },
+                    onMonthChange = {
+                        month = it
+                        onConfirm()
+                    },
+                    //modifier = Modifier.align(Alignment.CenterVertically).border(1.dp, Color.Red),
+                )
 
-            val yv = year
-            val mv = month
+                val yv = year
+                val mv = month
 
-            // 确认按钮
-            StopBonusFilledTonalButton(
-                enabled = yv != null && mv != null,
-                onClick = onConfirm,
-                modifier = Modifier.align(Alignment.CenterVertically),
-            ) {
-                Text("确定", fontFamily = FontLXGWNeoXiHeiScreenFamily())
-            }
+                // 确认按钮
+                // StopBonusFilledTonalButton(
+                //     enabled = yv != null && mv != null,
+                //     onClick = onConfirm,
+                //     modifier = Modifier.align(Alignment.CenterVertically),
+                // ) {
+                //     Text("确定", fontFamily = FontLXGWNeoXiHeiScreenFamily())
+                // }
             }
         }
     }
@@ -188,7 +200,6 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
         }
     }
 
-    @OptIn(ExperimentalKoalaPlotApi::class)
     @Composable
     private fun CountContent(state: PageViewState) {
         val zone = LocalAppConfig.current.zoneId
@@ -202,7 +213,7 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
 
         data class Data(
             val boroughs: List<Int>,
-            val population: List<Float>,
+            val population: List<Int>,
         )
 
         var data by remember(type, yearMonth) { mutableStateOf<Data?>(null) }
@@ -221,11 +232,11 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
 
 
                 val boroughs = mutableListOf<Int>()
-                val population = mutableListOf<Float>()
+                val population = mutableListOf<Int>()
 
                 for (i in 1..maxDay) {
                     boroughs.add(i)
-                    population.add(countGroup.getOrDefault(i, 0).toFloat())
+                    population.add(countGroup.getOrDefault(i, 0))
                 }
 
                 data = Data(boroughs, population)
@@ -244,8 +255,8 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
                 KoalaPlotTheme {
                     XYGraph(
                         xAxisModel = remember { CategoryAxisModel(d.boroughs) },
-                        yAxisModel = rememberFloatLinearAxisModel(
-                            0f..max(1f, d.population.max() / 0.85f),
+                        yAxisModel = rememberIntLinearAxisModel(//) rememberFloatLinearAxisModel(
+                            0..d.population.max().coerceAtLeast(1),
                             minorTickCount = 0
                         ),
                         xAxisContent = rememberAxisContent(
@@ -258,10 +269,10 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
                         ),
                     ) {
                         VerticalBarPlot(
-                            xData = d.boroughs,
-                            yData = d.population,
-                            barWidth = 0.65f,
-                            bar = { _, index, _ ->
+                            data = d.boroughs.fastZip(d.population) { borough, population ->
+                                verticalBarPlotEntry(borough, 0, population)
+                            },
+                            bar = { series, index, value ->
                                 DefaultBarWithTooltip(
                                     brush = SolidColor(StatsColors.firstColor),
                                     shape = RoundedCornerShape(topStartPercent = 35, topEndPercent = 35),
@@ -272,15 +283,15 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
                                             shape = RoundedCornerShape(35),
                                             colors = CardDefaults.elevatedCardColors(containerColor = Color.LightGray)
                                         ) {
-                                            val date = d.boroughs[index]
-                                            val value = d.population[index]
+                                            val date = value.x.let { if (it < 10) "0$it" else it.toString() }
+                                            val value = value.y.end
                                             Column(modifier = Modifier.padding(12.dp)) {
                                                 Text(
                                                     "日期: $yearMonth-$date",
                                                     fontFamily = FontLXGWNeoXiHeiScreenFamily()
                                                 )
                                                 Text(
-                                                    "次数: ${value.toInt()}",
+                                                    "次数: $value",
                                                     fontFamily = FontLXGWNeoXiHeiScreenFamily()
                                                 )
                                             }
@@ -289,6 +300,39 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
                                 )
                             }
                         )
+
+                        // VerticalBarPlot(
+                        //     xData = d.boroughs.map { it.toFloat() },
+                        //     yData = d.population.map { it.toFloat() },
+                        //     barWidth = 0.65f,
+                        //     bar = { _, index, _ ->
+                        //         DefaultBarWithTooltip(
+                        //             brush = SolidColor(StatsColors.firstColor),
+                        //             shape = RoundedCornerShape(topStartPercent = 35, topEndPercent = 35),
+                        //             tooltip = {
+                        //                 ElevatedCard(
+                        //                     modifier = Modifier
+                        //                         .clip(RoundedCornerShape(35)),
+                        //                     shape = RoundedCornerShape(35),
+                        //                     colors = CardDefaults.elevatedCardColors(containerColor = Color.LightGray)
+                        //                 ) {
+                        //                     val date = d.boroughs[index]
+                        //                     val value = d.population[index]
+                        //                     Column(modifier = Modifier.padding(12.dp)) {
+                        //                         Text(
+                        //                             "日期: $yearMonth-$date",
+                        //                             fontFamily = FontLXGWNeoXiHeiScreenFamily()
+                        //                         )
+                        //                         Text(
+                        //                             "次数: ${value.toInt()}",
+                        //                             fontFamily = FontLXGWNeoXiHeiScreenFamily()
+                        //                         )
+                        //                     }
+                        //                 }
+                        //             }
+                        //         )
+                        //     }
+                        // )
                     }
                 }
 
@@ -301,7 +345,7 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
         StatsColors.secondColor
     )
 
-    @OptIn(ExperimentalKoalaPlotApi::class, ExperimentalFoundationApi::class)
+    @OptIn(ExperimentalKoalaPlotApi::class)
     @Composable
     private fun DurationContent(state: PageViewState) {
         val zone = LocalAppConfig.current.zoneId
@@ -314,13 +358,13 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
 
         data class Data(
             val boroughs: List<Int>,
-            val population: List<List<Float>>,
+            val population: List<List<Int>>,
         )
 
         data class Counter(
-            val count: Float,
-            val totalMinutes: Float,
-            val avgMinutes: Float,
+            val count: Int,
+            val totalMinutes: Int,
+            val avgMinutes: Int,
         )
 
         var data by remember(type, yearMonth) { mutableStateOf<Data?>(null) }
@@ -335,27 +379,27 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
 
                 val countGroup = allRecords.groupBy { it.startTime.atZone(zone).toLocalDate().dayOfMonth }
                     .mapValues { (_, value) ->
-                        val count = value.count().toFloat()
-                        val totalDurationMinutes =
+                        val count = value.count()
+                        val totalDurationMinutes: Int =
                             value.map { it.duration }.reduce { a, b -> a + b }
-                                .toMinutes().toFloat()
+                                .toMinutes().toInt()
 
-                        val avgDurationMinutes: Float = if (count > 0) {
+                        val avgDurationMinutes: Int = if (count > 0) {
                             totalDurationMinutes / count
-                        } else 0f
+                        } else 0
 
                         Counter(count, totalDurationMinutes, avgDurationMinutes)
                     }
 
 
                 val boroughs = mutableListOf<Int>()
-                val population = mutableListOf<List<Float>>()
+                val population = mutableListOf<List<Int>>()
 
                 for (i in 1..maxDay) {
                     boroughs.add(i)
                     // countGroup.getOrDefault(i, 0).toFloat()
                     val counter = countGroup.getOrDefault(i, null)
-                    population.add(listOf(counter?.totalMinutes ?: 0f, counter?.avgMinutes ?: 0f))
+                    population.add(listOf(counter?.totalMinutes ?: 0, counter?.avgMinutes ?: 0))
                 }
 
                 data = Data(boroughs, population)
@@ -398,8 +442,8 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
 
                         XYGraph(
                             xAxisModel = remember(d) { CategoryAxisModel(d.boroughs) },
-                            yAxisModel = rememberFloatLinearAxisModel(
-                                0f..max(1f, d.population.flatten().max() / 0.85f),
+                            yAxisModel = rememberIntLinearAxisModel(
+                                0..d.population.flatten().max().coerceAtLeast(1),
                                 minorTickCount = 0
                             ),
                             xAxisContent = rememberAxisContent(
@@ -413,7 +457,7 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
                         ) {
 
                             @Composable
-                            fun BarScope.Bar(name: String, color: Color, date: Int, value: Float) {
+                            fun BarScope.Bar(name: String, color: Color, date: Int, value: Int) {
                                 DefaultBarWithTooltip(
                                     brush = SolidColor(color),
                                     shape = RoundedCornerShape(topStartPercent = 35, topEndPercent = 35),
@@ -445,11 +489,12 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
                                 animationSpec = KoalaPlotTheme.animationSpec,
                             ) {
                                 // 1: 总
+
                                 series(verticalSolidBar(chartColors[0])) {
                                     d.boroughs.forEachIndexed { index, borough ->
                                         val value = d.population[index][0]
 
-                                        item(borough, 0f, d.population[index][0]) { _, _, _ ->
+                                        item(borough, 0, d.population[index][0]) { _, _, _ ->
                                             Bar("总时长(分钟)", chartColors[0], borough, value)
                                         }
                                     }
@@ -459,7 +504,7 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
                                 series(verticalSolidBar(chartColors[1])) {
                                     d.boroughs.forEachIndexed { index, borough ->
                                         val value = d.population[index][1]
-                                        item(borough, 0f, d.population[index][1]) { _, _, _ ->
+                                        item(borough, 0, d.population[index][1]) { _, _, _ ->
                                             Bar("平均时长(分钟)", chartColors[1], borough, value)
                                         }
                                     }

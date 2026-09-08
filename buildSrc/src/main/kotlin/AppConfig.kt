@@ -6,7 +6,7 @@ object AppConfig {
     const val APP_NAME = "StopBonus"
     const val APP_PACKAGE = "love.forte.bonus"
     const val APP_MENU_GROUP = "forteApp"
-    const val DEFAULT_VERSION = "1.0.24"
+    const val DEFAULT_VERSION = "1.1.0"
 
     val appNameWithPackage: String
         get() = "$APP_PACKAGE.$APP_NAME"

@@ -1,11 +1,9 @@
 package view.common
 
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import common.Dimensions
+import androidx.compose.ui.text.TextRange
 import view.account.stats.StatsType
 
 /**
@@ -22,21 +20,23 @@ fun StatsTypeSelector(
     onExpandedChange: (Boolean) -> Unit,
     onTypeChange: (StatsType) -> Unit
 ) {
+    val textFieldState = rememberTextFieldState(currentType.title, TextRange.Zero)
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = onExpandedChange,
     ) {
-        OutlinedTextField(
-            modifier = Modifier
-                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                .widthIn(min = Dimensions.SelectorMinWidth, max = 180.dp),
-            value = currentType.title,
-            readOnly = true,
-            onValueChange = { },
-            label = { Text("统计类型") },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            colors = ExposedDropdownMenuDefaults.textFieldColors(),
-        )
+        // OutlinedTextField(
+        //     modifier = Modifier
+        //         .widthIn(min = Dimensions.SelectorMinWidth, max = 180.dp)
+        //         .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+        //     state = textFieldState,
+        //     readOnly = true,
+        //     label = { Text("统计类型") },
+        //     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+        //     colors = ExposedDropdownMenuDefaults.textFieldColors(),
+        // )
+
+        DropdownMenuDecorationBox(value = "统计类型", expanded, true)
 
         ExposedDropdownMenu(
             expanded = expanded,

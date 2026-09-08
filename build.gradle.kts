@@ -73,6 +73,8 @@ dependencies {
     implementation(libs.hikariCP)
     implementation(libs.bundles.exposed)
     implementation(libs.koalaPlot.core)
+    implementation(libs.filekit.dialogs.compose)
+    implementation(libs.apache.poi.ooxml)
 }
 
 buildConfig {
