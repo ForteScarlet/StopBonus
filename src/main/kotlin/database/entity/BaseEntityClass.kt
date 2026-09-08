@@ -1,10 +1,10 @@
 package database.entity
 
 import config.ClockProvider
-import org.jetbrains.exposed.dao.*
-import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.dao.id.IntIdTable
-import org.jetbrains.exposed.sql.javatime.timestamp
+import org.jetbrains.exposed.v1.core.dao.id.EntityID
+import org.jetbrains.exposed.v1.core.dao.id.IntIdTable
+import org.jetbrains.exposed.v1.dao.*
+import org.jetbrains.exposed.v1.javatime.timestamp
 
 private fun currentInstant() = ClockProvider.now()
 

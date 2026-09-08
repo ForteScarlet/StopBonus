@@ -1,7 +1,7 @@
 package view.login
 
 import androidx.compose.animation.*
-import androidx.compose.animation.SharedTransitionScope.ResizeMode.Companion.ScaleToBounds
+import androidx.compose.animation.SharedTransitionScope.ResizeMode.Companion.scaleToBounds
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -19,8 +19,8 @@ import kotlinx.coroutines.launch
 import love.forte.bonus.bonus_self_desktop.generated.resources.Res
 import love.forte.bonus.bonus_self_desktop.generated.resources.icon_home
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import view.AppState
 import view.common.StopBonusButton
 import view.common.StopBonusElevatedButton
@@ -153,7 +153,7 @@ private inline fun AccountList(
                                     .sharedBounds(
                                         shardTitleTransactionScope.rememberSharedContentState("title-$itemId"),
                                         animatedVisibilityScope = animatedContentScope,
-                                        resizeMode = ScaleToBounds()
+                                        resizeMode = scaleToBounds()
                                     ),
                                 // fontFamily = FontBTTFamily(),
                                 text = item.name

@@ -1,8 +1,10 @@
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.process.ExecOperations
 import org.gradle.api.tasks.*
 import java.io.File
 import javax.inject.Inject
@@ -19,7 +21,9 @@ import javax.inject.Inject
  * ```
  */
 abstract class ConveyorExecTask @Inject constructor(
-    private val layout: ProjectLayout
+    private val layout: ProjectLayout,
+    private val fileSystemOperations: FileSystemOperations,
+    private val execOperations: ExecOperations,
 ) : DefaultTask() {
 
     init {
@@ -67,7 +71,9 @@ abstract class ConveyorExecTask @Inject constructor(
 
         // Conveyor 默认使用 SAFE_REPLACE：当输出目录内容被改动时会拒绝覆盖。
         // build/ 下的产物可安全重建，因此先清理输出目录，避免 "output dir changed" 导致构建失败。
-        project.delete(outputDir)
+        fileSystemOperations.delete {
+            delete(outputDir)
+        }
 
         val conveyor = project.resolveConveyorExecutable()
 
@@ -89,8 +95,8 @@ abstract class ConveyorExecTask @Inject constructor(
             addAll(extraArgs.get())
         }
 
-        project.exec {
-            workingDir(layout.projectDirectory)
+        execOperations.exec {
+            workingDir(layout.projectDirectory.asFile)
             environment("JAVA_HOME", javaHome.absolutePath)
             commandLine(commandLineArgs)
             standardOutput = System.out

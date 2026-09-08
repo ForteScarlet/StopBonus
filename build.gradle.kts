@@ -16,6 +16,8 @@ plugins {
 }
 
 val appVersion = resolveAppVersion()
+val composeVersion = libs.versions.compose.plugin.get()
+val material3Version = libs.versions.compose.material3.get()
 
 group = AppConfig.APP_PACKAGE
 version = appVersion
@@ -48,20 +50,20 @@ dependencies {
         exclude(group = "org.jetbrains.compose.material", module = "material-desktop")
     }
 
-    linuxAmd64(compose.desktop.linux_x64, excludeMaterial2)
-    linuxAarch64(compose.desktop.linux_arm64, excludeMaterial2)
-    windowsAmd64(compose.desktop.windows_x64, excludeMaterial2)
-    windowsAarch64(compose.desktop.windows_arm64, excludeMaterial2)
-    macAmd64(compose.desktop.macos_x64, excludeMaterial2)
-    macAarch64(compose.desktop.macos_arm64, excludeMaterial2)
+    linuxAmd64("org.jetbrains.compose.desktop:desktop-jvm-linux-x64:$composeVersion", excludeMaterial2)
+    linuxAarch64("org.jetbrains.compose.desktop:desktop-jvm-linux-arm64:$composeVersion", excludeMaterial2)
+    windowsAmd64("org.jetbrains.compose.desktop:desktop-jvm-windows-x64:$composeVersion", excludeMaterial2)
+    windowsAarch64("org.jetbrains.compose.desktop:desktop-jvm-windows-arm64:$composeVersion", excludeMaterial2)
+    macAmd64("org.jetbrains.compose.desktop:desktop-jvm-macos-x64:$composeVersion", excludeMaterial2)
+    macAarch64("org.jetbrains.compose.desktop:desktop-jvm-macos-arm64:$composeVersion", excludeMaterial2)
 
-    implementation(compose.ui)
-    implementation(compose.uiUtil)
-    implementation(compose.uiTooling)
+    implementation("org.jetbrains.compose.ui:ui:$composeVersion")
+    implementation("org.jetbrains.compose.ui:ui-util:$composeVersion")
+    implementation("org.jetbrains.compose.ui:ui-tooling:$composeVersion")
     // 图标直接在 https://fonts.google.com/icons?hl=zh-cn 按需下载
-    implementation(compose.material3)
-    implementation(compose.components.resources)
-    implementation(compose.animation)
+    implementation("org.jetbrains.compose.material3:material3:$material3Version")
+    implementation("org.jetbrains.compose.components:components-resources:$composeVersion")
+    implementation("org.jetbrains.compose.animation:animation:$composeVersion")
 
     implementation(libs.h2db)
     runtimeOnly(libs.logback.classic)

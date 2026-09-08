@@ -3,7 +3,7 @@ package view.account.weapon
 import FontBTTFamily
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -21,8 +21,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import love.forte.bonus.bonus_self_desktop.generated.resources.*
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import view.account.PageViewState
 import view.account.SimpleAccountViewPageSelector
 import view.common.DeleteConfirmDialog

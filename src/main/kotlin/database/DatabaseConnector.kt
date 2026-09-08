@@ -3,14 +3,15 @@ package database
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import database.entity.AllTables
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.DatabaseConfig
-import org.jetbrains.exposed.sql.Schema
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.Transaction
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.transactions.transactionManager
+import kotlinx.coroutines.withContext
+import org.jetbrains.exposed.v1.core.DatabaseConfig
+import org.jetbrains.exposed.v1.core.Schema
+import org.jetbrains.exposed.v1.core.Transaction
+import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.SchemaUtils
+import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.jdbc.transactions.transactionManager
 import java.nio.file.Path
 import kotlin.coroutines.CoroutineContext
 import kotlin.io.path.Path
@@ -22,8 +23,12 @@ import kotlin.io.path.pathString
  *
  * 提供事务管理和数据库操作的统一入口
  */
-class DatabaseOperator(val database: Database) {
-    fun close() {
+class DatabaseOperator(
+    val database: Database,
+    private val dataSource: HikariDataSource,
+) : AutoCloseable {
+    override fun close() {
+        dataSource.close()
     }
 
     /**
@@ -33,11 +38,19 @@ class DatabaseOperator(val database: Database) {
         context: CoroutineContext? = null,
         transactionIsolation: Int? = null,
         crossinline statement: suspend Transaction.() -> T
-    ): T = newSuspendedTransaction(
-        context = context,
-        db = database,
-        transactionIsolation = transactionIsolation,
-    ) { statement() }
+    ): T = if (context == null) {
+        suspendTransaction(
+            db = database,
+            transactionIsolation = transactionIsolation,
+        ) { statement() }
+    } else {
+        withContext(context) {
+            suspendTransaction(
+                db = database,
+                transactionIsolation = transactionIsolation,
+            ) { statement() }
+        }
+    }
 
     /**
      * 在同步事务中执行数据库操作
@@ -104,7 +117,7 @@ fun connectDatabaseOperator(dataDir: Path = DEFAULT_DATA_DIR, schemaName: String
 
     database.init(schema)
 
-    return DatabaseOperator(database)
+    return DatabaseOperator(database, source)
 }
 
 private inline fun hikariConfig(block: HikariConfig.() -> Unit): HikariConfig = HikariConfig().apply {
@@ -113,18 +126,15 @@ private inline fun hikariConfig(block: HikariConfig.() -> Unit): HikariConfig = 
 
 
 /**
- * 初始化数据库 schema 和表结构
+ * 初始化数据库 schema 和表结构。
+ *
+ * 这里只负责创建首次运行所需的表；已有数据库的结构演进必须通过显式、可审计的迁移完成，
+ * 避免启动时自动执行不可逆的 schema 修补。
  */
 fun Database.init(schema: Schema) {
     transaction(this) {
-        if (!schema.exists()) {
-            SchemaUtils.createSchema(schema)
-        }
+        SchemaUtils.createSchema(schema)
         SchemaUtils.setSchema(schema)
-        SchemaUtils.createMissingTablesAndColumns(
-            tables = AllTables,
-            inBatch = true,
-            withLogs = true,
-        )
+        SchemaUtils.create(*AllTables, inBatch = true)
     }
 }

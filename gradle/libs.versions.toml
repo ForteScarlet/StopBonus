@@ -1,23 +1,25 @@
 [versions]
-compose-plugin = "1.9.3"
+compose-plugin = "1.12.0"
+compose-material3 = "1.9.0"
 # Kotlin
-kotlin = "2.3.0"
-buildconfig = "6.0.7"
-kotlinx-coroutines = "1.10.1"
-kotlinx-serialization = "1.9.0"
+kotlin = "2.4.20"
+buildconfig = "6.0.10"
+kotlinx-coroutines = "1.11.0"
+kotlinx-serialization = "1.11.0"
 # logback
-logback = "1.4.14"
+logback = "1.6.3"
 # https://github.com/h2database/h2database
-h2 = "2.3.232"
+h2 = "2.5.250"
 # https://github.com/JetBrains/Exposed
-exposed = "0.57.0" # TODO 1.0.0-rc-3
+exposed = "1.5.0"
 # https://github.com/KoalaPlot/koalaplot-core
 # https://koalaplot.github.io/
-#koalaPlot = "0.5.3"
-koalaPlot = "0.7.1"
+koalaPlot = "0.12.1"
+# https://github.com/brettwooldridge/HikariCP
+hikariCP = "7.1.0"
 
 # https://conveyor.hydraulic.dev/21.0/configs/maven-gradle/#gradle
-conveyor = "1.12"
+conveyor = "2.0"
 
 [libraries]
 # logback
@@ -30,7 +32,6 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 
 # h2 driver
 h2db = { module = "com.h2database:h2", version.ref = "h2" }
-h2-r2dbc = { module = "io.r2dbc:r2dbc-h2", version = "1.0.0.RELEASE" }
 
 # exposed
 exposed-core = { group = "org.jetbrains.exposed", name = "exposed-core", version.ref = "exposed" }
@@ -41,11 +42,7 @@ exposed-javaTime = { group = "org.jetbrains.exposed", name = "exposed-java-time"
 # koalaPlot
 koalaPlot-core = { group = "io.github.koalaplot", name = "koalaplot-core", version.ref = "koalaPlot" }
 
-# com.zaxxer:HikariCP
-# https://github.com/brettwooldridge/HikariCP
-hikariCP = "com.zaxxer:HikariCP:6.2.1"
-
-junique = "de.huxhorn.lilith:de.huxhorn.lilith.3rdparty.junique:1.0.4"
+hikariCP = { module = "com.zaxxer:HikariCP", version.ref = "hikariCP" }
 
 [bundles]
 exposed = ["exposed-core", "exposed-dao", "exposed-jdbc", "exposed-javaTime"]

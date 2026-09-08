@@ -31,8 +31,11 @@ import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import io.github.koalaplot.core.xygraph.CategoryAxisModel
 import io.github.koalaplot.core.xygraph.XYGraph
+import io.github.koalaplot.core.xygraph.rememberAxisContent
 import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
-import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.between
+import org.jetbrains.exposed.v1.core.eq
 import view.account.PageViewState
 import view.account.record.format
 import view.common.MonthSelector
@@ -245,18 +248,24 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
                             0f..max(1f, d.population.max() / 0.85f),
                             minorTickCount = 0
                         ),
-                        yAxisTitle = "奖励次数",
-                        xAxisTitle = "日期"
+                        xAxisContent = rememberAxisContent(
+                            labels = { Text(it.toString()) },
+                            title = { Text("日期") },
+                        ),
+                        yAxisContent = rememberAxisContent(
+                            labels = { Text(it.toString()) },
+                            title = { Text("奖励次数") },
+                        ),
                     ) {
                         VerticalBarPlot(
                             xData = d.boroughs,
                             yData = d.population,
                             barWidth = 0.65f,
-                            bar = { index ->
-                                DefaultVerticalBar(
+                            bar = { _, index, _ ->
+                                DefaultBarWithTooltip(
                                     brush = SolidColor(StatsColors.firstColor),
                                     shape = RoundedCornerShape(topStartPercent = 35, topEndPercent = 35),
-                                    hoverElement = {
+                                    tooltip = {
                                         ElevatedCard(
                                             modifier = Modifier
                                                 .clip(RoundedCornerShape(35)),
@@ -393,16 +402,22 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
                                 0f..max(1f, d.population.flatten().max() / 0.85f),
                                 minorTickCount = 0
                             ),
-                            yAxisTitle = "奖励时长(分钟)",
-                            xAxisTitle = "日期"
+                            xAxisContent = rememberAxisContent(
+                                labels = { Text(it.toString()) },
+                                title = { Text("日期") },
+                            ),
+                            yAxisContent = rememberAxisContent(
+                                labels = { Text(it.toString()) },
+                                title = { Text("奖励时长(分钟)") },
+                            ),
                         ) {
 
                             @Composable
                             fun BarScope.Bar(name: String, color: Color, date: Int, value: Float) {
-                                DefaultVerticalBar(
+                                DefaultBarWithTooltip(
                                     brush = SolidColor(color),
                                     shape = RoundedCornerShape(topStartPercent = 35, topEndPercent = 35),
-                                    hoverElement = {
+                                    tooltip = {
                                         ElevatedCard(
                                             modifier = Modifier
                                                 .clip(RoundedCornerShape(35)),
@@ -425,23 +440,26 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
                                 )
                             }
 
-                            GroupedVerticalBarPlot(maxBarGroupWidth = 0.65f) {
+                            GroupedVerticalBarPlot(
+                                maxBarGroupWidth = 0.65f,
+                                animationSpec = KoalaPlotTheme.animationSpec,
+                            ) {
                                 // 1: 总
-                                series(solidBar(chartColors[0])) {
+                                series(verticalSolidBar(chartColors[0])) {
                                     d.boroughs.forEachIndexed { index, borough ->
                                         val value = d.population[index][0]
 
-                                        item(borough, 0f, d.population[index][0]) {
+                                        item(borough, 0f, d.population[index][0]) { _, _, _ ->
                                             Bar("总时长(分钟)", chartColors[0], borough, value)
                                         }
                                     }
                                 }
 
                                 // 2: 平均
-                                series(solidBar(chartColors[1])) {
+                                series(verticalSolidBar(chartColors[1])) {
                                     d.boroughs.forEachIndexed { index, borough ->
                                         val value = d.population[index][1]
-                                        item(borough, 0f, d.population[index][1]) {
+                                        item(borough, 0f, d.population[index][1]) { _, _, _ ->
                                             Bar("平均时长(分钟)", chartColors[1], borough, value)
                                         }
                                     }

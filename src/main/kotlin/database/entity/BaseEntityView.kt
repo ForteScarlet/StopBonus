@@ -1,7 +1,7 @@
 package database.entity
 
-import org.jetbrains.exposed.dao.DaoEntityID
-import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.v1.core.dao.id.EntityID
+import org.jetbrains.exposed.v1.dao.DaoEntityID
 
 
 /**
