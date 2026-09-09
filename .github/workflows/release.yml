@@ -28,6 +28,8 @@ jobs:
         with:
           distribution: jetbrains
           java-version: 21
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: gradle/actions/setup-gradle@v5
 
