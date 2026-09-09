@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.time.temporal.ChronoUnit
 import java.util.*
 
@@ -26,13 +27,14 @@ object DateTimeFormatters {
      */
     fun formatRelativeDate(
         targetDate: LocalDate,
-        referenceDate: LocalDate
+        referenceDate: LocalDate,
+        locale: Locale? = null,
     ): String {
         val daysDiff = ChronoUnit.DAYS.between(targetDate, referenceDate)
         val monthsDiff = ChronoUnit.MONTHS.between(targetDate, referenceDate)
 
         return when {
-            daysDiff < 0L -> targetDate.format(dateFormatter) // 未来日期显示完整格式
+            daysDiff < 0L -> formatDate(targetDate, locale) // 未来日期显示完整格式
             daysDiff == 0L -> "今天"
             daysDiff == 1L -> "昨天"
             daysDiff == 2L -> "前天"
@@ -54,29 +56,38 @@ object DateTimeFormatters {
      * 格式化时间（24小时制，无秒）
      *
      * @param time 时间
-     * @return "HH:mm" 格式的时间字符串
+     * @return 本地化格式的时间字符串
      */
-    fun formatTime(time: LocalTime): String {
-        return time.format(timeFormatter)
+    fun formatTime(time: LocalTime, locale: Locale? = null): String {
+        return DateTimeFormatter
+            .ofLocalizedTime(FormatStyle.SHORT)
+            .withLocale(locale ?: Locale.getDefault())
+            .format(time)
     }
 
     /**
      * 格式化日期为中文格式
      *
      * @param date 日期
-     * @return "yyyy年M月d日" 格式的日期字符串
+     * @return 本地化格式的日期字符串
      */
-    fun formatDate(date: LocalDate): String {
-        return date.format(dateFormatter)
+    fun formatDate(date: LocalDate, locale: Locale? = null): String {
+        return DateTimeFormatter
+            .ofLocalizedDate(FormatStyle.LONG)
+            .withLocale(locale ?: Locale.getDefault())
+            .format(date)
     }
 
     /**
      * 格式化日期时间为友好格式
      *
      * @param dateTime 日期时间
-     * @return "yyyy年M月d日 HH:mm" 格式的日期时间字符串
+     * @return 本地化格式的日期时间字符串
      */
-    fun formatDateTime(dateTime: LocalDateTime): String {
-        return "${formatDate(dateTime.toLocalDate())} ${formatTime(dateTime.toLocalTime())}"
+    fun formatDateTime(dateTime: LocalDateTime, locale: Locale? = null): String {
+        return DateTimeFormatter
+            .ofLocalizedDateTime(FormatStyle.LONG, FormatStyle.SHORT)
+            .withLocale(locale ?: Locale.getDefault())
+            .format(dateTime)
     }
 }

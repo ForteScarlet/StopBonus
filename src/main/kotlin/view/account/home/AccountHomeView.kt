@@ -2,8 +2,7 @@ package view.account.home
 
 import FontBTTFamily
 import FontLXGWNeoXiHeiScreenFamily
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
+import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -16,6 +15,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
 import common.DateTimeFormatters
 import common.Emojis
@@ -29,13 +29,20 @@ import love.forte.bonus.bonus_self_desktop.generated.resources.icon_home
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.SizedCollection
+import picker.core.*
+import picker.desktop.InstantPickerPanel
+import picker.foundation.rememberPickerNow
+import picker.material.MaterialPickerTheme
 import view.account.AccountViewPage
 import view.account.AccountViewPageSelector
 import view.account.PageViewState
-import view.common.StopBonusButtonDefaults
 import view.common.StopBonusElevatedButton
+import view.common.StopBonusOutlinedButton
 import view.common.StopBonusTextButton
-import java.time.*
+import java.time.Duration
+import java.time.Instant
+import java.time.temporal.ChronoUnit
+import java.util.*
 
 /**
  *
@@ -117,381 +124,385 @@ object AccountHomeView : AccountViewPageSelector {
 @Composable
 private fun AccountHome(state: PageViewState) {
     val configState = LocalAppConfig.current
-    val clock = configState.clock
-    val zoneId = configState.zoneId
-
-    val nowInstant = Instant.now(clock)
-    val nowMillis = nowInstant.toEpochMilli()
-    val nowLocalDateTime = LocalDateTime.now(clock)
+    val environment = remember(configState.clock, configState.zoneId) {
+        PickerEnvironment(
+            clock = configState.clock,
+            zoneId = configState.zoneId,
+        )
+    }
+    val zoneId = environment.zoneId
+    val now = rememberPickerNow(environment)
 
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
 
-    val nowYear = Year.now(clock)
+    var startInstant by remember { mutableStateOf<Instant?>(null) }
+    var endInstant by remember { mutableStateOf<Instant?>(null) }
+    var activeTimePicker by remember { mutableStateOf<RecordTimeField?>(null) }
 
-    val startDatePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = null,
-        initialDisplayedMonthMillis = nowMillis,
-        yearRange = 1900..nowYear.value,
-        initialDisplayMode = DisplayMode.Input,
-        selectableDates = object : SelectableDates {
-            override fun isSelectableDate(utcTimeMillis: Long): Boolean =
-                Instant.ofEpochMilli(utcTimeMillis).atZone(zoneId)
-                    .toLocalDate() <= nowLocalDateTime.toLocalDate()
-        }
+    val latestDate = now.date.coerceAtLeast(EARLIEST_RECORD_DATE)
+    val startDateConstraints = DateConstraints(
+        min = EARLIEST_RECORD_DATE,
+        max = latestDate,
     )
-
-    val selectedStartDateMillis = startDatePickerState.selectedDateMillis
-    val selectedStartDateInstant = selectedStartDateMillis?.let { Instant.ofEpochMilli(it) }
-
-    var startTimePickerValue by remember { mutableStateOf<LocalTime?>(null) }
-
-    fun selectedStartDateTime(): LocalDateTime? {
-        val selectedStartDateInstantValue = selectedStartDateInstant
-            ?: return null
-        val timeValue = startTimePickerValue
-            ?: return null
-
-        return selectedStartDateInstantValue.atZone(zoneId)
-            .toLocalDate()
-            .atTime(timeValue)
-    }
-
-    val selectedStartDateTime = selectedStartDateTime()
-
-
-    val endDatePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = null,
-        initialDisplayedMonthMillis = selectedStartDateMillis ?: nowMillis,
-        yearRange = selectedStartDateTime?.let {
-            it.year..nowYear.value
-        } ?: 1900..nowYear.value,
-        initialDisplayMode = DisplayMode.Input,
-        selectableDates = object : SelectableDates {
-            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                val date = Instant.ofEpochMilli(utcTimeMillis).atZone(zoneId).toLocalDate()
-                val notInFuture = date <= nowLocalDateTime.toLocalDate()
-                val afterStartDate = selectedStartDateTime?.toLocalDate()?.let { date >= it } ?: true
-                return notInFuture && afterStartDate
+    val endDateConstraints = DateConstraints(
+        min = EARLIEST_RECORD_DATE,
+        max = latestDate,
+    )
+    val endOrderValidator = remember(startInstant) {
+        ValueValidator<Instant> { candidate, _ ->
+            if (startInstant != null && candidate <= startInstant) {
+                ValidationResult.Invalid(PickerIssue(PickerIssueCodes.EndBeforeStart))
+            } else {
+                ValidationResult.Valid
             }
         }
-    )
-
-    val selectedEndDateMillis = endDatePickerState.selectedDateMillis
-    val selectedEndDateInstant = selectedEndDateMillis?.let { Instant.ofEpochMilli(it) }
-    // val selectedEndDateTime = selectedEndDateInstant?.atZone(ZoneId.systemDefault())
-    //     ?.toLocalDate()
-    //     ?.atTime(endTimePickerState.hour, endTimePickerState.minute)
-
-    var endTimePickerValue by remember { mutableStateOf<LocalTime?>(null) }
-
-    fun selectedEndDateTime(): LocalDateTime? {
-        val selectedEndDateInstantValue = selectedEndDateInstant
-            ?: return null
-        val timeValue = endTimePickerValue
-            ?: return null
-
-        return selectedEndDateInstantValue.atZone(zoneId)
-            .toLocalDate()
-            .atTime(timeValue)
     }
-
-    val selectedEndDateTime = selectedEndDateTime()
-
-    // val endTimePickerState = rememberTimePickerState(
-    //     is24Hour = true,
-    //     initialHour = nowTime.hour,
-    //     initialMinute = nowTime.minute
-    // )
+    val startInstantConstraints = InstantConstraints(max = now.instant)
+    val endInstantConstraints = InstantConstraints(
+        max = now.instant,
+        additional = endOrderValidator,
+    )
+    val format = TimeFormatOptions(precision = TimePrecision.Second)
 
     var weapon by remember { mutableStateOf<WeaponView?>(null) }
     val score = remember { SliderState(value = 10f, steps = 8, valueRange = 1f..10f) }
     var remarkValue by remember { mutableStateOf("") }
+    var recording by remember { mutableStateOf(false) }
 
     fun clearStates() {
-        startDatePickerState.selectedDateMillis = null
-        startTimePickerValue = null
-        endDatePickerState.selectedDateMillis = null
-        endTimePickerValue = null
+        startInstant = null
+        endInstant = null
+        activeTimePicker = null
         weapon = null
         score.value = 10f
         remarkValue = ""
     }
 
-    Column(
-        modifier = Modifier.verticalScroll(scrollState),
-        verticalArrangement = Arrangement.spacedBy(15.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // start date
-        var showSelectStartDate by remember { mutableStateOf(false) }
-        if (showSelectStartDate) {
-            val nowTime0 = nowLocalDateTime
-            val startTimePickerState = rememberTimePickerState(
-                is24Hour = true,
-                initialHour = nowTime0.hour,
-                initialMinute = nowTime0.minute
-            )
+    fun displayInstant(value: Instant?): String {
+        val local = value?.atZone(zoneId)?.toLocalDateTime() ?: return ""
+        return DateTimeFormatters.formatDateTime(local, environment.locale)
+        // return DateTimeFormatters.formatDate(local.toLocalDate(), environment.locale) + " " +
+        //     "%02d:%02d:%02d".format(Locale.ROOT, local.hour, local.minute, local.second)
+    }
 
-            DatePickerDialog(
-                onDismissRequest = { showSelectStartDate = false },
-                dismissButton = {
-                    StopBonusTextButton(onClick = {
-                        startDatePickerState.selectedDateMillis = nowMillis
-                        startTimePickerValue = nowLocalDateTime.toLocalTime()
-                        showSelectStartDate = false
-                    }) {
-                        Text(
-                            "现在${Emojis.CLOCK}",
-                            fontFamily = FontLXGWNeoXiHeiScreenFamily(),
-                        )
-                    }
-                },
-                confirmButton = {
-                    StopBonusTextButton(onClick = {
-                        startTimePickerValue = LocalTime.of(startTimePickerState.hour, startTimePickerState.minute)
-                        showSelectStartDate = false
-                    }) {
-                        Text(
-                            "就是这时${Emojis.ANGRY}",
-                            fontFamily = FontLXGWNeoXiHeiScreenFamily(),
-                        )
-                    }
-                },
-            ) {
-                Column {
-                    DatePicker(
-                        state = startDatePickerState,
-                        title = {
-                            Text(
-                                "什么时候开始打的${Emojis.ANGRY}",
-                                fontFamily = FontLXGWNeoXiHeiScreenFamily(),
-                                modifier = Modifier.padding(PaddingValues(start = 24.dp, end = 12.dp, top = 16.dp))
-                            )
-                        },
-                    )
+    val duration = if (startInstant != null && endInstant != null) {
+        Duration.between(startInstant, endInstant)
+    } else {
+        null
+    }
+    val recordTimes = validateRecordTimes(startInstant, endInstant, environment, now)
+    val canRecord = recordTimes is RecordTimesResult.Valid
 
-                    TimeInput(
-                        modifier = Modifier.align(Alignment.CenterHorizontally).padding(20.dp),
-                        state = startTimePickerState,
-                    )
-                }
-            }
-
-        }
-
-        StopBonusTextButton(
-            modifier = Modifier.fillMaxWidth()
-                .align(Alignment.CenterHorizontally),
-            onClick = { showSelectStartDate = true }
+    MaterialPickerTheme {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(scrollState),
+            verticalArrangement = Arrangement.spacedBy(15.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                "什么时候开始打的${Emojis.ANGRY}${Emojis.ANGRY}",
-                fontFamily = FontLXGWNeoXiHeiScreenFamily(),
-                fontSize = TextUnit(50f, TextUnitType.Sp),
-                modifier = Modifier
-            )
-        }
-
-        AnimatedVisibility(visible = selectedStartDateTime != null) {
-            Text(
-                text = selectedStartDateTime?.let { DateTimeFormatters.formatDateTime(it) } ?: "",
-                fontFamily = FontLXGWNeoXiHeiScreenFamily(),
-                fontSize = TextUnit(15f, TextUnitType.Sp),
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-            )
-        }
-
-
-        // end date & time
-        var showEndDateTime by remember { mutableStateOf(false) }
-        if (showEndDateTime) {
-            val nowTime0 = nowLocalDateTime
-            val endTimePickerState = rememberTimePickerState(
-                is24Hour = true,
-                initialHour = nowTime0.hour,
-                initialMinute = nowTime0.minute
-            )
-
-            DatePickerDialog(
-                onDismissRequest = { showEndDateTime = false },
-                dismissButton = {
-                    StopBonusTextButton(onClick = {
-                        endDatePickerState.selectedDateMillis = nowMillis
-                        endTimePickerValue = nowLocalDateTime.toLocalTime()
-                        showEndDateTime = false
-                    }) {
-                        Text(
-                            "现在${Emojis.CLOCK}",
-                            fontFamily = FontLXGWNeoXiHeiScreenFamily(),
-                        )
-                    }
+            RecordTimePickerButton(
+                label = "开始时间",
+                value = startInstant,
+                enabled = !recording,
+                onOpen = { activeTimePicker = RecordTimeField.Start },
+                onUseNow = {
+                    startInstant = environment.sampleNow().instant.truncatedTo(ChronoUnit.SECONDS)
+                    endInstant = null
                 },
-                confirmButton = {
-                    StopBonusTextButton(onClick = {
-                        endTimePickerValue = LocalTime.of(endTimePickerState.hour, endTimePickerState.minute)
-                        showEndDateTime = false
-                    }) {
-                        Text(
-                            "就是这时${Emojis.ANGRY}",
-                            fontFamily = FontLXGWNeoXiHeiScreenFamily(),
-                        )
-                    }
-                },
-            ) {
-                Column {
-                    DatePicker(
-                        state = endDatePickerState,
-                        title = {
-                            Text(
-                                "什么时候打完的${Emojis.ANGRY}",
-                                fontFamily = FontLXGWNeoXiHeiScreenFamily(),
-                                modifier = Modifier.padding(PaddingValues(start = 24.dp, end = 12.dp, top = 16.dp))
-                            )
-                        },
-                    )
-                    TimeInput(
-                        modifier = Modifier.align(Alignment.CenterHorizontally).padding(20.dp),
-                        state = endTimePickerState,
-                    )
-                }
-            }
-        }
+                display = ::displayInstant,
+            )
 
-        AnimatedVisibility(selectedStartDateMillis != null) {
-            StopBonusTextButton(
-                modifier = Modifier.fillMaxWidth()
-                    .align(Alignment.CenterHorizontally),
-                onClick = { showEndDateTime = true }
+            RecordTimePickerButton(
+                label = "结束时间",
+                value = endInstant,
+                enabled = startInstant != null && !recording,
+                onOpen = { activeTimePicker = RecordTimeField.End },
+                onUseNow = { endInstant = environment.sampleNow().instant.truncatedTo(ChronoUnit.SECONDS) },
+                display = ::displayInstant,
+                supportingText = if (startInstant == null) "请先选择开始时间" else null,
+            )
+            if (recordTimes is RecordTimesResult.Invalid &&
+                recordTimes.field == RecordTimeField.End &&
+                endInstant != null
             ) {
                 Text(
-                    "什么时候打完的${Emojis.ANGRY}${Emojis.ANGRY}",
-                    fontFamily = FontLXGWNeoXiHeiScreenFamily(),
-                    fontSize = TextUnit(50f, TextUnitType.Sp),
-                    modifier = Modifier
+                    text = PickerStrings.forLocale(environment.locale).message(recordTimes.issue),
+                    color = MaterialTheme.colorScheme.error,
                 )
             }
-        }
 
-        AnimatedVisibility(selectedEndDateTime != null) {
-            Text(
-                text = selectedEndDateTime?.let { DateTimeFormatters.formatDateTime(it) } ?: "",
-                fontFamily = FontLXGWNeoXiHeiScreenFamily(),
-                fontSize = TextUnit(15f, TextUnitType.Sp),
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-            )
-        }
+            AnimatedVisibility(canRecord) {
+                WeaponSelector(
+                    state = state,
+                    selectedWeapon = weapon,
+                    enabled = !recording,
+                    onSelect = { weapon = it },
+                )
+            }
+            AnimatedVisibility(canRecord) {
+                ScoreSelector(score, enabled = !recording)
+            }
+            AnimatedVisibility(canRecord) {
+                OutlinedTextField(
+                    enabled = !recording,
+                    value = remarkValue,
+                    onValueChange = {
+                        remarkValue =
+                            if (it.length <= Limits.REMARK_MAX_LENGTH) {
+                                it
+                            } else {
+                                it.substring(0, Limits.REMARK_MAX_LENGTH)
+                            }
+                    },
+                    label = { Text("备注") },
+                    placeholder = { Text("备注") },
+                    supportingText = {
+                        Text(
+                            remarkValue.length.toString() + " / " +
+                                Limits.REMARK_MAX_LENGTH.toString()
+                        )
+                    },
+                )
+            }
 
-        val duration = if (selectedStartDateTime != null && selectedEndDateTime != null) {
-            Duration.between(selectedStartDateTime, selectedEndDateTime)
-        } else null
+            AnimatedVisibility(startInstant != null && endInstant != null) {
+                StopBonusElevatedButton(
+                    enabled = !recording && canRecord,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally),
+                    onClick = {
+                        val submitNow = environment.sampleNow()
+                        val submittedStart = startInstant
+                        val submittedEnd = endInstant
+                        if (submittedStart != null && submittedEnd != null) {
+                                when (
+                                    val validated = validateRecordTimes(
+                                        submittedStart,
+                                        submittedEnd,
+                                        environment,
+                                        submitNow,
+                                    )
+                                ) {
+                                    is RecordTimesResult.Invalid -> Unit
 
-        AnimatedVisibility(duration != null) {
-            // 武器选择
-            WeaponSelector(state, weapon, onSelect = { weapon = it })
-        }
-
-        AnimatedVisibility(duration != null) {
-            // 打分
-            ScoreSelector(score)
-        }
-
-        AnimatedVisibility(duration != null) {
-            // 备注
-            OutlinedTextField(
-                value = remarkValue,
-                onValueChange = {
-                    remarkValue =
-                        if (it.length <= Limits.REMARK_MAX_LENGTH) it else it.substring(0, Limits.REMARK_MAX_LENGTH)
-                },
-                label = { Text("备注") },
-                placeholder = { Text("备注") },
-                supportingText = { Text("${remarkValue.length} / ${Limits.REMARK_MAX_LENGTH}") },
-            )
-        }
-
-        var recording by remember { mutableStateOf(false) }
-
-        AnimatedVisibility(selectedStartDateTime != null && selectedEndDateTime != null) {
-            StopBonusElevatedButton(
-                enabled = !recording && duration != null && duration.isPositive(),
-                modifier = Modifier.fillMaxWidth()
-                    .align(Alignment.CenterHorizontally),
-                onClick = {
-                    if (selectedStartDateTime != null && selectedEndDateTime != null && duration != null) {
-                        recording = true
-                        scope.launch {
-                            try {
-                                state.accountState.inAccountTransaction { account ->
-
-
-                                    BonusRecord.new {
-                                        this.account = Account.findById(account.id)!! // TODO null ?
-                                        this.duration = duration
-                                        this.startTime =
-                                            ZonedDateTime.of(selectedStartDateTime, zoneId).toInstant()
-                                        this.endTime =
-                                            ZonedDateTime.of(selectedEndDateTime, zoneId).toInstant()
-                                        this.score = score.value.toUInt()
-                                        this.remark = remarkValue
-                                        weapon?.also { w ->
-                                            Weapon.findById(w.id)?.also {
-                                                this.weapons = SizedCollection(listOf(it))
+                                    is RecordTimesResult.Valid -> {
+                                        val snapshotStart = validated.start
+                                        val snapshotEnd = validated.end
+                                        val snapshotDuration = validated.duration
+                                        val snapshotScore = score.value.toUInt()
+                                        val snapshotRemark = remarkValue
+                                        val snapshotWeapon = weapon
+                                        recording = true
+                                        scope.launch {
+                                            try {
+                                                state.accountState.inAccountTransaction { account ->
+                                                    BonusRecord.new {
+                                                        this.account = Account.findById(account.id)
+                                                            ?: error("当前账号不存在")
+                                                        this.startTime = snapshotStart
+                                                        this.endTime = snapshotEnd
+                                                        this.duration = snapshotDuration
+                                                        this.score = snapshotScore
+                                                        this.remark = snapshotRemark
+                                                        snapshotWeapon?.let { selected ->
+                                                            Weapon.findById(selected.id)?.let { entity ->
+                                                                this.weapons = SizedCollection(listOf(entity))
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                state.snackbarHostState.showSnackbar(
+                                                    "记录已保存。你就打吧！",
+                                                    withDismissAction = true,
+                                                )
+                                                clearStates()
+                                            } catch (e: Exception) {
+                                                state.snackbarHostState.showSnackbar(
+                                                    "记录失败: " + (e.message ?: "未知错误"),
+                                                    withDismissAction = true,
+                                                )
+                                            } finally {
+                                                recording = false
                                             }
                                         }
                                     }
                                 }
-
-                                scope.launch {
-                                    state.snackbarHostState.showSnackbar(
-                                        "记录已保存。你就打吧！",
-                                        withDismissAction = true
-                                    )
-                                }
-
-                                clearStates()
-
-                            } catch (e: Exception) {
-                                scope.launch {
-                                    state.snackbarHostState.showSnackbar(
-                                        "记录失败: ${e.message ?: "未知错误"}",
-                                        withDismissAction = true
-                                    )
-                                }
-                            } finally {
-                                recording = false
                             }
+                    },
+                ) {
+                    if (duration != null) {
+                        if (duration.isNegative) {
+                            Text(
+                                "时光回溯是吧！" + Emojis.ANGRY,
+                                modifier = Modifier.align(Alignment.CenterVertically),
+                                fontFamily = FontBTTFamily(),
+                                fontSize = TextUnit(50f, TextUnitType.Sp),
+                            )
+                        } else if (duration.toMinutes() <= 0) {
+                            Text(
+                                "一分钟都没有？😰",
+                                modifier = Modifier.align(Alignment.CenterVertically),
+                                fontFamily = FontBTTFamily(),
+                                fontSize = TextUnit(50f, TextUnitType.Sp),
+                            )
+                        } else {
+                            Text(
+                                "就打就打" + Emojis.ANGRY + Emojis.ANGRY + Emojis.ANGRY,
+                                modifier = Modifier.align(Alignment.CenterVertically),
+                                fontFamily = FontBTTFamily(),
+                                fontSize = TextUnit(50f, TextUnitType.Sp),
+                            )
                         }
                     }
-                },
-            ) {
-                if (duration != null) {
-                    if (duration.isNegative) {
-                        Text(
-                            "时光回溯是吧！${Emojis.ANGRY}",
-                            modifier = Modifier
-                                .align(Alignment.CenterVertically),
-                            fontFamily = FontBTTFamily(),
-                            fontSize = TextUnit(50f, TextUnitType.Sp)
-                        )
-                    } else if (duration.toMinutes() <= 0) {
-                        Text(
-                            "一分钟都没有？😰",
-                            modifier = Modifier
-                                .align(Alignment.CenterVertically),
-                            fontFamily = FontBTTFamily(),
-                            fontSize = TextUnit(50f, TextUnitType.Sp)
-                        )
+                }
+            }
+        }
+        activeTimePicker?.let { field ->
+            RecordTimePickerDialog(
+                field = field,
+                value = if (field == RecordTimeField.Start) startInstant else endInstant,
+                environment = environment,
+                format = format,
+                dateConstraints = if (field == RecordTimeField.Start) startDateConstraints else endDateConstraints,
+                constraints = if (field == RecordTimeField.Start) startInstantConstraints else endInstantConstraints,
+                onValueChange = { selected ->
+                    if (field == RecordTimeField.Start) {
+                        startInstant = selected
+                        endInstant = null
                     } else {
+                        endInstant = selected
+                    }
+                },
+                onUseNow = {
+                    val current = environment.sampleNow().instant.truncatedTo(ChronoUnit.SECONDS)
+                    if (field == RecordTimeField.Start) {
+                        startInstant = current
+                        endInstant = null
+                    } else {
+                        endInstant = current
+                    }
+                },
+                onClear = {
+                    if (field == RecordTimeField.Start) {
+                        startInstant = null
+                        endInstant = null
+                    } else {
+                        endInstant = null
+                    }
+                },
+                onDismiss = { activeTimePicker = null },
+            )
+        }
+    }
+}
+
+/**
+ * 业务页的时间选择入口。
+ *
+ * 它仅作为按钮触发器，不允许直接编辑文本；“现在”是业务页自行决定的快捷操作。
+ */
+@Composable
+private fun RecordTimePickerButton(
+    label: String,
+    value: Instant?,
+    enabled: Boolean,
+    onOpen: () -> Unit,
+    onUseNow: () -> Unit,
+    display: (Instant?) -> String,
+    supportingText: String? = null,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Text(label, fontFamily = FontLXGWNeoXiHeiScreenFamily())
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            StopBonusOutlinedButton(
+                onClick = onOpen,
+                enabled = enabled,
+                modifier = Modifier.weight(1f),
+            ) {
+                Text(
+                    text = value?.let(display)?.ifEmpty { "选择时间" } ?: "选择时间",
+                    fontFamily = FontLXGWNeoXiHeiScreenFamily(),
+                )
+            }
+            StopBonusTextButton(onClick = onUseNow, enabled = enabled) {
+                Text("现在", fontFamily = FontLXGWNeoXiHeiScreenFamily())
+            }
+        }
+        supportingText?.let {
+            Text(it, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+/**
+ * 业务页以对话框承载无容器的即时选择面板。
+ *
+ * 面板本身不内置确认、清空或“现在”动作；这些动作均由此业务容器提供，可按相同
+ * 方式替换为 Popup、抽屉或独立窗口。
+ */
+@Composable
+private fun RecordTimePickerDialog(
+    field: RecordTimeField,
+    value: Instant?,
+    environment: PickerEnvironment,
+    format: TimeFormatOptions,
+    dateConstraints: DateConstraints,
+    constraints: InstantConstraints,
+    onValueChange: (Instant) -> Unit,
+    onUseNow: () -> Unit,
+    onClear: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var appeared by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { appeared = true }
+    Dialog(onDismissRequest = onDismiss) {
+        AnimatedVisibility(visible = appeared, enter = fadeIn() + scaleIn(initialScale = 0.94f)) {
+            Surface(
+                modifier = Modifier.widthIn(min = 680.dp),
+                shape = MaterialTheme.shapes.extraLarge,
+                tonalElevation = 6.dp,
+                shadowElevation = 16.dp,
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    AnimatedContent(
+                        targetState = value,
+                        label = "已选时间过渡",
+                    ) { selected ->
                         Text(
-                            "就打就打${Emojis.ANGRY}${Emojis.ANGRY}${Emojis.ANGRY}",
-                            modifier = Modifier
-                                .align(Alignment.CenterVertically),
-                            fontFamily = FontBTTFamily(),
-                            fontSize = TextUnit(50f, TextUnitType.Sp)
+                            text = (if (field == RecordTimeField.Start) "选择开始时间" else "选择结束时间"),
+                            style = MaterialTheme.typography.titleLarge,
                         )
+                    }
+                    InstantPickerPanel(
+                        value = value,
+                        onValueChange = onValueChange,
+                        environment = environment,
+                        format = format,
+                        dateConstraints = dateConstraints,
+                        constraints = constraints,
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                    ) {
+                        StopBonusTextButton(
+                            onClick = {
+                                onClear()
+                                // 清空是提交到业务状态的终止动作；关闭对话框能立即反馈字段已无值。
+                                onDismiss()
+                            },
+                        ) { Text("清空") }
+                        StopBonusTextButton(onClick = onUseNow) { Text("现在") }
+                        StopBonusElevatedButton(onClick = onDismiss) { Text("完成") }
                     }
                 }
             }
@@ -503,6 +514,7 @@ private fun AccountHome(state: PageViewState) {
 @Composable
 private inline fun WeaponSelector(
     state: PageViewState, selectedWeapon: WeaponView?,
+    enabled: Boolean = true,
     crossinline onSelect: (WeaponView?) -> Unit
 ) {
     val weapons = remember { mutableStateListOf<WeaponView>() }
@@ -522,7 +534,7 @@ private inline fun WeaponSelector(
         expanded = expanded,
         modifier = Modifier,
         onExpandedChange = {
-            expanded = it
+            if (enabled) expanded = it
         },
     ) {
         OutlinedTextField(
@@ -530,6 +542,7 @@ private inline fun WeaponSelector(
                 .focusable(false)
                 .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
                 .fillMaxWidth(.65f),
+            enabled = enabled,
             value = if (!expanded) selectedWeapon?.name ?: "无" else value,
             onValueChange = {
                 value = it
@@ -554,12 +567,13 @@ private inline fun WeaponSelector(
                 .background(MaterialTheme.colorScheme.surface)
                 .exposedDropdownSize(true),
             properties = PopupProperties(focusable = false),
-            expanded = expanded,
+            expanded = expanded && enabled,
             onDismissRequest = { expanded = false },
         ) {
             DropdownMenuItem(
                 text = { Text("无") },
                 trailingIcon = { Icon(painterResource(Res.drawable.icon_clear), "Clear icon") },
+                enabled = enabled,
                 onClick = {
                     onSelect(null)
                     value = ""
@@ -570,6 +584,7 @@ private inline fun WeaponSelector(
             for (weapon in filteredList) {
                 DropdownMenuItem(
                     text = { Text(weapon.name) },
+                    enabled = enabled,
                     onClick = {
                         onSelect(weapon)
                         value = ""
@@ -588,6 +603,7 @@ private inline fun WeaponSelector(
 @Composable
 private fun ScoreSelector(
     scoreState: SliderState,
+    enabled: Boolean = true,
 ) {
     val scoreValue = scoreState.value.toInt()
     Column(
@@ -625,7 +641,7 @@ private fun ScoreSelector(
             )
         }
 
-        Slider(state = scoreState)
+        Slider(state = scoreState, enabled = enabled)
     }
 
 

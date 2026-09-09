@@ -21,6 +21,7 @@ hikariCP = "7.1.0"
 filekit = "0.16.0"
 # https://poi.apache.org/
 apachePoi = "5.5.1"
+junit = "4.13.2"
 
 # https://conveyor.hydraulic.dev/21.0/configs/maven-gradle/#gradle
 conveyor = "2.0"
@@ -50,6 +51,7 @@ hikariCP = { module = "com.zaxxer:HikariCP", version.ref = "hikariCP" }
 
 filekit-dialogs-compose = { group = "io.github.vinceglb", name = "filekit-dialogs-compose", version.ref = "filekit" }
 apache-poi-ooxml = { group = "org.apache.poi", name = "poi-ooxml", version.ref = "apachePoi" }
+junit4 = { module = "junit:junit", version.ref = "junit" }
 
 [bundles]
 exposed = ["exposed-core", "exposed-dao", "exposed-jdbc", "exposed-javaTime"]

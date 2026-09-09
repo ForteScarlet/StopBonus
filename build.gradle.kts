@@ -75,6 +75,9 @@ dependencies {
     implementation(libs.koalaPlot.core)
     implementation(libs.filekit.dialogs.compose)
     implementation(libs.apache.poi.ooxml)
+
+    testImplementation(kotlin("test-junit"))
+    testImplementation(libs.junit4)
 }
 
 buildConfig {
