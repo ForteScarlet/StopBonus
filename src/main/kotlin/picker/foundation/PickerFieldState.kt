@@ -1,6 +1,7 @@
 package picker.foundation
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.TextFieldValue
@@ -158,6 +159,9 @@ class PickerFieldState<T : Any> internal constructor() {
      * 此字段当前是否持有打开的选择器弹层会话。
      */
     var isPopupOpen: Boolean by mutableStateOf(false)
+        private set
+
+    internal var panelCommitCount by mutableIntStateOf(0)
         private set
 
     /**
@@ -530,9 +534,7 @@ class PickerFieldState<T : Any> internal constructor() {
             directEdited = false
             panelEdited = false
             if (closesPanel) {
-                isPopupOpen = false
-                panelDraftValue = null
-                panelRawInputValue = null
+                closeCommittedPanel()
             }
             issue = null
             return
@@ -543,6 +545,13 @@ class PickerFieldState<T : Any> internal constructor() {
             closesPanel = closesPanel,
         )
         currentOnValueChange(candidate)
+    }
+
+    private fun closeCommittedPanel() {
+        isPopupOpen = false
+        panelDraftValue = null
+        panelRawInputValue = null
+        panelCommitCount++
     }
 
     /**
@@ -596,9 +605,7 @@ class PickerFieldState<T : Any> internal constructor() {
                 panelEdited = false
                 issue = null
                 if (pending.closesPanel) {
-                    isPopupOpen = false
-                    panelDraftValue = null
-                    panelRawInputValue = null
+                    closeCommittedPanel()
                 }
                 return
             }

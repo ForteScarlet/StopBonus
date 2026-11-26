@@ -58,3 +58,5 @@ generated.conveyor.conf
 !.idea/runConfigurations
 
 .gradle-user
+
+.local

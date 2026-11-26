@@ -23,11 +23,11 @@ import database.entity.BonusRecord
 import database.entity.BonusRecordView
 import database.entity.BonusRecords
 import database.entity.toView
+import io.github.vinceglb.filekit.FileKit
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vinceglb.filekit.absolutePath
-import io.github.vinceglb.filekit.dialogs.FileKitDialogException
 import io.github.vinceglb.filekit.dialogs.FileKitDialogSettings
-import io.github.vinceglb.filekit.dialogs.compose.rememberFileSaverLauncher
+import io.github.vinceglb.filekit.dialogs.openFileSaver
 import io.github.vinceglb.filekit.write
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -101,38 +101,7 @@ private fun ShowBonusRecordList(state: PageViewState) {
     val configState = LocalAppConfig.current
     var exportMenuExpanded by remember { mutableStateOf(false) }
     var exportInProgress by remember { mutableStateOf(false) }
-    var pendingExport by remember { mutableStateOf<PendingBonusRecordExport?>(null) }
     var exportedFile by remember { mutableStateOf<ExportedBonusRecordFile?>(null) }
-
-    val fileSaverLauncher = rememberFileSaverLauncher(
-        dialogSettings = FileKitDialogSettings.createDefault(),
-        onError = { _: FileKitDialogException ->
-            exportInProgress = false
-            pendingExport = null
-            showExportError(scope, state)
-        },
-        onResult = { file ->
-            val export = pendingExport
-            pendingExport = null
-            if (file == null || export == null) {
-                exportInProgress = false
-            } else {
-                scope.launch {
-                    try {
-                        file.write(export.bytes)
-                        val absolutePath = file.absolutePath()
-                        exportedFile = ExportedBonusRecordFile(file, absolutePath)
-                    } catch (cause: CancellationException) {
-                        throw cause
-                    } catch (_: Exception) {
-                        showExportError(scope, state)
-                    } finally {
-                        exportInProgress = false
-                    }
-                }
-            }
-        },
-    )
 
     fun startExport(format: BonusRecordExportFormat) {
         exportMenuExpanded = false
@@ -151,18 +120,20 @@ private fun ShowBonusRecordList(state: PageViewState) {
                         .map { it.toView() }
                 }
                 val bytes = BonusRecordExporter.bytes(format, records, configState.zoneId)
-                pendingExport = PendingBonusRecordExport(bytes)
-                fileSaverLauncher.launch(
+                val file = FileKit.openFileSaver(
                     suggestedName = "奖励记录_${LocalDate.now(configState.zoneId)}",
                     defaultExtension = format.extension,
                     allowedExtensions = setOf(format.extension),
-                )
+                    dialogSettings = FileKitDialogSettings(title = format.exportLabel),
+                ) ?: return@launch
+                file.write(bytes)
+                exportedFile = ExportedBonusRecordFile(file, file.absolutePath())
             } catch (cause: CancellationException) {
                 throw cause
             } catch (_: Exception) {
-                exportInProgress = false
-                pendingExport = null
                 showExportError(scope, state)
+            } finally {
+                exportInProgress = false
             }
         }
     }
@@ -199,11 +170,11 @@ private fun ShowBonusRecordList(state: PageViewState) {
                         onDismissRequest = { exportMenuExpanded = false },
                     ) {
                         DropdownMenuItem(
-                            text = { Text("导出 CSV") },
+                            text = { Text(BonusRecordExportFormat.CSV.exportLabel) },
                             onClick = { startExport(BonusRecordExportFormat.CSV) },
                         )
                         DropdownMenuItem(
-                            text = { Text("导出 Excel") },
+                            text = { Text(BonusRecordExportFormat.EXCEL.exportLabel) },
                             onClick = { startExport(BonusRecordExportFormat.EXCEL) },
                         )
                     }
@@ -226,21 +197,27 @@ private fun ShowBonusRecordList(state: PageViewState) {
                 export = export,
                 onDismiss = { exportedFile = null },
                 onOpenFile = {
-                    ExportFileActions.openFile(export.file)
-                        .onFailure { showActionError(scope, state, "打开文件失败") }
+                    scope.launch {
+                        ExportFileActions.openFile(export.file)
+                            .onFailure { showActionError(scope, state, "打开文件失败") }
+                    }
                 },
                 onOpenDirectory = {
-                    ExportFileActions.openDirectory(export.file)
-                        .onFailure { showActionError(scope, state, "打开目录失败") }
+                    scope.launch {
+                        ExportFileActions.openDirectory(export.file)
+                            .onFailure { showActionError(scope, state, "打开目录失败") }
+                    }
                 },
             )
         }
     }
 }
 
-private data class PendingBonusRecordExport(
-    val bytes: ByteArray,
-)
+private val BonusRecordExportFormat.exportLabel: String
+    get() = when (this) {
+        BonusRecordExportFormat.CSV -> "导出 CSV"
+        BonusRecordExportFormat.EXCEL -> "导出 Excel"
+    }
 
 private data class ExportedBonusRecordFile(
     val file: PlatformFile,

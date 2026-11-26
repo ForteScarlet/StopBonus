@@ -16,10 +16,13 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -629,6 +632,15 @@ internal fun <T : Any> PickerFieldFrame(
      */
     hiddenPrecision: String? = null,
 ) {
+    val fieldFocus = remember { FocusRequester() }
+    val initialPanelCommitCount = remember(state) { state.panelCommitCount }
+    val panelCommitCount = state.panelCommitCount
+    LaunchedEffect(state, panelCommitCount) {
+        if (panelCommitCount != initialPanelCommitCount && enabled && !readOnly && !state.isPopupOpen) {
+            fieldFocus.requestFocus()
+        }
+    }
+
     val borderColor = when {
         state.issue != null -> style.colors.error
         !enabled -> style.colors.disabled
@@ -656,6 +668,7 @@ internal fun <T : Any> PickerFieldFrame(
                     onValueChange = state::updateInput,
                     modifier = Modifier
                         .weight(1f)
+                        .focusRequester(fieldFocus)
                         .onFocusChanged { focus ->
                             // 点击清空或下拉按钮会让文本框失焦；指针标记可阻止在点击前提交临时值。
                             if (!focus.isFocused && state.consumePointerAction()) return@onFocusChanged

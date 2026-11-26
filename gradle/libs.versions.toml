@@ -1,26 +1,27 @@
 [versions]
-compose-plugin = "1.12.0"
+compose-plugin = "1.12.2"
 compose-material3 = "1.9.0"
 # Kotlin
-kotlin = "2.4.20"
-buildconfig = "6.0.10"
+kotlin = "2.4.21"
+buildconfig = "6.1.2"
 kotlinx-coroutines = "1.11.0"
-kotlinx-serialization = "1.11.0"
+kotlinx-serialization = "1.13.0"
 # logback
-logback = "1.6.3"
+logback = "1.6.8"
+log4j = "2.26.1"
 # https://github.com/h2database/h2database
-h2 = "2.5.250"
+h2 = "2.5.252"
 # https://github.com/JetBrains/Exposed
-exposed = "1.5.0"
+exposed = "1.6.1"
 # https://github.com/KoalaPlot/koalaplot-core
 # https://koalaplot.github.io/
 koalaPlot = "0.12.1"
 # https://github.com/brettwooldridge/HikariCP
 hikariCP = "7.1.0"
 # https://github.com/vinceglb/FileKit
-filekit = "0.16.0"
+filekit = "0.17.1"
 # https://poi.apache.org/
-apachePoi = "5.5.1"
+apachePoi = "6.0.0"
 junit = "4.13.2"
 
 # https://conveyor.hydraulic.dev/21.0/configs/maven-gradle/#gradle
@@ -29,6 +30,7 @@ conveyor = "2.0"
 [libraries]
 # logback
 logback-classic = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
+log4j-to-slf4j = { module = "org.apache.logging.log4j:log4j-to-slf4j", version.ref = "log4j" }
 
 # ktx
 # ktx-coroutine
@@ -49,7 +51,7 @@ koalaPlot-core = { group = "io.github.koalaplot", name = "koalaplot-core", versi
 
 hikariCP = { module = "com.zaxxer:HikariCP", version.ref = "hikariCP" }
 
-filekit-dialogs-compose = { group = "io.github.vinceglb", name = "filekit-dialogs-compose", version.ref = "filekit" }
+filekit-dialogs = { group = "io.github.vinceglb", name = "filekit-dialogs", version.ref = "filekit" }
 apache-poi-ooxml = { group = "org.apache.poi", name = "poi-ooxml", version.ref = "apachePoi" }
 junit4 = { module = "junit:junit", version.ref = "junit" }
 

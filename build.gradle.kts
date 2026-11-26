@@ -40,11 +40,6 @@ kotlin {
 
 
 dependencies {
-    // Note, if you develop a library, you should use compose.desktop.common.
-    // compose.desktop.currentOs should be used in launcher-sourceSet
-    // (in a separate module for demo project and in testMain).
-    // With compose.desktop.common you will also lose @Preview functionality
-
     val excludeMaterial2: Action<ExternalModuleDependency> = Action {
         exclude(group = "org.jetbrains.compose.material", module = "material")
         exclude(group = "org.jetbrains.compose.material", module = "material-desktop")
@@ -67,17 +62,19 @@ dependencies {
 
     implementation(libs.h2db)
     runtimeOnly(libs.logback.classic)
+    runtimeOnly(libs.log4j.to.slf4j)
 
     implementation(libs.kotlinx.coroutine.core)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.hikariCP)
     implementation(libs.bundles.exposed)
     implementation(libs.koalaPlot.core)
-    implementation(libs.filekit.dialogs.compose)
+    implementation(libs.filekit.dialogs)
     implementation(libs.apache.poi.ooxml)
 
     testImplementation(kotlin("test-junit"))
     testImplementation(libs.junit4)
+    testImplementation("org.jetbrains.compose.ui:ui-test:$composeVersion")
 }
 
 buildConfig {
