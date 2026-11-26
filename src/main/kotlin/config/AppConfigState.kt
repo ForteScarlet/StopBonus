@@ -30,28 +30,15 @@ class AppConfigState(initialConfig: AppConfig) {
      */
     val clock: Clock get() = _cachedClock
 
-    /**
-     * 更新时区配置并持久化
-     */
-    fun updateTimezone(timezone: String) {
-        config = config.copy(timezone = timezone)
-        _cachedClock = Clock.system(config.zoneId())
-        ConfigManager.save(config)
-        ClockProvider.initialize(config.zoneId())
-    }
-
-    /**
-     * 更新配置并持久化
-     */
-    fun updateConfig(newConfig: AppConfig) {
-        val zoneChanged = config.timezone != newConfig.timezone
-        config = newConfig
-        if (zoneChanged) {
-            _cachedClock = Clock.system(config.zoneId())
-            ClockProvider.initialize(config.zoneId())
+    fun updateConfig(newConfig: AppConfig): Result<Unit> =
+        ConfigManager.save(newConfig).onSuccess {
+            val zoneChanged = config.timezone != newConfig.timezone
+            config = newConfig
+            if (zoneChanged) {
+                _cachedClock = Clock.system(config.zoneId())
+                ClockProvider.initialize(config.zoneId())
+            }
         }
-        ConfigManager.save(config)
-    }
 }
 
 /**

@@ -13,6 +13,7 @@ import config.BuildConfig
 import love.forte.bonus.bonus_self_desktop.generated.resources.Res
 import love.forte.bonus.bonus_self_desktop.generated.resources.icon_info
 import org.jetbrains.compose.resources.painterResource
+import update.UpdateCoordinator
 import view.common.StopBonusElevatedButton
 import view.common.StopBonusOutlinedButton
 
@@ -22,10 +23,16 @@ import view.common.StopBonusOutlinedButton
  * 管理 HOME/CONFIG/ABOUT 三个子页面的导航
  */
 @Composable
-fun WelcomeNavHost(
-    onEnterApp: () -> Unit
+internal fun WelcomeNavHost(
+    onEnterApp: () -> Unit,
+    updates: UpdateCoordinator? = null,
+    onInstallUpdate: () -> Unit = {},
 ) {
     var currentScreen by remember { mutableStateOf(WelcomeScreen.HOME) }
+    val updateState = updates?.state?.collectAsState()?.value
+    val version = updateState?.current?.label ?: "v${BuildConfig.VERSION}"
+    val hasUpdate = updateState?.newer != null
+    val showConfig = { currentScreen = WelcomeScreen.CONFIG }
 
     AnimatedContent(
         targetState = currentScreen,
@@ -47,14 +54,22 @@ fun WelcomeNavHost(
         when (screen) {
             WelcomeScreen.HOME -> WelcomeHomePage(
                 onEnter = onEnterApp,
-                onConfig = { currentScreen = WelcomeScreen.CONFIG },
-                onAbout = { currentScreen = WelcomeScreen.ABOUT }
+                onConfig = showConfig,
+                onAbout = { currentScreen = WelcomeScreen.ABOUT },
+                version = version,
+                hasUpdate = hasUpdate,
             )
             WelcomeScreen.CONFIG -> ConfigPage(
-                onBack = { currentScreen = WelcomeScreen.HOME }
+                onBack = { currentScreen = WelcomeScreen.HOME },
+                updates = updates,
+                updateState = updateState,
+                onInstallUpdate = onInstallUpdate,
             )
             WelcomeScreen.ABOUT -> AboutPage(
-                onBack = { currentScreen = WelcomeScreen.HOME }
+                onBack = { currentScreen = WelcomeScreen.HOME },
+                version = version,
+                hasUpdate = hasUpdate,
+                onShowUpdate = showConfig,
             )
         }
     }
@@ -72,7 +87,9 @@ fun WelcomeNavHost(
 private fun WelcomeHomePage(
     onEnter: () -> Unit,
     onConfig: () -> Unit,
-    onAbout: () -> Unit
+    onAbout: () -> Unit,
+    version: String,
+    hasUpdate: Boolean,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         // 主体内容
@@ -89,13 +106,12 @@ private fun WelcomeHomePage(
                 color = MaterialTheme.colorScheme.primary
             )
 
-            // 版本号
-            Text(
-                text = "v${BuildConfig.VERSION}",
-                fontFamily = FontLXGWNeoXiHeiScreenFamily(),
+            VersionLabel(
+                label = version,
                 fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 60.dp)
+                hasUpdate = hasUpdate,
+                onShowUpdate = onConfig,
+                modifier = Modifier.padding(bottom = 60.dp),
             )
 
             // 按钮组

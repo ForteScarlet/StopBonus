@@ -21,6 +21,9 @@ filekit = "0.17.1"
 # https://poi.apache.org/
 apachePoi = "6.0.0"
 junit = "4.13.2"
+jna = "5.19.1"
+maven-artifact = "3.9.11"
+conveyor-control = "1.1"
 
 # https://conveyor.hydraulic.dev/21.0/configs/maven-gradle/#gradle
 conveyor = "2.0"
@@ -47,6 +50,9 @@ koalaPlot-core = { group = "io.github.koalaplot", name = "koalaplot-core", versi
 filekit-dialogs = { group = "io.github.vinceglb", name = "filekit-dialogs", version.ref = "filekit" }
 apache-poi-ooxml = { group = "org.apache.poi", name = "poi-ooxml", version.ref = "apachePoi" }
 junit4 = { module = "junit:junit", version.ref = "junit" }
+jna-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }
+maven-artifact = { module = "org.apache.maven:maven-artifact", version.ref = "maven-artifact" }
+conveyor-control = { module = "dev.hydraulic.conveyor:conveyor-control", version.ref = "conveyor-control" }
 
 [plugins]
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }

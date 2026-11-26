@@ -72,6 +72,9 @@ dependencies {
     implementation(libs.koalaPlot.core)
     implementation(libs.filekit.dialogs)
     implementation(libs.apache.poi.ooxml)
+    implementation(libs.jna.platform)
+    implementation(libs.maven.artifact)
+    implementation(libs.conveyor.control)
 
     testImplementation(kotlin("test-junit"))
     testImplementation(libs.junit4)
@@ -99,6 +102,7 @@ buildConfig {
     buildConfigField("APP_NAME", AppConfig.APP_NAME)
     buildConfigField("GITHUB_URL", AppConfig.Meta.GITHUB_URL)
     buildConfigField("DOWNLOAD_URL", AppConfig.Meta.DOWNLOAD_URL)
+    buildConfigField("UPDATE_SITE_URL", AppConfig.Meta.UPDATE_SITE_URL)
 }
 
 compose.resources {
@@ -125,7 +129,7 @@ compose.desktop {
         args("--win-shortcut-prompt")
 
         nativeDistributions {
-            modules("java.sql", "java.naming")
+            modules("java.sql", "java.naming", "java.net.http")
 
             targetFormats(
                 TargetFormat.Dmg, TargetFormat.Deb,

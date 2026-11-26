@@ -18,7 +18,8 @@ data class TimezoneInfo(
  */
 @Serializable
 data class AppConfig(
-    val timezone: String = DEFAULT_TIMEZONE
+    val timezone: String = DEFAULT_TIMEZONE,
+    val autoCheckUpdates: Boolean = true,
 ) {
     /**
      * 获取 ZoneId，带容错机制

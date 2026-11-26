@@ -24,7 +24,8 @@ object AppConfig {
         const val VENDOR = "Forte Scarlet"
         const val DESCRIPTION = "DO NOT BONUS YOURSELF!"
         const val GITHUB_URL = "https://github.com/ForteScarlet/StopBonus"
-        const val DOWNLOAD_URL = "https://fortescarlet.github.io/StopBonus/download"
+        const val UPDATE_SITE_URL = "https://fortescarlet.github.io/StopBonus"
+        const val DOWNLOAD_URL = "$UPDATE_SITE_URL/download"
         const val DEB_MAINTAINER = "ForteScarlet@163.com"
         const val WINDOWS_UPGRADE_UUID = "f4a9a22b-b663-4848-95a8-7c0cf844da3f"
     }

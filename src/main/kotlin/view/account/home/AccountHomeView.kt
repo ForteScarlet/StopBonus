@@ -302,10 +302,12 @@ private fun AccountHome(state: PageViewState) {
                                                 account.account.id, snapshotStart, snapshotEnd, snapshotDuration,
                                                 snapshotScore, snapshotRemark, snapshotWeapon?.id,
                                             )
-                                            state.snackbarHostState.showSnackbar(
-                                                "记录已保存。你就打吧！",
-                                                withDismissAction = true,
-                                            )
+                                            launch {
+                                                state.snackbarHostState.showSnackbar(
+                                                    "记录已保存。你就打吧！",
+                                                    withDismissAction = true,
+                                                )
+                                            }
                                             clearStates()
                                         } catch (e: Exception) {
                                             if (e is CancellationException) {

@@ -3,6 +3,9 @@ package config
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption.ATOMIC_MOVE
+import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import kotlin.io.path.*
 
 private val logger = LoggerFactory.getLogger("ConfigManager")
@@ -86,12 +89,18 @@ object ConfigManager {
     /**
      * 保存配置
      */
-    fun save(config: AppConfig) {
+    fun save(config: AppConfig): Result<Unit> {
         val path = configFilePath()
-        runCatching {
-            // 确保目录存在
-            path.parent?.createDirectories()
-            path.writeText(json.encodeToString(AppConfig.serializer(), config))
+        return runCatching {
+            path.parent.createDirectories()
+            val temporary = Files.createTempFile(path.parent, "config-", ".tmp")
+            try {
+                temporary.writeText(json.encodeToString(AppConfig.serializer(), config))
+                Files.move(temporary, path, ATOMIC_MOVE, REPLACE_EXISTING)
+            } finally {
+                Files.deleteIfExists(temporary)
+            }
+            Unit
         }.onFailure { e ->
             logger.error("Failed to save config: {}", e.message)
         }

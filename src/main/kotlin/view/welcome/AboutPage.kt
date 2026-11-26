@@ -40,7 +40,12 @@ private fun formatBytes(bytes: Long): String {
  * 简洁现代的页面布局，从上往下排列，水平居中
  */
 @Composable
-fun AboutPage(onBack: () -> Unit) {
+fun AboutPage(
+    onBack: () -> Unit,
+    version: String = "v${BuildConfig.VERSION}",
+    hasUpdate: Boolean = false,
+    onShowUpdate: (() -> Unit)? = null,
+) {
     val uriHandler = LocalUriHandler.current
     var showSysProps by remember { mutableStateOf(false) }
     var showEnvVars by remember { mutableStateOf(false) }
@@ -125,11 +130,7 @@ fun AboutPage(onBack: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    "v${BuildConfig.VERSION}",
-                    fontFamily = FontLXGWNeoXiHeiScreenFamily(),
-                    fontSize = 14.sp
-                )
+                VersionLabel(version, 14.sp, hasUpdate, onShowUpdate)
             }
 
             // 运行时信息

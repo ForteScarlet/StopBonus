@@ -1,15 +1,13 @@
 package database
 
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
+import app.cash.sqldelight.db.SqlDriver
 import config.ClockProvider
 import database.entity.AccountView
 import database.entity.BonusRecordView
 import database.entity.WeaponView
 import database.sql.StopBonusDatabase
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.nio.file.Path
 import java.sql.Connection
@@ -17,14 +15,19 @@ import java.sql.DriverManager
 import java.time.Duration
 import java.time.Instant
 import java.util.Properties
+import java.util.concurrent.locks.ReentrantReadWriteLock
+import kotlin.concurrent.read
+import kotlin.concurrent.write
 
 internal const val SQLITE_APPLICATION_ID = 0x53424F4E
 
-class DatabaseOperator internal constructor(path: Path) : AutoCloseable {
-    private val driver = JdbcSqliteDriver(sqliteUrl(path, "rw"), sqliteProperties())
+class DatabaseOperator internal constructor(private val driver: SqlDriver) : AutoCloseable {
+    internal constructor(path: Path) : this(JdbcSqliteDriver(sqliteUrl(path, "rw"), sqliteProperties()))
+
     private val database = StopBonusDatabase(driver)
     private val queries = database.storageQueries
-    private val mutex = Mutex()
+    // 共享锁让 SQL 操作并发使用驱动，关闭驱动时才需要独占。
+    private val lifecycleLock = ReentrantReadWriteLock(true)
     private var closed = false
 
     suspend fun accounts(): List<AccountView> = access {
@@ -106,19 +109,17 @@ class DatabaseOperator internal constructor(path: Path) : AutoCloseable {
     }
 
     private suspend fun <T> access(block: () -> T): T = withContext(Dispatchers.IO) {
-        mutex.withLock {
+        lifecycleLock.read {
             check(!closed)
             block()
         }
     }
 
     override fun close() {
-        runBlocking {
-            mutex.withLock {
-                if (!closed) {
-                    closed = true
-                    driver.close()
-                }
+        lifecycleLock.write {
+            if (!closed) {
+                closed = true
+                driver.close()
             }
         }
     }

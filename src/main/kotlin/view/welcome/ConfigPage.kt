@@ -1,6 +1,8 @@
 package view.welcome
 
 import FontLXGWNeoXiHeiScreenFamily
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,6 +21,8 @@ import love.forte.bonus.bonus_self_desktop.generated.resources.icon_arrow_back
 import love.forte.bonus.bonus_self_desktop.generated.resources.icon_home
 import org.jetbrains.compose.resources.painterResource
 import storeAppPath
+import update.UpdateCoordinator
+import update.UpdateState
 import view.common.StopBonusFilledTonalButton
 import view.common.StopBonusTextButton
 import java.nio.file.Path
@@ -32,14 +36,34 @@ import kotlin.io.path.createDirectories
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ConfigPage(onBack: () -> Unit) {
+internal fun ConfigPage(
+    onBack: () -> Unit,
+    updates: UpdateCoordinator?,
+    updateState: UpdateState?,
+    onInstallUpdate: () -> Unit,
+) {
     val configState = LocalAppConfig.current
     var expanded by remember { mutableStateOf(false) }
     var selectedTimezone by remember { mutableStateOf(configState.config.timezone) }
+    var autoCheckUpdates by remember { mutableStateOf(configState.config.autoCheckUpdates) }
+    val settingsEdited = selectedTimezone != configState.config.timezone ||
+        autoCheckUpdates != configState.config.autoCheckUpdates
+    val controlsLocked = updateState?.let { it.verifying || it.confirmation != null || it.installing || it.handedOff } == true
     val dataDir = remember { ConfigManager.appDataDir() }
     val storeDir = remember { storeAppPath().toAbsolutePath() }
     val logDir = remember { Path(".logs").toAbsolutePath() }
     var openDirError by remember { mutableStateOf<String?>(null) }
+    var saveFailed by remember { mutableStateOf(false) }
+
+    updateState?.confirmation?.let { version ->
+        AlertDialog(
+            onDismissRequest = { updates?.cancelConfirmation() },
+            title = { Text("安装 ${version.label}") },
+            text = { Text("更新后将重新启动 StopBonus。") },
+            confirmButton = { TextButton(onClick = onInstallUpdate) { Text("安装更新") } },
+            dismissButton = { TextButton(onClick = { updates?.cancelConfirmation() }) { Text("取消") } },
+        )
+    }
 
     openDirError?.let { message ->
         AlertDialog(
@@ -63,7 +87,7 @@ fun ConfigPage(onBack: () -> Unit) {
             modifier = Modifier.fillMaxWidth().padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBack) {
+            IconButton(onClick = onBack, enabled = !controlsLocked) {
                 Icon(
                     painter = painterResource(Res.drawable.icon_arrow_back),
                     contentDescription = "返回"
@@ -81,13 +105,17 @@ fun ConfigPage(onBack: () -> Unit) {
 
         HorizontalDivider()
 
-        Spacer(modifier = Modifier.height(48.dp))
-
         // 内容区域
         Column(
-            modifier = Modifier.widthIn(max = 400.dp).padding(horizontal = 24.dp),
+            modifier = Modifier.widthIn(max = 480.dp).fillMaxWidth().weight(1f)
+                .verticalScroll(rememberScrollState()).padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
+            if (updates != null && updateState != null) {
+                UpdateSettings(updates, updateState, autoCheckUpdates, { autoCheckUpdates = it }, settingsEdited)
+                HorizontalDivider()
+            }
+
             // 配置存储目录（只读展示）
             OutlinedTextField(
                 label = { Text("配置存储目录") },
@@ -160,7 +188,7 @@ fun ConfigPage(onBack: () -> Unit) {
             ) {
                 ExposedDropdownMenuBox(
                     expanded = expanded,
-                    onExpandedChange = { expanded = it }
+                    onExpandedChange = { if (!controlsLocked) expanded = it }
                 ) {
                     OutlinedTextField(
                         label = { Text("时区") },
@@ -171,7 +199,7 @@ fun ConfigPage(onBack: () -> Unit) {
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled = !controlsLocked)
                     )
 
                     ExposedDropdownMenu(
@@ -196,23 +224,26 @@ fun ConfigPage(onBack: () -> Unit) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+        }
 
-            // 操作按钮
+        Column(Modifier.widthIn(max = 480.dp).fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp)) {
+            if (saveFailed) {
+                Text("保存配置失败，请检查配置目录权限后重试。", color = MaterialTheme.colorScheme.error)
+            }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                StopBonusTextButton(onClick = onBack) {
+                StopBonusTextButton(onClick = onBack, enabled = !controlsLocked) {
                     Text("取消", fontFamily = FontLXGWNeoXiHeiScreenFamily())
                 }
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                StopBonusFilledTonalButton(onClick = {
-                    configState.updateTimezone(selectedTimezone)
-                    onBack()
+                StopBonusFilledTonalButton(enabled = !controlsLocked, onClick = {
+                    val config = configState.config.copy(timezone = selectedTimezone, autoCheckUpdates = autoCheckUpdates)
+                    configState.updateConfig(config).onSuccess { onBack() }.onFailure { saveFailed = true }
                 }) {
                     Text("保存", fontFamily = FontLXGWNeoXiHeiScreenFamily())
                 }
