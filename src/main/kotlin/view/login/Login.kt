@@ -11,16 +11,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import database.DatabaseOperator
-import database.entity.Account
 import database.entity.AccountView
-import database.entity.Accounts
-import database.entity.toView
 import kotlinx.coroutines.launch
 import love.forte.bonus.bonus_self_desktop.generated.resources.Res
 import love.forte.bonus.bonus_self_desktop.generated.resources.icon_home
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import view.AppState
 import view.common.StopBonusButton
 import view.common.StopBonusElevatedButton
@@ -46,9 +41,7 @@ fun LoginView(
     var inDeleting by remember { mutableStateOf(false) }
 
     suspend fun readData() {
-        state.database.inSuspendedTransaction {
-            accountList.addAll(Account.all().notForUpdate().map { it.toView() })
-        }
+        accountList.addAll(state.database.accounts())
     }
 
     var readDataState by remember { mutableStateOf(Any()) }
@@ -80,10 +73,8 @@ fun LoginView(
                     inDeleting = true
                     scope.launch {
                         try {
-                            state.database.inSuspendedTransaction {
-                                Accounts.deleteWhere(limit = 1) { id eq target.id }
-                                accountList.remove(target)
-                            }
+                            state.database.deleteAccount(target.id)
+                            accountList.remove(target)
                         } finally {
                             inDeleting = false
                         }
@@ -123,7 +114,7 @@ private inline fun AccountList(
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
-        var showItem by remember { mutableStateOf<Int?>(null) }
+        var showItem by remember { mutableStateOf<Long?>(null) }
 
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(15.dp, Alignment.CenterVertically),
@@ -243,13 +234,7 @@ inline fun NewAccount(
                     inSave = true
                     state.scope.launch {
                         try {
-                            val new = state.database.inSuspendedTransaction {
-                                Account.new {
-                                    name = nameValue.trim()
-                                }
-                            }
-
-                            onCreate(new.toView())
+                            onCreate(state.database.createAccount(nameValue.trim()))
                         } finally {
                             inSave = false
                         }

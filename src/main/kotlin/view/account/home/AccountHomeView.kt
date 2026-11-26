@@ -21,14 +21,14 @@ import common.DateTimeFormatters
 import common.Emojis
 import common.Limits
 import config.LocalAppConfig
-import database.entity.*
+import database.entity.WeaponView
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import love.forte.bonus.bonus_self_desktop.generated.resources.Res
 import love.forte.bonus.bonus_self_desktop.generated.resources.icon_clear
 import love.forte.bonus.bonus_self_desktop.generated.resources.icon_home
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.jdbc.SizedCollection
 import picker.core.*
 import picker.desktop.InstantPickerPanel
 import picker.foundation.rememberPickerNow
@@ -42,7 +42,6 @@ import view.common.StopBonusTextButton
 import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-import java.util.*
 
 /**
  *
@@ -261,7 +260,7 @@ private fun AccountHome(state: PageViewState) {
                     supportingText = {
                         Text(
                             remarkValue.length.toString() + " / " +
-                                Limits.REMARK_MAX_LENGTH.toString()
+                                    Limits.REMARK_MAX_LENGTH.toString()
                         )
                     },
                 )
@@ -278,59 +277,51 @@ private fun AccountHome(state: PageViewState) {
                         val submittedStart = startInstant
                         val submittedEnd = endInstant
                         if (submittedStart != null && submittedEnd != null) {
-                                when (
-                                    val validated = validateRecordTimes(
-                                        submittedStart,
-                                        submittedEnd,
-                                        environment,
-                                        submitNow,
-                                    )
-                                ) {
-                                    is RecordTimesResult.Invalid -> Unit
+                            when (
+                                val validated = validateRecordTimes(
+                                    submittedStart,
+                                    submittedEnd,
+                                    environment,
+                                    submitNow,
+                                )
+                            ) {
+                                is RecordTimesResult.Invalid -> Unit
 
-                                    is RecordTimesResult.Valid -> {
-                                        val snapshotStart = validated.start
-                                        val snapshotEnd = validated.end
-                                        val snapshotDuration = validated.duration
-                                        val snapshotScore = score.value.toUInt()
-                                        val snapshotRemark = remarkValue
-                                        val snapshotWeapon = weapon
-                                        recording = true
-                                        scope.launch {
-                                            try {
-                                                state.accountState.inAccountTransaction { account ->
-                                                    BonusRecord.new {
-                                                        this.account = Account.findById(account.id)
-                                                            ?: error("当前账号不存在")
-                                                        this.startTime = snapshotStart
-                                                        this.endTime = snapshotEnd
-                                                        this.duration = snapshotDuration
-                                                        this.score = snapshotScore
-                                                        this.remark = snapshotRemark
-                                                        snapshotWeapon?.let { selected ->
-                                                            Weapon.findById(selected.id)?.let { entity ->
-                                                                this.weapons = SizedCollection(listOf(entity))
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                                state.snackbarHostState.showSnackbar(
-                                                    "记录已保存。你就打吧！",
-                                                    withDismissAction = true,
-                                                )
-                                                clearStates()
-                                            } catch (e: Exception) {
-                                                state.snackbarHostState.showSnackbar(
-                                                    "记录失败: " + (e.message ?: "未知错误"),
-                                                    withDismissAction = true,
-                                                )
-                                            } finally {
-                                                recording = false
+                                is RecordTimesResult.Valid -> {
+                                    val snapshotStart = validated.start
+                                    val snapshotEnd = validated.end
+                                    val snapshotDuration = validated.duration
+                                    val snapshotScore = score.value.toUInt()
+                                    val snapshotRemark = remarkValue
+                                    val snapshotWeapon = weapon
+                                    recording = true
+                                    scope.launch {
+                                        try {
+                                            val account = state.accountState
+                                            account.database.createRecord(
+                                                account.account.id, snapshotStart, snapshotEnd, snapshotDuration,
+                                                snapshotScore, snapshotRemark, snapshotWeapon?.id,
+                                            )
+                                            state.snackbarHostState.showSnackbar(
+                                                "记录已保存。你就打吧！",
+                                                withDismissAction = true,
+                                            )
+                                            clearStates()
+                                        } catch (e: Exception) {
+                                            if (e is CancellationException) {
+                                                ensureActive()
                                             }
+                                            state.snackbarHostState.showSnackbar(
+                                                "记录失败: " + (e.message ?: "未知错误"),
+                                                withDismissAction = true,
+                                            )
+                                        } finally {
+                                            recording = false
                                         }
                                     }
                                 }
                             }
+                        }
                     },
                 ) {
                     if (duration != null) {
@@ -476,7 +467,7 @@ private fun RecordTimePickerDialog(
                     AnimatedContent(
                         targetState = value,
                         label = "已选时间过渡",
-                    ) { selected ->
+                    ) {
                         Text(
                             text = (if (field == RecordTimeField.Start) "选择开始时间" else "选择结束时间"),
                             style = MaterialTheme.typography.titleLarge,
@@ -519,12 +510,8 @@ private inline fun WeaponSelector(
 ) {
     val weapons = remember { mutableStateListOf<WeaponView>() }
     LaunchedEffect(state) {
-        val all = state.accountState.inAccountTransaction { account ->
-            Weapon.find { Weapons.account eq account.id }
-                .notForUpdate().map { it.toView() }
-        }
-
-        weapons.addAll(all)
+        val account = state.accountState
+        weapons.addAll(account.database.weapons(account.account.id))
     }
 
     var expanded by remember { mutableStateOf(false) }

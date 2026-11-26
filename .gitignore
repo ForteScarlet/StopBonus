@@ -60,3 +60,7 @@ generated.conveyor.conf
 .gradle-user
 
 .local
+
+# 本地调试时的应用数据
+/data/
+/config.json

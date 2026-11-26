@@ -1,0 +1,99 @@
+CREATE TABLE accounts (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    create_time TEXT NOT NULL,
+    last_updated_time TEXT NOT NULL
+);
+
+CREATE TABLE weapons (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    name TEXT NOT NULL,
+    create_time TEXT NOT NULL,
+    last_updated_time TEXT NOT NULL
+);
+
+CREATE INDEX weapons_name ON weapons(name);
+CREATE INDEX weapons_account ON weapons(account_id);
+
+CREATE TABLE bonus_records (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    start_time TEXT NOT NULL,
+    end_time TEXT NOT NULL,
+    duration INTEGER NOT NULL,
+    score INTEGER NOT NULL CHECK (score BETWEEN 0 AND 4294967295),
+    remark TEXT NOT NULL,
+    create_time TEXT NOT NULL,
+    last_updated_time TEXT NOT NULL
+);
+
+CREATE INDEX bonus_records_account_start ON bonus_records(account_id, start_time);
+
+CREATE TABLE bonus_record_weapons (
+    record_id INTEGER NOT NULL REFERENCES bonus_records(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    weapon_id INTEGER NOT NULL REFERENCES weapons(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    PRIMARY KEY (record_id, weapon_id)
+);
+
+CREATE INDEX bonus_record_weapons_weapon ON bonus_record_weapons(weapon_id);
+
+CREATE TABLE storage_metadata (
+    id INTEGER NOT NULL PRIMARY KEY CHECK (id = 1),
+    instance_id TEXT NOT NULL,
+    activated INTEGER NOT NULL CHECK (activated IN (0, 1)),
+    source_path TEXT,
+    source_sha256 TEXT,
+    source_zone TEXT
+);
+
+listAccounts:
+SELECT id, name FROM accounts ORDER BY id;
+
+insertAccount:
+INSERT INTO accounts (name, create_time, last_updated_time) VALUES (?, ?, ?);
+
+deleteAccount:
+DELETE FROM accounts WHERE id = ?;
+
+listWeapons:
+SELECT id, name FROM weapons WHERE account_id = ? ORDER BY id;
+
+findWeapon:
+SELECT id FROM weapons WHERE account_id = ? AND id = ?;
+
+insertWeapon:
+INSERT INTO weapons (account_id, name, create_time, last_updated_time) VALUES (?, ?, ?, ?);
+
+deleteWeapon:
+DELETE FROM weapons WHERE account_id = ? AND id = ?;
+
+listRecords:
+SELECT id, start_time, end_time, duration, score, remark FROM bonus_records
+WHERE account_id = ? ORDER BY create_time DESC, id DESC;
+
+listRecordWeapons:
+SELECT link.record_id, weapons.id, weapons.name
+FROM bonus_record_weapons AS link
+JOIN bonus_records ON bonus_records.id = link.record_id
+JOIN weapons ON weapons.id = link.weapon_id
+WHERE bonus_records.account_id = ?
+ORDER BY link.record_id, weapons.id;
+
+recordsInRange:
+SELECT start_time, duration FROM bonus_records
+WHERE account_id = ? AND start_time BETWEEN :range_start AND :range_end
+ORDER BY start_time, id;
+
+insertRecord:
+INSERT INTO bonus_records (account_id, start_time, end_time, duration, score, remark, create_time, last_updated_time)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+linkWeapon:
+INSERT INTO bonus_record_weapons (record_id, weapon_id) VALUES (?, ?);
+
+deleteRecord:
+DELETE FROM bonus_records WHERE account_id = ? AND id = ?;
+
+lastInsertedId:
+SELECT last_insert_rowid();

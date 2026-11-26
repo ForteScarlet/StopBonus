@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import common.Dimensions
 import config.LocalAppConfig
-import database.entity.BonusRecords
 import io.github.koalaplot.core.ChartLayout
 import io.github.koalaplot.core.Symbol
 import io.github.koalaplot.core.bar.BarScope
@@ -35,10 +34,6 @@ import io.github.koalaplot.core.xygraph.CategoryAxisModel
 import io.github.koalaplot.core.xygraph.XYGraph
 import io.github.koalaplot.core.xygraph.rememberAxisContent
 import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
-import org.jetbrains.exposed.v1.core.*
-import org.jetbrains.exposed.v1.javatime.month
-import org.jetbrains.exposed.v1.javatime.year
-import org.jetbrains.exposed.v1.jdbc.select
 import view.account.PageViewState
 import view.account.record.format
 import view.common.StatsTypeSelector
@@ -203,34 +198,11 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
         var data by remember(type, year) { mutableStateOf<Data?>(null) }
 
         LaunchedEffect(type, year) {
-            state.accountState.inAccountTransaction { account ->
-                addLogger(StdOutSqlLogger)
-                // 根据年查询所有数据，并按月统计
-                // 数据：年月 / 次数
-
-                val idCount = BonusRecords.id.count()
-                val stYear = BonusRecords.startTime.year()
-                val stMonth = BonusRecords.startTime.month()
-
-                val query = BonusRecords
-                    .select(idCount, stYear, stMonth)
-                    .where {
-                        BonusRecords.account eq account.id and BonusRecords.startTime.between(
-                            startDateTime,
-                            endDateTime
-                        )
-                    }
-                    .groupBy(stYear, stMonth).notForUpdate()
-
-                data class DataRow(val yearMonth: YearMonth, val count: Long)
-
-                val dataGroup = query.map { row ->
-                    val count = row[idCount]
-                    val year = row[stYear]
-                    val month = row[stMonth]
-
-                    DataRow(YearMonth.of(year, month), count)
-                }.associate { it.yearMonth to it.count }
+            val account = state.accountState
+            val records = account.database.recordsInRange(account.account.id, startDateTime, endDateTime)
+            val storageZone = ZoneId.systemDefault()
+            run {
+                val dataGroup = records.groupingBy { YearMonth.from(it.startTime.atZone(storageZone)) }.eachCount()
 
                 val boroughs = mutableListOf<YearMonth>()
                 val population = mutableListOf<Float>()
@@ -334,40 +306,16 @@ class YearMonthlyModeStats(private val yearMonthlyModeState: YearMonthlyModeStat
         var data by remember(type, year) { mutableStateOf<Data?>(null) }
 
         LaunchedEffect(type, year) {
-            state.accountState.inAccountTransaction { account ->
-                // 根据年查询所有数据，并按月份统计
-                val stYear = BonusRecords.startTime.year()
-                val stMonth = BonusRecords.startTime.month()
-
-                val totalDuration = BonusRecords.duration.sum()
-                val idCount = BonusRecords.id.count()
-
-                val query = BonusRecords.select(
-                    idCount, stYear, stMonth, totalDuration
-                ).where {
-                    BonusRecords.account eq account.id and BonusRecords.startTime.between(startDateTime, endDateTime)
-                }.groupBy(stYear, stMonth)
-
-                data class DataRow(val yearMonth: YearMonth, val counter: Counter)
-
-                val dataMap = query.map { row ->
-                    val count = row[idCount]
-                    val year = row[stYear]
-                    val month = row[stMonth]
-                    val sumD = row[totalDuration]
-
-                    val totalMinutes = sumD?.toMinutes()?.toFloat() ?: 0f
-                    val avgMinutes = if (count > 0L) {
-                        totalMinutes / count.toFloat()
-                    } else 0f
-
-                    val counter = Counter(
-                        totalMinutes = totalMinutes,
-                        avgMinutes = avgMinutes,
-                    )
-
-                    DataRow(YearMonth.of(year, month), counter)
-                }.associate { it.yearMonth to it.counter }
+            val account = state.accountState
+            val records = account.database.recordsInRange(account.account.id, startDateTime, endDateTime)
+            val storageZone = ZoneId.systemDefault()
+            run {
+                val dataMap = records.groupBy { YearMonth.from(it.startTime.atZone(storageZone)) }
+                    .mapValues { (_, entries) ->
+                        val minutes = entries.fold(java.time.Duration.ZERO) { total, entry -> total + entry.duration }
+                            .toMinutes().toFloat()
+                        Counter(minutes, minutes / entries.size)
+                    }
 
 
                 val boroughs = mutableListOf<YearMonth>()

@@ -1,4 +1,5 @@
 [versions]
+sqldelight = "2.4.1"
 compose-plugin = "1.12.2"
 compose-material3 = "1.9.0"
 # Kotlin
@@ -8,16 +9,13 @@ kotlinx-coroutines = "1.11.0"
 kotlinx-serialization = "1.13.0"
 # logback
 logback = "1.6.8"
+slf4j = "2.0.20"
 log4j = "2.26.1"
 # https://github.com/h2database/h2database
 h2 = "2.5.252"
-# https://github.com/JetBrains/Exposed
-exposed = "1.6.1"
 # https://github.com/KoalaPlot/koalaplot-core
 # https://koalaplot.github.io/
 koalaPlot = "0.12.1"
-# https://github.com/brettwooldridge/HikariCP
-hikariCP = "7.1.0"
 # https://github.com/vinceglb/FileKit
 filekit = "0.17.1"
 # https://poi.apache.org/
@@ -28,8 +26,11 @@ junit = "4.13.2"
 conveyor = "2.0"
 
 [libraries]
+sqldelight-driver = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqldelight" }
+sqldelight-dialect = { module = "app.cash.sqldelight:sqlite-3-38-dialect", version.ref = "sqldelight" }
 # logback
 logback-classic = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 log4j-to-slf4j = { module = "org.apache.logging.log4j:log4j-to-slf4j", version.ref = "log4j" }
 
 # ktx
@@ -40,25 +41,15 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 # h2 driver
 h2db = { module = "com.h2database:h2", version.ref = "h2" }
 
-# exposed
-exposed-core = { group = "org.jetbrains.exposed", name = "exposed-core", version.ref = "exposed" }
-exposed-dao = { group = "org.jetbrains.exposed", name = "exposed-dao", version.ref = "exposed" }
-exposed-jdbc = { group = "org.jetbrains.exposed", name = "exposed-jdbc", version.ref = "exposed" }
-exposed-javaTime = { group = "org.jetbrains.exposed", name = "exposed-java-time", version.ref = "exposed" }
-
 # koalaPlot
 koalaPlot-core = { group = "io.github.koalaplot", name = "koalaplot-core", version.ref = "koalaPlot" }
-
-hikariCP = { module = "com.zaxxer:HikariCP", version.ref = "hikariCP" }
 
 filekit-dialogs = { group = "io.github.vinceglb", name = "filekit-dialogs", version.ref = "filekit" }
 apache-poi-ooxml = { group = "org.apache.poi", name = "poi-ooxml", version.ref = "apachePoi" }
 junit4 = { module = "junit:junit", version.ref = "junit" }
 
-[bundles]
-exposed = ["exposed-core", "exposed-dao", "exposed-jdbc", "exposed-javaTime"]
-
 [plugins]
+sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

@@ -25,32 +25,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import database.DatabaseOperator
 import database.entity.AccountView
-import org.jetbrains.exposed.v1.core.Transaction
 import view.AppState
 import view.account.home.AccountHomeView
 import view.account.record.AccountBonusRecordView
 import view.account.stats.StatsPageView
 import view.account.weapon.AccountWeaponPageView
-import kotlin.coroutines.CoroutineContext
 
 @Suppress("MemberVisibilityCanBePrivate")
 class AccountState(
     val appState: AppState,
     val database: DatabaseOperator,
     val account: AccountView,
-) {
-    suspend inline fun <T> inAccountTransaction(
-        context: CoroutineContext? = null,
-        transactionIsolation: Int? = null,
-        crossinline block: suspend Transaction.(AccountView) -> T
-    ): T {
-        return account.let { a ->
-            database.inSuspendedTransaction(context, transactionIsolation) {
-                block(a)
-            }
-        }
-    }
-}
+)
 
 class PageViewState(
     val accountState: AccountState,

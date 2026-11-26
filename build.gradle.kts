@@ -4,6 +4,7 @@ import java.time.Year
 import java.time.ZoneId
 
 plugins {
+    alias(libs.plugins.sqldelight)
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.jetbrainsCompose)
     alias(libs.plugins.compose.compiler)
@@ -61,13 +62,13 @@ dependencies {
     implementation("org.jetbrains.compose.animation:animation:$composeVersion")
 
     implementation(libs.h2db)
+    implementation(libs.sqldelight.driver)
+    implementation(libs.slf4j.api)
     runtimeOnly(libs.logback.classic)
     runtimeOnly(libs.log4j.to.slf4j)
 
     implementation(libs.kotlinx.coroutine.core)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.hikariCP)
-    implementation(libs.bundles.exposed)
     implementation(libs.koalaPlot.core)
     implementation(libs.filekit.dialogs)
     implementation(libs.apache.poi.ooxml)
@@ -75,6 +76,17 @@ dependencies {
     testImplementation(kotlin("test-junit"))
     testImplementation(libs.junit4)
     testImplementation("org.jetbrains.compose.ui:ui-test:$composeVersion")
+}
+
+sqldelight {
+    databases {
+        register("StopBonusDatabase") {
+            packageName.set("database.sql")
+            dialect(libs.sqldelight.dialect)
+            schemaOutputDirectory.set(file("src/main/sqldelight/databases"))
+            verifyMigrations.set(true)
+        }
+    }
 }
 
 buildConfig {

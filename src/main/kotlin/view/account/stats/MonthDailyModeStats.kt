@@ -24,8 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastZip
 import common.Dimensions
 import config.LocalAppConfig
-import database.entity.BonusRecord
-import database.entity.BonusRecords
 import io.github.koalaplot.core.ChartLayout
 import io.github.koalaplot.core.Symbol
 import io.github.koalaplot.core.bar.*
@@ -36,9 +34,6 @@ import io.github.koalaplot.core.xygraph.CategoryAxisModel
 import io.github.koalaplot.core.xygraph.XYGraph
 import io.github.koalaplot.core.xygraph.rememberAxisContent
 import io.github.koalaplot.core.xygraph.rememberIntLinearAxisModel
-import org.jetbrains.exposed.v1.core.and
-import org.jetbrains.exposed.v1.core.between
-import org.jetbrains.exposed.v1.core.eq
 import view.account.PageViewState
 import view.account.record.format
 import view.common.MonthSelector
@@ -219,12 +214,9 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
         var data by remember(type, yearMonth) { mutableStateOf<Data?>(null) }
 
         LaunchedEffect(type, yearMonth) {
-            state.accountState.inAccountTransaction { account ->
-                // 根据年月查询所有数据，并按日期统计
-                // 直接在代码中聚合
-                val allRecords = BonusRecord.find {
-                    BonusRecords.account eq account.id and BonusRecords.startTime.between(startDateTime, endDateTime)
-                }.notForUpdate()
+            val account = state.accountState
+            val allRecords = account.database.recordsInRange(account.account.id, startDateTime, endDateTime)
+            run {
 
                 // 次数
                 val countGroup = allRecords.groupingBy { it.startTime.atZone(zone).toLocalDate().dayOfMonth }
@@ -370,12 +362,9 @@ class MonthDailyModeStats(private val monthDailyModeState: MonthDailyModeState) 
         var data by remember(type, yearMonth) { mutableStateOf<Data?>(null) }
 
         LaunchedEffect(type, yearMonth) {
-            state.accountState.inAccountTransaction { account ->
-                // 根据年月查询所有数据，并按日期统计
-                // 直接在代码中聚合
-                val allRecords = BonusRecord.find {
-                    BonusRecords.account eq account.id and BonusRecords.startTime.between(startDateTime, endDateTime)
-                }.notForUpdate()
+            val account = state.accountState
+            val allRecords = account.database.recordsInRange(account.account.id, startDateTime, endDateTime)
+            run {
 
                 val countGroup = allRecords.groupBy { it.startTime.atZone(zone).toLocalDate().dayOfMonth }
                     .mapValues { (_, value) ->

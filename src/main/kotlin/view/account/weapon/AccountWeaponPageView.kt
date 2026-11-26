@@ -16,13 +16,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import database.entity.*
+import database.entity.WeaponView
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import love.forte.bonus.bonus_self_desktop.generated.resources.*
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import view.account.PageViewState
 import view.account.SimpleAccountViewPageSelector
 import view.common.DeleteConfirmDialog
@@ -61,13 +61,8 @@ private fun WeaponList(state: PageViewState) {
     val listState = rememberLazyListState()
 
     LaunchedEffect(state) {
-        state.accountState.inAccountTransaction { account ->
-            val all = Weapon.find { Weapons.account eq account.id }
-                .notForUpdate()
-                .map { it.toView() }
-
-            weaponList.addAll(all)
-        }
+        val account = state.accountState
+        weaponList.addAll(account.database.weapons(account.account.id))
     }
 
     var createNewWeapon by remember { mutableStateOf(false) }
@@ -110,7 +105,6 @@ private fun WeaponList(state: PageViewState) {
  * 新增一个武器
  */
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview
 @Composable
 private inline fun NewWeapon(
     scope: CoroutineScope,
@@ -193,17 +187,14 @@ private inline fun NewWeapon(
 
                         scope.launch {
                             try {
-                                state.accountState.inAccountTransaction { account ->
-                                    val new = Weapon.new {
-                                        this.account = Account.findById(account.id)!! // TODO null ?
-                                        this.name = newName
-                                    }
-
-                                    onCreated(new.toView())
-                                }
+                                val account = state.accountState
+                                onCreated(account.database.createWeapon(account.account.id, newName))
 
                                 onDismiss()
                             } catch (e: Exception) {
+                                if (e is CancellationException) {
+                                    ensureActive()
+                                }
                                 scope.launch {
                                     state.snackbarHostState.showSnackbar("创建失败!\n$e", withDismissAction = true)
                                 }
@@ -248,7 +239,6 @@ private fun ShowList(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LazyItemScope.ListItemWeapon(
     state: PageViewState,
@@ -273,9 +263,8 @@ private fun LazyItemScope.ListItemWeapon(
                     scope.launch {
                         val name = weapon.name
                         try {
-                            state.accountState.database.inSuspendedTransaction {
-                                Weapons.deleteWhere(limit = 1) { id eq weapon.id }
-                            }
+                            val account = state.accountState
+                            account.database.deleteWeapon(account.account.id, weapon.id)
                             scope.launch {
                                 state.snackbarHostState.showSnackbar("「$name」已删除", withDismissAction = true)
                             }

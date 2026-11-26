@@ -41,7 +41,7 @@ internal object BonusRecordExporter {
     ): ByteArray {
         val sortedRecords = records.sortedWith(
             compareBy<BonusRecordView> { it.startTime }
-                .thenBy { it.entityID.value },
+                .thenBy { it.id },
         )
         return when (format) {
             BonusRecordExportFormat.CSV -> csvBytes(sortedRecords, zoneId)

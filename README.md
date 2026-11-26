@@ -23,7 +23,10 @@
 
 **数据保存位置**
 
-Windows 上数据默认储存在 `$USER_HOME\AppData\Local\StopBonus`
+Windows 默认使用 `%USERPROFILE%\AppData\Local\StopBonus\data`，
+MacOS 和 Linux 通常使用 `~/StopBonus/data`。
+
+SQLite 数据库文件为 `bonus.sqlite`。应用菜单中的「数据库 → 备份与恢复」可以创建和恢复完整备份。
 
 **如何使用**
 
@@ -31,8 +34,11 @@ Windows 上数据默认储存在 `$USER_HOME\AppData\Local\StopBonus`
 
 ## 更新
 
-比较建议先卸载旧的，再安装新的。如果数据被保存在安装目录内，记得先备份。
-别问，compose打包出来的安装包似乎对更新安装不太友好。
+从 H2 版本升级前，请退出旧应用和托盘。新版本会检查旧数据库。若旧版数据位于旧安装目录，可以在迁移页手动选择 `bonus.d.mv.db` 文件。
+
+选择旧电脑保存记录时使用的系统时区。应用会保留 H2 原文件，在数据目录下的 `backups` 另存一份备份，并显示导入结果。确认后，新记录会保存到 SQLite。启用 SQLite 后请使用新版本，旧应用仍会写入原 H2，两个库的数据会分开。
+
+恢复 SQLite 备份前，应用会在 `backups` 保留当前库。CSV 和 Excel 导出适合查看记录，完整恢复请使用 SQLite 备份。
 
 当然，如果实际上是我配置的有问题请务必[告诉我](https://github.com/ForteScarlet/StopBonus/issues/new)，
 非常感谢！
